@@ -1,0 +1,106 @@
+type BlogPost{
+id:ID!
+title:String
+content:String
+author:User
+categories:[Category]
+comments:[Comment]
+createAt:String
+updateAt:String
+}
+
+type Category{
+id:ID!
+name:String
+blogPosts:[BlogPost]
+}
+
+type  Comment {
+id:ID!
+content:String
+user:User
+blogPost:BlogPost
+createAt:String
+}
+
+
+type User{
+id:ID!
+username:String
+password:String
+email:String
+blogPost:[BlogPost]
+comments:[Comment]
+}
+
+type BlogPostResponse{
+title:String
+content:String
+author:BlogPostUserResponse
+categories:[CategoryResponse]
+comments:[CommentResponse]
+createAt:String
+updateAt:String
+}
+
+type PinnedBlogPosts{
+blogPostResponse: BlogPostResponse
+pinnedDate:String
+}
+
+type UserResponse{
+id:ID!
+username:String
+followers:Int
+following:Int
+bio:String
+totalPosts:Int
+email:String
+blogPosts:[BlogPostResponse]
+comments:[CommentResponse]
+}
+
+
+type BlogPostUserResponse{
+username:String
+email:String
+}
+type CategoryResponse{
+id:ID!
+name:String
+}
+
+type CommentResponse{
+content:String
+createAt:String
+}
+
+
+
+
+type Query{
+searchPosts(keyword:String):[BlogPostResponse]
+getPosts(page:Int,size:Int):[BlogPostResponse]
+getPinnedPostsOfTheUser(uId: Int): [PinnedBlogPosts]
+getFollowers(uId : ID): [UserResponse]
+getFollowings(uId : ID): [UserResponse]
+trendingPosts: [BlogPostResponse]
+userLikedPost(uId : ID): [BlogPostResponse]
+blockedUsers(uId : ID) : [UserResponse]
+}
+
+input ReactDTO{
+bpId: ID!
+uId: ID!
+reaction: Boolean!
+}
+
+type Mutation{
+setReaction(request : ReactDTO ):BlogPostResponse
+pinnedPost(uId : Int, bpId : Int) : PinnedBlogPosts
+followOrUnFollowAuthor( follower:Int  , followee : Int) : [UserResponse]
+blockUser(blockerId:Int! , blockedUserId:Int!) : [UserResponse]
+}
+
+
+
