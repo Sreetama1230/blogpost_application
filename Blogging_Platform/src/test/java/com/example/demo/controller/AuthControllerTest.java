@@ -25,9 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
 
-@SpringBootTest
+
 @ExtendWith(MockitoExtension.class)
-@AutoConfigureWebMvc
 public class AuthControllerTest {
     @InjectMocks
     private AuthController authController;
