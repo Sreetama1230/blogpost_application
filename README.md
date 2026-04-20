@@ -232,8 +232,4 @@ Developed as a full-feature backend system demonstrating:
 
 This project shows a complete backend system with real-world features including authentication, messaging, and flexible API design.
 
----
 
-## 📷 Reference
-
-See full project details here: 
