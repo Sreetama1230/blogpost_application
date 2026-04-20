@@ -196,10 +196,9 @@ Required for:
 
 ### With Kafka
 
-1. Start Zookeeper
-2. Start Kafka
-3. Run AdminTool
-4. Run Blogging Platform
+1. Start Kafka
+2. Run AdminTool
+3. Run Blogging Platform
 
 ---
 
