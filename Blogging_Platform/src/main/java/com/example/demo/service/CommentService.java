@@ -265,13 +265,14 @@ public class CommentService {
 			return authDbUser.getId().equals(commentAuthor.getId());
 		}
 		//any comment can be edited by admin
+		// one admin's comment can not be edited by another admin
 		if (SecurityUtils.isAdmin(authDbUser)) {
 			// own                                                   // editor or user
 			return authDbUser.getId().equals(commentAuthor.getId())
 					|| SecurityUtils.isEditor(commentAuthor) || SecurityUtils.isUser(commentAuthor);
 		}
 
-		// Editors can only update themselves
+		// Editors can only update their own comments
 		if (SecurityUtils.isEditor(authDbUser)) {
 			return authDbUser.getId().equals(commentAuthor.getId());
 		}

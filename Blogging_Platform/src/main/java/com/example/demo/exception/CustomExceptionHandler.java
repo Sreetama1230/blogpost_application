@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.example.demo.error.ErrorDetails;
 
 @ControllerAdvice
-public class UnexpectedCustomExceptionHandler {
+public class CustomExceptionHandler {
 
 	@ExceptionHandler
 	public ResponseEntity<ErrorDetails> handleUnexpectedCustomException(UnexpectedCustomException e) {
@@ -52,5 +52,11 @@ public class UnexpectedCustomExceptionHandler {
 	public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException e) {
 		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.NOT_FOUND.value());
 		return new ResponseEntity<>(ed, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler
+	public ResponseEntity<ErrorDetails> handleInvalidEmailIdError(InvalidEmailIdError e) {
+		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<>(ed, HttpStatus.BAD_REQUEST);
 	}
 }

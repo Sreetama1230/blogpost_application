@@ -22,6 +22,7 @@ import com.example.demo.dao.UserDao;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvaildRoleException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.User;
 import com.example.demo.response.UserResponse;
 
@@ -39,6 +40,9 @@ public class UserService {
 
 	@Transactional
 	public User createUser(UserDTO u) {
+		if(!u.getEmail().contains("@")) {
+			throw new UnexpectedCustomException("Please enter a valid email id");
+		}
 		User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
 		reqUser.setBio(u.getBio());
 		reqUser.setTotalPosts(0L);
