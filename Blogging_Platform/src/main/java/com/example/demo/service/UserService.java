@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.example.demo.config.SecurityUtils;
+import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.model.BlogPost;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +34,10 @@ public class UserService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private BlogPostDao blogPostDao;
+	@Autowired
+	KafkaTemplate<String, String> kafkaTemplate;
 
-
+	@Transactional
 	public User createUser(UserDTO u) {
 		User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
 		reqUser.setBio(u.getBio());
@@ -40,30 +46,48 @@ public class UserService {
 		reqUser.setFollowing(0L);
 		reqUser.setBlogPosts(new ArrayList<>());
 		reqUser.setRoles(UserService.convertRoles(u.getRoles()));
+		User newUser = userDao.save(reqUser);
 
-		return userDao.save(reqUser);
+		try {
+			SendResult<String, String> res = kafkaTemplate
+					.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Created User " + String.valueOf(newUser.getId())).get();
+		} catch (InterruptedException | ExecutionException e) {
+
+			e.printStackTrace();
+		}
+
+		return newUser;
 	}
 
-	public User updateUser( UserDTO userDTO) {
+	@Transactional
+	public User updateUser(UserDTO userDTO) {
 		long id = userDTO.getId();
 		if (id > 0 && userDao.findById(id).isPresent()) {
 
-
 			User targetUser = userDao.findById(id).get();
 			User currentUser = userDao.findById(SecurityUtils.getCurrentUserId()).get();
-			if(canUpdateOrDelete(currentUser,targetUser)){
+			if (canUpdateOrDelete(currentUser, targetUser)) {
 				targetUser.setBio(userDTO.getBio());
 				targetUser.setUsername(userDTO.getUsername());
 				targetUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 				userDao.save(targetUser);
+				
+				try {
+					SendResult<String, String> res = kafkaTemplate
+							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Updated User " + String.valueOf(targetUser.getId())).get();
+				} catch (InterruptedException | ExecutionException e) {
+
+					e.printStackTrace();
+				}
+				
 				return targetUser;
-			}else{
-				throw  new DoNotHavePermissionError("You don't have proper role to update the user!");
+			} else {
+				throw new DoNotHavePermissionError("You don't have proper role to update the user!");
 			}
 		} else {
 			throw new ResourceNotFoundException("No user present with the provided id");
 		}
-    }
+	}
 
 	public List<UserResponse> getAll() {
 		List<User> lists = userDao.findAll();
@@ -99,13 +123,20 @@ public class UserService {
 				}
 				UserResponse resp = UserResponse.convertUserResponse(dbUser);
 				userDao.deleteById(id);
+				try {
+					SendResult<String, String> res = kafkaTemplate
+							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted User " + String.valueOf(id)).get();
+				} catch (InterruptedException | ExecutionException e) {
+
+					e.printStackTrace();
+				}
 				return resp;
 			} else {
 				throw new DoNotHavePermissionError("You can not delete the user!");
 			}
 
 		} else {
-		throw  new ResourceNotFoundException("No value is present with that id!");
+			throw new ResourceNotFoundException("No value is present with that id!");
 		}
 	}
 
@@ -131,13 +162,13 @@ public class UserService {
 
 	}
 
-
-	public static boolean canUpdateOrDelete(User currentUser , User targetUser){
+	public static boolean canUpdateOrDelete(User currentUser, User targetUser) {
 		// user does not have access to update or delete itself
-		if(SecurityUtils.isUser(currentUser)){
+		if (SecurityUtils.isUser(currentUser)) {
 			return false;
 		}
-		// Admin can update/delete another editor or user but can not delete/update another admin
+		// Admin can update/delete another editor or user but can not delete/update
+		// another admin
 		if (SecurityUtils.isAdmin(currentUser)) {
 			return currentUser.getId().equals(targetUser.getId()) || SecurityUtils.isEditor(targetUser)
 					|| SecurityUtils.isUser(targetUser);
@@ -150,6 +181,5 @@ public class UserService {
 
 		return false;
 	}
-
 
 }

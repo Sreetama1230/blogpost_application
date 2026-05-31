@@ -31,17 +31,14 @@ public class CategoryController {
 		Category c = new Category();
 		String name = cdto.getName();
 		String normalizedName = name.startsWith("#") ? name : "#" + name;
-//		if(cdto.getId() != null && cdto.getId()>0){
-//		  throw new CategoryException("You can not change an existing category! please create new one by removing the id");
-//
-//		}else {
+
 			try {
 				c = service.getByName(normalizedName);
 				throw new CategoryException("Category is already present with the provided name...");
 			} catch (ResourceNotFoundException e) {
 				c = new Category(cdto.getName(), new HashSet<>());
-				logger.info("created category : {} ", c.getName());
 				service.createCategory(c);
+				logger.info("created category : {} ", c.getName());
 				return new ResponseEntity<CategoryResponse>(CategoryResponse.convertCategoryResponse(c), HttpStatus.CREATED);
 			}
 

@@ -5,16 +5,14 @@ import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
-import com.example.demo.exception.CategoryException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.ResourceNotFoundExceptionHandler;
+import com.example.demo.exception.UnexpectedCustomExceptionHandler;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Comment;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
 import com.example.demo.service.CommentService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -61,7 +57,7 @@ public class CommentControllerTest {
     void setUp(){
     mockMvc = MockMvcBuilders
             .standaloneSetup(commentController)
-            .setControllerAdvice(new ResourceNotFoundExceptionHandler())
+            .setControllerAdvice(new UnexpectedCustomExceptionHandler())
             .build();
     }
 

@@ -15,10 +15,13 @@ public class Category {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
 	@Column
 	private String name;
+	
 	@ManyToMany(mappedBy = "categories")
 	private Set<BlogPost> blogPosts = new HashSet<>();
+	
 
 	public Set<BlogPost> getBlogPosts() {
 		return blogPosts;
@@ -42,7 +45,6 @@ public class Category {
 	}
 	public Category() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Category(String name, Set<BlogPost> blogPosts) {

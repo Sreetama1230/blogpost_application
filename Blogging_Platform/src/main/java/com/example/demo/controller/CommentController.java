@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.CommentDTO;
+import com.example.demo.dto.CommentReact;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
 import com.example.demo.service.CommentService;
@@ -39,7 +40,7 @@ public class CommentController {
 
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) {
-		logger.info("edited comment {}", c.getContent());
+		logger.info("editing comment {}", c.getContent());
 		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.CREATED);
 	}
 
@@ -49,10 +50,21 @@ public class CommentController {
 	}
 	
 	
+	@PostMapping("/react")
+	public ResponseEntity<CommentResponse> reactComment(  @RequestBody CommentReact reactComment){
+		return new ResponseEntity<CommentResponse>(commentService.reactComment(reactComment) ,HttpStatus.CREATED);
+	}
+	
+//	@PostMapping("/react/remove")
+//	public ResponseEntity<CommentResponse> removeReactComment(  @RequestBody CommentReact reactComment){
+//		return new ResponseEntity<CommentResponse>(commentService.removeReactedComment(reactComment) ,HttpStatus.CREATED);
+//	}
+//	
+	
 	
 	@DeleteMapping("/{cId}/blogposts/{bpId}")
 	public ResponseEntity<CommentResponse> deleteComment(  @PathVariable long cId, @PathVariable long bpId) {
-		logger.info("deleted comment {id}"+cId);
+		logger.info("deleting comment {id}"+cId);
 		return new ResponseEntity<CommentResponse>(commentService.deleteComment( cId, bpId), HttpStatus.OK);
 	}
 }

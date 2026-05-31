@@ -14,5 +14,7 @@ public class KafkaConfig {
 	public NewTopic topic() {
 		return TopicBuilder.name(AppConstants.ADMINTOOL_TOPIC_NAME).build();
 	}
+	
+	
 
 }

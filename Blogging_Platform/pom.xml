@@ -133,6 +133,7 @@
 	</dependencies>
 
 	<build>
+	<finalName>producer-blogpost</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

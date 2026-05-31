@@ -1,13 +1,9 @@
 package com.example.demo.model;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
+import java.util.*;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ManyToAny;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 
 @Entity
 public class User  implements Comparable<User>{
@@ -43,7 +39,7 @@ public class User  implements Comparable<User>{
 	@OneToMany(mappedBy = "user")
 	private List<Comment> comments= new ArrayList<>(); ;
 
-	  // any particular user pinned some posts
+	  // any particular user has pinned some posts
 	@OneToMany(mappedBy = "pinnedBy")
 	private List<BlogPost> pinnedBlogPosts= new ArrayList<>(); 
 
@@ -70,7 +66,7 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
 	
 	
 	
-	//  Users that this user follows
+	//   this user follows those users
     @ManyToMany
     @JoinTable(
         name = "user_following",
@@ -79,12 +75,12 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
     )
     private Set<User> listfollowing = new HashSet<>();
 
-    //  Users who follow this user
+    //  who follows this user
     @ManyToMany(mappedBy = "listfollowing")
     private Set<User> listfollowers = new HashSet<>();
 
 
-    // Users this user has blocked
+    // this user has blocked
     @ManyToMany
     @JoinTable(
         name = "user_blocked_users",
@@ -93,7 +89,7 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
     )
     private Set<User> blockedUsers = new HashSet<>();
 
-    // Users who have blocked this user
+    // who have blocked this user
     @ManyToMany(mappedBy = "blockedUsers")
     private Set<User> blockedByUsers = new HashSet<>();
     
@@ -201,11 +197,6 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
 	}
 
 
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email
-				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
-	}
 
 	public User() {
 		super();
@@ -271,6 +262,13 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
 	@Override
 	public int compareTo(User u) {
 		return this.getUsername().compareTo(u.getUsername());
+	}
+	
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email
+				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
 	}
 
 

@@ -9,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -18,13 +17,13 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
-    private final CustomUserDetailsService customUserDetailsService;
+
 
     public AuthService(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                       CustomUserDetailsService customUserDetails) {
+                       CustomUserDetailsService customUserDetailsService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.customUserDetailsService = customUserDetails;
+       
     }
 
 
@@ -39,7 +38,7 @@ public class AuthService {
         // 2. Manually set SecurityContext
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // 3. Return success response (JWT or session or plain user data)
+        // 3. Return success response (JWT or session or plb.title ain user data)
         String token = jwtUtils.generateToken(customUserDetails1);
         AuthResponse authResponse = new AuthResponse(customUserDetails1.getId(), token);
 

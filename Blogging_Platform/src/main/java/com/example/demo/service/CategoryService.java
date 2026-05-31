@@ -3,6 +3,9 @@ package com.example.demo.service;
 import java.util.List;
 
 import com.example.demo.response.BlogPostResponse;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ public class CategoryService {
 	private CategoryDao categoryDao;
 
 
+	@Transactional
 	public Category createCategory(Category cg) {
 		String s = cg.getName();
 		String str=null;
@@ -53,6 +57,7 @@ public class CategoryService {
 	}
 
 
+	@Transactional
 	public Category deleteById(  long id)  {
 		
 		if (categoryDao.findById(id).isPresent()) {
@@ -73,6 +78,7 @@ public class CategoryService {
 		
 	}
 
+	
 	public List<BlogPostResponse> listBlogsByCategory(String categoryName){
 
 

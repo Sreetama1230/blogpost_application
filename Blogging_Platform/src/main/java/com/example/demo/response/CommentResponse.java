@@ -14,6 +14,12 @@ public class CommentResponse {
 	private LocalDateTime createAt;
 
 
+	private Long likeCount;
+
+	private Long loveCount;
+
+	private Long funnyCount;
+
 	public String getContent() {
 		return content;
 	}
@@ -57,13 +63,62 @@ public class CommentResponse {
 		this.id = id;
 	}
 
-	public CommentResponse(LocalDateTime createAt, String content, Long id) {
-		this.createAt = createAt;
-		this.content = content;
-		this.id = id;
+	
+
+	public Long getLikeCount() {
+		return likeCount;
 	}
 
+
+	public void setLikeCount(Long likeCount) {
+		this.likeCount = likeCount;
+	}
+
+
+	public Long getLoveCount() {
+		return loveCount;
+	}
+
+
+	public void setLoveCount(Long loveCount) {
+		this.loveCount = loveCount;
+	}
+
+
+	public Long getFunnyCount() {
+		return funnyCount;
+	}
+
+
+	public void setFunnyCount(Long funnyCount) {
+		this.funnyCount = funnyCount;
+	}
+
+	
+
+	public CommentResponse(String content, LocalDateTime createAt, Long likeCount, Long loveCount, Long funnyCount) {
+		super();
+		this.content = content;
+		this.createAt = createAt;
+		this.likeCount = likeCount;
+		this.loveCount = loveCount;
+		this.funnyCount = funnyCount;
+	}
+
+
+	public CommentResponse(String content, Long id, LocalDateTime createAt, Long likeCount, Long loveCount,
+			Long funnyCount) {
+		super();
+		this.content = content;
+		this.id = id;
+		this.createAt = createAt;
+		this.likeCount = likeCount;
+		this.loveCount = loveCount;
+		this.funnyCount = funnyCount;
+	}
+
+
 	public static CommentResponse convertCommentResponse(Comment c) {
-		return new CommentResponse(c.getCreateAt(),c.getContent(), c.getId());
+		return new CommentResponse(c.getContent(), c.getId(),c.getCreateAt(),c.getLikeCount(),c.getLoveCount(),c.getFunnyCount());
 	}
 }

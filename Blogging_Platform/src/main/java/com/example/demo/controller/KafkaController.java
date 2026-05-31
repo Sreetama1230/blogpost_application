@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,17 +24,18 @@ public class KafkaController {
 	public AuthService authService;
 	@Autowired
 	public UserService userService;
+
 	@GetMapping
-	public  ResponseEntity<String> getPassword(){
-	try {
-		Long id=SecurityUtils.getCurrentUserId();
-		User dbUser = userService.getbyId(id);
-		UserResponse  response = UserResponse.convertUserResponse(dbUser);
-		service.getLoginUserData(response);
-		return new ResponseEntity<>( "Sending the username, check the console"  ,HttpStatus.OK);
-	}catch(IllegalStateException illegalStateException) {
-		return new ResponseEntity<>( "no user currently logged in..."  ,HttpStatus.OK);
-	}
+	public ResponseEntity<String> getUsername() {
+		try {
+			Long id = SecurityUtils.getCurrentUserId();
+			User dbUser = userService.getbyId(id);
+			UserResponse response = UserResponse.convertUserResponse(dbUser);
+			service.getLoginUserData(response);
+			return new ResponseEntity<>("Sending the username, check the console", HttpStatus.OK);
+		} catch (IllegalStateException illegalStateException) {
+			return new ResponseEntity<>("no user currently logged in...", HttpStatus.OK);
+		}
 
 	}
 }
