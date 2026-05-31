@@ -6,7 +6,7 @@ import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.UnexpectedCustomExceptionHandler;
+import com.example.demo.exception.CustomExceptionHandler;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Comment;
 import com.example.demo.model.User;
@@ -57,7 +57,7 @@ public class CommentControllerTest {
     void setUp(){
     mockMvc = MockMvcBuilders
             .standaloneSetup(commentController)
-            .setControllerAdvice(new UnexpectedCustomExceptionHandler())
+            .setControllerAdvice(new CustomExceptionHandler())
             .build();
     }
 

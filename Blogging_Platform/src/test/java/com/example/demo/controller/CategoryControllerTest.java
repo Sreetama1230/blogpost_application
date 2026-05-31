@@ -52,7 +52,7 @@ public class CategoryControllerTest {
     @BeforeEach
     void setUp(){
         mockMvc = MockMvcBuilders.standaloneSetup(categoryController)
-                .setControllerAdvice(new UnexpectedCustomExceptionHandler(),new UnexpectedCustomExceptionHandler())
+                .setControllerAdvice(new CustomExceptionHandler(),new CustomExceptionHandler())
                 .build();
 
         c = new Category("#test", new HashSet<BlogPost>());
