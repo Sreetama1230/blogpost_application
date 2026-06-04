@@ -58,7 +58,8 @@ public class UserController {
 
 	@PutMapping
 	public ResponseEntity<UserResponse> updateUser( @RequestBody UserDTO userDTO) {
-		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(s.updateUser(userDTO)),HttpStatus.OK);
+		User user = s.updateUser(userDTO);
+		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(user),HttpStatus.OK);
 	}
 
 

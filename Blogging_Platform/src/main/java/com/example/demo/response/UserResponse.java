@@ -181,28 +181,33 @@ public class UserResponse {
 
 
 public static UserResponse convertUserResponse(User u) {
-	List<BlogPost> dbBlogPosts=   u.getBlogPosts();
-	List<BlogPostResponse> blogPostResponses = new ArrayList<>();
-	for(BlogPost b : dbBlogPosts) {
-		blogPostResponses.add(BlogPostResponse.convertBlogPostRespons(b));
+	if(u != null) {
+		List<BlogPost> dbBlogPosts=   u.getBlogPosts();
+		List<BlogPostResponse> blogPostResponses = new ArrayList<>();
+		for(BlogPost b : dbBlogPosts) {
+			blogPostResponses.add(BlogPostResponse.convertBlogPostRespons(b));
+		}
+		List<Comment> dbComments = u.getComments();
+		List<CommentResponse> commentResponses = new ArrayList<>();
+		
+		for(Comment c : dbComments  ) {
+			commentResponses.add(CommentResponse.convertCommentResponse(c));
+		}
+		  UserResponse resp= 
+				  new UserResponse(u.getId(),
+						  u.getUsername(),u.getFollowers(),
+						  u.getFollowing(),u.getBio(),
+						  u.getTotalPosts(),u.getEmail(),blogPostResponses,commentResponses);
+		  resp.setFollowers(u.getFollowers());
+		  resp.setFollowing(u.getFollowing());
+		  resp.setTotalPosts((long)u.getBlogPosts().size());
+		  resp.setRoles(u.getRoles());
+		  resp.setId(u.getId());
+		  return resp;
 	}
-	List<Comment> dbComments = u.getComments();
-	List<CommentResponse> commentResponses = new ArrayList<>();
 	
-	for(Comment c : dbComments  ) {
-		commentResponses.add(CommentResponse.convertCommentResponse(c));
-	}
-	  UserResponse resp= 
-			  new UserResponse(u.getId(),
-					  u.getUsername(),u.getFollowers(),
-					  u.getFollowing(),u.getBio(),
-					  u.getTotalPosts(),u.getEmail(),blogPostResponses,commentResponses);
-	  resp.setFollowers(u.getFollowers());
-	  resp.setFollowing(u.getFollowing());
-	  resp.setTotalPosts((long)u.getBlogPosts().size());
-	  resp.setRoles(u.getRoles());
-	  resp.setId(u.getId());
-	  return resp;
+	return null;
+	
 	  
 }
 

@@ -40,7 +40,7 @@ public class CommentController {
 
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) {
-		logger.info("editing comment {}", c.getContent());
+		logger.info("editing comment {}", c.getMessage());
 		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.CREATED);
 	}
 

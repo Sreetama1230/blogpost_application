@@ -64,7 +64,7 @@ public class CommentControllerTest {
     @Test
     void testAddComments() throws Exception {
         CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setContent("fake-comment");
+        commentDTO.setMessage("fake-comment");
 
         User user = new User();
         user.setId(1L);
@@ -79,7 +79,7 @@ public class CommentControllerTest {
         Comment c = new Comment();
         c.setBlogPost(blogPost);
         c.setUser(user);
-        c.setContent(commentDTO.getContent());
+        c.setContent(commentDTO.getMessage());
         c.setId(1L);
         c.setCreateAt(LocalDateTime.now());
 
@@ -115,8 +115,8 @@ public class CommentControllerTest {
    @Test
     void testUpdateComments() throws Exception {
        CommentDTO commentDTO = new CommentDTO();
-       commentDTO.setContent("update-fake-comment");
-       commentDTO.setId(1L);
+       commentDTO.setMessage("update-fake-comment");
+       commentDTO.setCommentId(1L);
 
        User user = new User();
        user.setId(1L);
@@ -131,7 +131,7 @@ public class CommentControllerTest {
        Comment c = new Comment();
        c.setBlogPost(blogPost);
        c.setUser(user);
-       c.setContent(commentDTO.getContent());
+       c.setContent(commentDTO.getMessage());
        c.setId(1L);
        c.setCreateAt(LocalDateTime.now());
 

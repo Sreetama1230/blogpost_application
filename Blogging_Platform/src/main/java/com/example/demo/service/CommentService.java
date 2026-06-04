@@ -57,32 +57,32 @@ public class CommentService {
 		}
 		BlogPost dbBlogPost = blogPostDao.findById(blogPostId).get();
 		User authDbUser = userdao.findById(userId).get();
-		logger.info("added new comment : {}", c.getContent());
+		logger.info("added new comment : {}", c.getMessage());
 		List<Comment> exitsingComments = dbBlogPost.getComments();
 		List<Comment> listComments = new ArrayList<>();
 		if (exitsingComments != null) {
 			listComments.addAll(exitsingComments);
 		}
 
-		Comment newComment = new Comment( c.getContent(), authDbUser, dbBlogPost, LocalDateTime.now(),0L,0L,0L, new TreeSet<>());
+		Comment newComment = new Comment( c.getMessage(), authDbUser, dbBlogPost, LocalDateTime.now(),0L,0L,0L, new TreeSet<>());
 
 		Comment existingComment;
 		// an existing comment can be changed only by that particular user
 
-		if (  c.getId() != null && c.getId()>0) {
+		if (  c.getCommentId() != null && c.getCommentId()>0) {
 
-			if(commentDao.findById(c.getId()).isEmpty()){
+			if(commentDao.findById(c.getCommentId()).isEmpty()){
 				throw new ResourceNotFoundException("No comment is present with the provided id...");
 			}else{
-				User commentAuthor = commentDao.findById(c.getId()).get().getUser();
+				User commentAuthor = commentDao.findById(c.getCommentId()).get().getUser();
 				if (canUpdateOrDelete(authDbUser,commentAuthor) ) {
 					// update
 
-					existingComment = commentDao.findById(c.getId()).get();
+					existingComment = commentDao.findById(c.getCommentId()).get();
 
 
-					if(!existingComment.getContent().equals(c.getContent())){
-						existingComment.setContent(c.getContent()+"(edited)");
+					if(!existingComment.getContent().equals(c.getMessage())){
+						existingComment.setContent(c.getMessage()+"(edited)");
 
 					}
 

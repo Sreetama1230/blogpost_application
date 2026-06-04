@@ -88,8 +88,8 @@ public class CommentServiceTest {
     void testUpdateComment_Success(){
 
         dto = new CommentDTO();
-        dto.setId(1L);
-        dto.setContent("fake-new-comment");
+        dto.setCommentId(1L);
+        dto.setMessage("fake-new-comment");
 
         try(MockedStatic<SecurityUtils> mockedStatic = mockStatic(SecurityUtils.class)){
             //user1 logged in
@@ -125,7 +125,7 @@ public class CommentServiceTest {
     void testCreateComment_Success(){
 
         dto = new CommentDTO();
-        dto.setContent("fake-new-comment");
+        dto.setMessage("fake-new-comment");
 
         try(MockedStatic<SecurityUtils> mockedStatic = mockStatic(SecurityUtils.class)){
             //user1 logged in
@@ -157,8 +157,8 @@ public class CommentServiceTest {
         @Test
         void testUpdateComment_NotFound(){
             dto = new CommentDTO();
-            dto.setId(2L);
-            dto.setContent("fake-new-comment");
+            dto.setCommentId(2L);
+            dto.setMessage("fake-new-comment");
 
             try(MockedStatic<SecurityUtils> mockedStatic = mockStatic(SecurityUtils.class)){
                 //user1 logged in
@@ -189,8 +189,8 @@ public class CommentServiceTest {
     @Test
     void testUpdateComment_DontHavePermission() {
         dto = new CommentDTO();
-        dto.setId(1L);
-        dto.setContent("fake-new-comment");
+        dto.setCommentId(1L);
+        dto.setMessage("fake-new-comment");
 
         try (MockedStatic<SecurityUtils> mockedStatic = mockStatic(SecurityUtils.class)) {
             //user1 logged in
