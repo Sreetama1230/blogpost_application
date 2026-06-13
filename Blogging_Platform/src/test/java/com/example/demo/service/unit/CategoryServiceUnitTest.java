@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.demo.dao.CategoryDao;
@@ -37,6 +40,9 @@ public class CategoryServiceUnitTest {
 
 	@InjectMocks
 	private CategoryService categoryService;
+
+	@Mock
+	private KafkaTemplate<String, String> kafkaTemplate;
 
 	User user;
 	BlogPost blogPost;
@@ -97,6 +103,7 @@ public class CategoryServiceUnitTest {
 		when(categoryDao.findAll()).thenReturn(listCategory);
 
 		List<Category> actualCategories = categoryService.getAll();
+
 		assertEquals(listCategory.size(), actualCategories.size());
 		assertEquals(listCategory.get(0).getName(), actualCategories.get(0).getName());
 
@@ -169,7 +176,8 @@ public class CategoryServiceUnitTest {
 
 		Category newCategory = new Category("#test", new HashSet<>());
 		when(categoryDao.save(newCategory)).thenReturn(newCategory);
-
+		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
+		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 		Category savedCategory = categoryService.createCategory(newCategory);
 
 		assertEquals(newCategory.getId(), savedCategory.getId());
@@ -184,8 +192,10 @@ public class CategoryServiceUnitTest {
 		newCategory.setId(5L);
 
 		when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
+		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
+		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 		Category deletedCategory = categoryService.deleteById(5L);
-
+	
 		assertEquals(newCategory.getId(), deletedCategory.getId());
 		assertEquals(newCategory.getName(), deletedCategory.getName());
 
@@ -201,6 +211,9 @@ public class CategoryServiceUnitTest {
 
 		when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
 
+		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
+		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+		
 		CategoryLinkedToBlogs categoryLinkedToBlogs = assertThrows(CategoryLinkedToBlogs.class, () -> {
 			categoryService.deleteById(5L);
 		});
@@ -221,8 +234,7 @@ public class CategoryServiceUnitTest {
 		});
 
 		assertNotNull(resourceNotFoundException);
-		assertEquals("Category with provided name is not present",
-				resourceNotFoundException.getMessage());
+		assertEquals("Category with provided name is not present.", resourceNotFoundException.getMessage());
 
 	}
 
