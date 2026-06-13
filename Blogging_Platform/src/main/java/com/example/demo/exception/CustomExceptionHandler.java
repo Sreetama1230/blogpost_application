@@ -12,8 +12,8 @@ public class CustomExceptionHandler {
 
 	@ExceptionHandler
 	public ResponseEntity<ErrorDetails> handleUnexpectedCustomException(UnexpectedCustomException e) {
-		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.CONFLICT.value());
-		return new ResponseEntity<ErrorDetails>(ed, HttpStatus.CONFLICT);
+		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<ErrorDetails>(ed, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler
@@ -38,7 +38,7 @@ public class CustomExceptionHandler {
 	@ExceptionHandler
 	public ResponseEntity<ErrorDetails> handleDoNotHavePermissionError(DoNotHavePermissionError e) {
 		return new ResponseEntity<ErrorDetails>(
-				new ErrorDetails("You don't have permission!", HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
+				new ErrorDetails(e.getMessage(), HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
 
 	}
 	

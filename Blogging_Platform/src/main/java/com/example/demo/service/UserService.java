@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dao.UserDao;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvaildRoleException;
+import com.example.demo.exception.InvalidEmailIdError;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.User;
@@ -41,7 +42,7 @@ public class UserService {
 	@Transactional
 	public User createUser(UserDTO u) {
 		if(!u.getEmail().contains("@")) {
-			throw new UnexpectedCustomException("Please enter a valid email id");
+			throw new InvalidEmailIdError("Please enter a valid email id");
 		}
 		User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
 		reqUser.setBio(u.getBio());
@@ -74,6 +75,7 @@ public class UserService {
 				targetUser.setBio(userDTO.getBio());
 				targetUser.setUsername(userDTO.getUsername());
 				targetUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+				//email can not be changed
 				userDao.save(targetUser);
 				
 				try {
@@ -107,7 +109,7 @@ public class UserService {
 			return userDao.findById(id).get();
 
 		} catch (Exception e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new ResourceNotFoundException("No user present with the provided id");
 		}
 	}
 

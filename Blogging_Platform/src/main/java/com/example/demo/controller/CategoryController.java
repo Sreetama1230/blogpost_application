@@ -20,49 +20,56 @@ import com.example.demo.service.CategoryService;
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
-	
+
 	@Autowired
 	private CategoryService service;
-	
+
 	Logger logger = LoggerFactory.getLogger(CategoryController.class);
-	
+
 	@PostMapping
-	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto){
+	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto) {
 		Category c = new Category();
 		String name = cdto.getName();
 		String normalizedName = name.startsWith("#") ? name : "#" + name;
 
-			try {
-				c = service.getByName(normalizedName);
+		try {
+			c = service.getByName(normalizedName);
+			if (c != null) {
 				throw new CategoryException("Category is already present with the provided name...");
-			} catch (ResourceNotFoundException e) {
-				c = new Category(cdto.getName(), new HashSet<>());
-				service.createCategory(c);
-				logger.info("created category : {} ", c.getName());
-				return new ResponseEntity<CategoryResponse>(CategoryResponse.convertCategoryResponse(c), HttpStatus.CREATED);
 			}
+		} catch (ResourceNotFoundException e) {
+			c = new Category(cdto.getName(), new HashSet<>());
+			Category newCategory = service.createCategory(c);
+			logger.info("created category : {} ", c.getName());
+			return new ResponseEntity<CategoryResponse>(CategoryResponse.convertCategoryResponse(newCategory),
+					HttpStatus.CREATED);
+		} catch (Exception e) {
+
+			throw e;
+		}
+		return null;
 
 	}
 
 	@GetMapping
-	public ResponseEntity<List<CategoryResponse>> getAll(){
+	public ResponseEntity<List<CategoryResponse>> getAll() {
 		List<CategoryResponse> categories = new ArrayList<>();
 		List<Category> DBCategories = service.getAll();
 		for (Category c : DBCategories) {
 			categories.add(CategoryResponse.convertCategoryResponse(c));
 		}
 		logger.info("getting all categories");
-		return new ResponseEntity<List<CategoryResponse>>(categories,HttpStatus.OK);
+		return new ResponseEntity<List<CategoryResponse>>(categories, HttpStatus.OK);
 	}
 
 	@GetMapping("/name")
-	public  ResponseEntity<List<BlogPostResponse>> listBlogsByCategory(  @RequestParam String name){
-		return  new ResponseEntity<>(service.listBlogsByCategory(name) , HttpStatus.OK);
+	public ResponseEntity<List<BlogPostResponse>> listBlogsByCategory(@RequestParam String name) {
+		return new ResponseEntity<>(service.listBlogsByCategory(name), HttpStatus.OK);
 
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Category> deleteById(    @PathVariable Long id ){
-			return new ResponseEntity<>(service.deleteById(id),HttpStatus.OK);
-    }
+	public ResponseEntity<Category> deleteById(@PathVariable Long id) {
+		return new ResponseEntity<>(service.deleteById(id), HttpStatus.OK);
+	}
 }

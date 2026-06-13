@@ -8,6 +8,7 @@
 		<version>3.3.10</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.example</groupId>
 	<artifactId>Blogging_Platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -28,8 +29,28 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		    <sonar.projectKey>blogpost-application</sonar.projectKey>
+    <sonar.projectName>BlogPost Application</sonar.projectName>
+
 	</properties>
 	<dependencies>
+	<!-- pom.xml -->
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka-test</artifactId>
+    <scope>test</scope>
+</dependency>
+<!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+
 <dependency>
     <groupId>org.springdoc</groupId>
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
