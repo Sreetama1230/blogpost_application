@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.Category;
 
 public class CategoryDTO {
 
@@ -19,6 +20,12 @@ public class CategoryDTO {
 	public CategoryDTO() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+	
+	public static CategoryDTO convertToCategoryDTO(Category category) {
+		CategoryDTO dto = 	new CategoryDTO();
+		dto.setName(category.getName());
+		return dto ;
 	}
 	
 }

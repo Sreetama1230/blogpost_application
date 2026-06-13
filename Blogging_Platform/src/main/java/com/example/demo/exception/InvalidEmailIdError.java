@@ -2,11 +2,11 @@ package com.example.demo.exception;
 
 public class InvalidEmailIdError extends RuntimeException{
 	
-	InvalidEmailIdError(){
+	public InvalidEmailIdError(){
 		super();
 	}
 	
-	InvalidEmailIdError(String message){
+	public InvalidEmailIdError(String message){
 		super(message);
 	}
 

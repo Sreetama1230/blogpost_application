@@ -40,8 +40,8 @@ public class CommentController {
 
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) {
-		logger.info("editing comment {}", c.getMessage());
-		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.CREATED);
+		logger.info("started request for editing comment {}", c.getMessage());
+		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
@@ -55,16 +55,10 @@ public class CommentController {
 		return new ResponseEntity<CommentResponse>(commentService.reactComment(reactComment) ,HttpStatus.CREATED);
 	}
 	
-//	@PostMapping("/react/remove")
-//	public ResponseEntity<CommentResponse> removeReactComment(  @RequestBody CommentReact reactComment){
-//		return new ResponseEntity<CommentResponse>(commentService.removeReactedComment(reactComment) ,HttpStatus.CREATED);
-//	}
-//	
-	
-	
+
 	@DeleteMapping("/{cId}/blogposts/{bpId}")
 	public ResponseEntity<CommentResponse> deleteComment(  @PathVariable long cId, @PathVariable long bpId) {
-		logger.info("deleting comment {id}"+cId);
+		logger.info("started request for deleting the comment id="+cId);
 		return new ResponseEntity<CommentResponse>(commentService.deleteComment( cId, bpId), HttpStatus.OK);
 	}
 }

@@ -15,7 +15,7 @@ public class SecurityUtils {
 			CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 			return customUserDetails.getId();
 		}
-		throw new IllegalStateException("User not authenticated");
+		throw new IllegalStateException("User is not authenticated");
 	}
 
 	public static boolean isAdmin(User u) {

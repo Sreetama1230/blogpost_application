@@ -12,7 +12,8 @@ public class CustomGraphQLExceptionHandler extends DataFetcherExceptionResolverA
 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
-        if (ex instanceof FollowUnFollowException) {
+       
+    	if (ex instanceof FollowUnFollowException) {
             return GraphqlErrorBuilder.newError(env)
                     .message(ex.getMessage())
                     .errorType(ErrorType.BAD_REQUEST) // optional custom type
@@ -23,6 +24,27 @@ public class CustomGraphQLExceptionHandler extends DataFetcherExceptionResolverA
                     .message(ex.getMessage())
                     .errorType(ErrorType.NOT_FOUND)
                     .build();
+        }
+        
+        if(ex instanceof BlockUnBlockException) {
+        	return GraphqlErrorBuilder.newError(env)
+        			.message(ex.getMessage())
+        			.errorType(ErrorType.BAD_REQUEST)
+        			.build();
+        }
+        
+        if(ex instanceof UnexpectedCustomException) {
+        	 return GraphqlErrorBuilder.newError(env)
+                    .message(ex.getMessage())
+                    .errorType(ErrorType.BAD_REQUEST)
+                    .build();
+        }
+        
+        if(ex instanceof InvalidIdException) {
+        	 return GraphqlErrorBuilder.newError(env)
+                     .message(ex.getMessage())
+                     .errorType(ErrorType.BAD_REQUEST)
+                     .build();
         }
 
         return null; // Let Spring handle unknown exceptions

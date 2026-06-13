@@ -12,6 +12,7 @@ import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.CommentDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.exception.CategoryException;
+import com.example.demo.exception.CustomExceptionHandler;
 import com.example.demo.model.Comment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class BlogPostService {
 		if (blogPostDao.findById(id).isPresent()) {
 			return blogPostDao.findById(id).get();
 		} else {
-			throw new ResourceNotFoundException("Blog Post not present with this id");
+			throw new ResourceNotFoundException("BlogPost is not present with this id");
 		}
 	}
 
@@ -73,9 +74,8 @@ public class BlogPostService {
 		List<BlogPost> blogPosts = u.getBlogPosts();
 		BlogPost bpdata = new BlogPost();
 		BlogPost newBlogPost = new BlogPost();
-		if (dtos.isEmpty()) {
-			throw new CategoryException("You have to specify a category to proceed");
-		}
+
+		// converting new categories
 		for (CategoryDTO c : dtos) {
 
 			try {
@@ -91,11 +91,13 @@ public class BlogPostService {
 					Category category = categoryService.getByName(categoryName.toString());
 					catSet.add(category);
 				}
-			} catch (Exception e) {
+			} catch (ResourceNotFoundException e) {
 				logger.info("Adding new category...");
 				Category newCat = categoryService.createCategory(new Category(c.getName(), new HashSet<>()));
 				catSet.add(newCat);
 
+			} catch (Exception e) {
+				throw e;
 			}
 
 		}
@@ -105,10 +107,22 @@ public class BlogPostService {
 			User blogpostAuthor = existingBP.getAuthor();
 			User authDbUser = userDao.findById(userId).get();
 			if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
+				
 				existingBP.setUpdateAt(LocalDateTime.now());
-				existingBP.setContent(bp.getContent());
-				existingBP.setCategories(catSet);
-				existingBP.setTitle(bp.getTitle());
+				// sparse update 
+				if(bp.getContent() != null) {
+					existingBP.setContent(bp.getContent());
+				}
+				
+				// if not category is present then it will retain the old categories i.e. will not throw any exception
+				if(bp.getCategories() != null) {
+					existingBP.setCategories(catSet);
+				}
+				
+				if(bp.getTitle() != null) {
+					existingBP.setTitle(bp.getTitle());
+				}
+			
 				bpdata = existingBP;
 				newBlogPost = blogPostDao.save(existingBP);
 				try {
@@ -123,24 +137,31 @@ public class BlogPostService {
 			}
 
 		} else {
-			// Assuming while creating the blogpost...it does not have any comments,likes
-			// or dislikes
+			// Assuming while creating the blog post...it does not have any comments,likes
+			// or dislikes etc
+
+			// if no category is provided while creating the blog post
+			if (dtos.isEmpty()) {
+				throw new CategoryException("You have to specify a category to proceed");
+			}
+
 			BlogPost reqPost = new BlogPost(bp.getTitle(), bp.getContent(), u, catSet, new ArrayList<>(),
 					LocalDateTime.now(), LocalDateTime.now());
 			reqPost.setLikes(0L);
 			reqPost.setDislikes(0L);
 
-			logger.info("blog post got created  : {}", reqPost.getContent());
+			
 			newBlogPost = blogPostDao.save(reqPost);
+			logger.info("blog post has been created  : ", reqPost.getContent());
+			
 			try {
-				SendResult<String, String> res = kafkaTemplate
-						.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Created BlogPost " + String.valueOf(newBlogPost.getId()))
-						.get();
+				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+						"Created BlogPost " + String.valueOf(newBlogPost.getId())).get();
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 			bpdata = reqPost;
-			// adding the new blog post the user's blogs list
+			// adding the new blog post in the user's blogs list
 			blogPosts.add(reqPost);
 		}
 
@@ -159,10 +180,7 @@ public class BlogPostService {
 		u.setBlogPosts(blogPosts);
 		u.setTotalPosts((long) u.getBlogPosts().size());
 		logger.info("new blog post has beed added for {} ", u.getUsername());
-		// userService.createOrUpdateUser(u);
 		userDao.save(u);
-
-		
 
 		return BlogPostResponse.convertBlogPostRespons(bpdata);
 
@@ -200,10 +218,15 @@ public class BlogPostService {
 					throw new DoNotHavePermissionError("You are not the author of this post or an admin!");
 				}
 			} else {
-				throw new ResourceNotFoundException("Resource not found!");
+				throw new ResourceNotFoundException("Resource is not found!");
 			}
+		} catch (DoNotHavePermissionError e) {
+			throw new DoNotHavePermissionError(e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
 		} catch (Exception e) {
 			throw new UnexpectedCustomException("Unexpected exception: " + e.getMessage());
+
 		}
 
 	}

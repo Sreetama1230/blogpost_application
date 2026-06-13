@@ -1,6 +1,7 @@
-package com.example.demo.controller;
+package com.example.demo.controller.unit;
 
 
+import com.example.demo.controller.AuthController;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.service.AuthService;

@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.unit;
 
 import com.example.demo.config.JwtUtils;
 
@@ -6,6 +6,8 @@ import com.example.demo.customuserdetails.CustomUserDetails;
 import com.example.demo.customuserdetails.CustomUserDetailsService;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.response.AuthResponse;
+import com.example.demo.service.AuthService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +47,7 @@ public class AuthServiceTest {
     UserDetails userDetails;
     private AuthRequest authRequest;
     private Collection<? extends GrantedAuthority> authorities;
+   
     @BeforeEach
     void setUp(){
 

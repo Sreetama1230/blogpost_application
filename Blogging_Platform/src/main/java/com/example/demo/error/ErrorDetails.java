@@ -1,15 +1,15 @@
 package com.example.demo.error;
 
 public class ErrorDetails {
-	private String msg;
+	private String message;
 	private int status;
 
 	public String getMsg() {
-		return msg;
+		return message;
 	}
 
 	public void setMsg(String msg) {
-		this.msg = msg;
+		this.message = msg;
 	}
 
 	public int getStatus() {
@@ -27,7 +27,7 @@ public class ErrorDetails {
 
 	public ErrorDetails(String msg, int status) {
 		super();
-		this.msg = msg;
+		this.message = msg;
 		this.status = status;
 	}
 

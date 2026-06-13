@@ -49,7 +49,7 @@ public class BlogPostController {
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateBlogPost(@RequestBody BlogPostDTO bp) {
 			logger.info("Updating blog post...");
-		return new ResponseEntity<BlogPostResponse>(service.createOrUpdateBlogPost( bp),HttpStatus.CREATED);
+		return new ResponseEntity<BlogPostResponse>(service.createOrUpdateBlogPost( bp),HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/{id}")
