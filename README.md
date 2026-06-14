@@ -294,11 +294,18 @@ http://localhost:8080/swagger-ui/index.html
 
 ```text
 http://localhost:8080/graphql
-All the graphql quries are available in the ```BlogPost Application.docx```
+
 ```
+All the graphql quries are available in the ```BlogPost_Application.docx```
 
 ### Admin Tool Events Endpoint
 
+### Swagger UI
+
+```text
+http://localhost:8081/swagger-ui/index.html
+```
+### Events Endpoint 
 ```text
 http://localhost:8081/events
 ```
