@@ -11,6 +11,7 @@ This project consists of two Spring Boot applications:
 * **Blogging_Platform** (Kafka Producer)
 * **AdminTool** (Kafka Consumer)
 
+
 ---
 
 ## Architecture
@@ -46,14 +47,18 @@ Responsible for:
 * Followers / Following
 * Blocking Users
 * Reactions
-* GraphQL APIs
+* GraphQL/REST APIs
 
 Publishes events to Kafka such as:
 
-* User Created
-* Blog Post Created
-* Blog Post Updated
-* Blog Post Deleted
+* User Created 
+* Blog Post Created 
+* Blog Post Updated 
+* Blog Post Deleted 
+* Follow/Unfollow related
+* Block/Unblock related
+* Reacting on posts/comments
+  
 
 ### Admin Tool (Consumer)
 
@@ -95,19 +100,21 @@ ADMIN > EDITOR > USER
 ### Blog Management
 
 * Create Blog Posts
-* Update Blog Posts
+* Update Blog Posts (Sparse Update is allowed)
 * Delete Blog Posts
 * Search Blog Posts
 * Category-Based Organization
 * Trending Posts
 * Pin Posts
+* Like/dislike a posts
+* Get posts with Pagination
 
 ---
 
 ### Category Management
 
 * Create Categories
-* Delete Categories
+* Delete Categories (Only when no blog posts are linked with the category)
 * View Posts by Category
 * Automatic Category Creation During Blog Creation
 
@@ -116,7 +123,9 @@ ADMIN > EDITOR > USER
 ### Comment System
 
 * Add Comments
-* Edit Comments
+* Edit Comments (Sparse Update is allowed )
+   - After edit if there is actually a change in comment message then a "(edited)" suffix will be added in the                comment message.
+   - Example, ```"content": "Nice Content!(edited)",```
 * Delete Comments
 * React to Comments
 
@@ -132,7 +141,7 @@ Supported Reactions:
 
 * Follow Users
 * Unfollow Users
-* Block Users
+* Block/Unblock Users
 * View Followers
 * View Following
 
@@ -143,14 +152,15 @@ Supported Reactions:
 Implemented GraphQL APIs for:
 
 * Pagination
-* Search
+* Search Blog Posts
 * Trending Posts
 * Pinned Posts
 * Followers
 * Following
-* User Reactions
+* User Reactions on a Blog Post
 * Blocked Users
-
+* Unblocked Users
+  
 ---
 
 ### Kafka Integration
@@ -284,6 +294,7 @@ http://localhost:8080/swagger-ui/index.html
 
 ```text
 http://localhost:8080/graphql
+All the graphql quries are available in the ```BlogPost Application.docx```
 ```
 
 ### Admin Tool Events Endpoint
@@ -321,7 +332,7 @@ Assign Categories
       ↓
 Add Comments
       ↓
-React / Follow / Block
+React / Follow 
       ↓
 Kafka Event Published
       ↓
@@ -339,11 +350,6 @@ The project includes:
 * Controller Layer Tests
 * Security Tests
 
----
-
-## Future Enhancements
-
-* Add reply on comments API.
 
 ---
 
