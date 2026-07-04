@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.controller.unit;
 
 import com.example.demo.dto.ReactDTO;
 import com.example.demo.exception.CustomGraphQLExceptionHandler;
@@ -422,7 +422,7 @@ public class GraphQlControllerTest {
 
 
 				mutation PinAPost {
-				 pinnedPost(uId:1 , bpId: 1 ){
+				 pinPost(uId:1 , bpId: 1 ){
 				   pinnedDate
 				    blogPostResponse {
 				      content
@@ -432,7 +432,7 @@ public class GraphQlControllerTest {
 
 
 
-				""").execute().path("pinnedPost").entity(PinnedBlogPost.class).get().getBlogPostResponse().getContent()
+				""").execute().path("pinPost").entity(PinnedBlogPost.class).get().getBlogPostResponse().getContent()
 				.equals("Content 1");
 
 	}

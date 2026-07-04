@@ -15,6 +15,18 @@ import jakarta.persistence.Column;
 
 public class UserResponse {
 
+	@Override
+	public String toString() {
+		return "UserResponse [id=" + id + ", username=" + username + ", followers=" + followers + ", following="
+				+ following + ", bio=" + bio + ", totalPosts=" + totalPosts + ", roles=" + roles + ", email=" + email
+				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
+	}
+
+
+
+
+
+
 	private long id;
 	private String username;
 

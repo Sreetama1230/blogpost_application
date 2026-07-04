@@ -95,7 +95,8 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
     
     
     
-	public User(String username, String password, String email) {
+	public User(String username, 
+			String password, String email) {
 		super();
 		this.username = username;
 		this.password = password;

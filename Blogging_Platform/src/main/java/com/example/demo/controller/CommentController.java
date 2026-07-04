@@ -22,7 +22,7 @@ import com.example.demo.response.CommentResponse;
 import com.example.demo.service.CommentService;
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/comment")
 public class CommentController {
 
 	@Autowired
@@ -56,7 +56,7 @@ public class CommentController {
 	}
 	
 
-	@DeleteMapping("/{cId}/blogposts/{bpId}")
+	@DeleteMapping("/{cId}/blogpost/{bpId}")
 	public ResponseEntity<CommentResponse> deleteComment(  @PathVariable long cId, @PathVariable long bpId) {
 		logger.info("started request for deleting the comment id="+cId);
 		return new ResponseEntity<CommentResponse>(commentService.deleteComment( cId, bpId), HttpStatus.OK);

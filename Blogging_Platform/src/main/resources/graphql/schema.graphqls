@@ -34,6 +34,7 @@ comments:[Comment]
 }
 
 type BlogPostResponse{
+id:Int
 title:String
 content:String
 author:BlogPostUserResponse
@@ -41,6 +42,8 @@ categories:[CategoryResponse]
 comments:[CommentResponse]
 createAt:String
 updateAt:String
+likes: Int
+dislikes: Int
 }
 
 type PinnedBlogPosts{
@@ -97,7 +100,7 @@ reaction: Boolean!
 
 type Mutation{
 setReaction(request : ReactDTO ):BlogPostResponse
-pinnedPost(uId : Int, bpId : Int) : PinnedBlogPosts
+pinPost(uId : Int, bpId : Int) : PinnedBlogPosts
 followOrUnFollowAuthor( follower:Int  , followee : Int) : [UserResponse]
 blockUser(blockerId:Int! , blockedUserId:Int!) : [UserResponse]
 }

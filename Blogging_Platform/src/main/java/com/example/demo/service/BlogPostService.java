@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.example.demo.config.SecurityUtils;
@@ -67,6 +68,7 @@ public class BlogPostService {
 
 	@Transactional
 	public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp) {
+
 		long userId = SecurityUtils.getCurrentUserId();
 		User u = userService.getbyId(userId);
 		Set<CategoryDTO> dtos = bp.getCategories();
@@ -94,6 +96,7 @@ public class BlogPostService {
 			} catch (ResourceNotFoundException e) {
 				logger.info("Adding new category...");
 				Category newCat = categoryService.createCategory(new Category(c.getName(), new HashSet<>()));
+
 				catSet.add(newCat);
 
 			} catch (Exception e) {
@@ -107,31 +110,37 @@ public class BlogPostService {
 			User blogpostAuthor = existingBP.getAuthor();
 			User authDbUser = userDao.findById(userId).get();
 			if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
-				
+
 				existingBP.setUpdateAt(LocalDateTime.now());
-				// sparse update 
-				if(bp.getContent() != null) {
+				// sparse update
+				if (bp.getContent() != null) {
 					existingBP.setContent(bp.getContent());
 				}
-				
-				// if not category is present then it will retain the old categories i.e. will not throw any exception
-				if(bp.getCategories() != null) {
+
+				// if not category is present then it will retain the old categories i.e. will
+				// not throw any exception
+				if (bp.getCategories() != null) {
 					existingBP.setCategories(catSet);
 				}
-				
-				if(bp.getTitle() != null) {
+
+				if (bp.getTitle() != null) {
 					existingBP.setTitle(bp.getTitle());
 				}
-			
+
 				bpdata = existingBP;
 				newBlogPost = blogPostDao.save(existingBP);
-				try {
-					SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-							"Updated BlogPost " + String.valueOf(newBlogPost.getId())).get();
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				}
-//				
+
+				CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
+						AppConstants.ADMINTOOL_TOPIC_NAME, "Updated BlogPost " + String.valueOf(newBlogPost.getId()));
+
+				future.whenComplete((result, exception) -> {
+					if (exception != null) {
+						throw new UnexpectedCustomException("Error occured while publishing the event");
+					} else {
+						logger.info("Successfully published the event...");
+					}
+				});
+
 			} else {
 				throw new DoNotHavePermissionError("You can not do the update!");
 			}
@@ -150,16 +159,20 @@ public class BlogPostService {
 			reqPost.setLikes(0L);
 			reqPost.setDislikes(0L);
 
-			
 			newBlogPost = blogPostDao.save(reqPost);
 			logger.info("blog post has been created  : ", reqPost.getContent());
-			
-			try {
-				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						"Created BlogPost " + String.valueOf(newBlogPost.getId())).get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
+
+			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					"Created BlogPost " + String.valueOf(newBlogPost.getId()));
+
+			future.whenComplete((result, exception) -> {
+				if (exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				} else {
+					logger.info("Successfully published the event...");
+				}
+			});
+
 			bpdata = reqPost;
 			// adding the new blog post in the user's blogs list
 			blogPosts.add(reqPost);
@@ -188,16 +201,20 @@ public class BlogPostService {
 
 	@Transactional
 	public BlogPostResponse deleteBlogPost(long id) {
+
 		long userId = SecurityUtils.getCurrentUserId();
 		BlogPostResponse deletedBlogPost = new BlogPostResponse();
 
 		try {
+
 			if (blogPostDao.findById(id).isPresent()) {
 
 				BlogPost bp = blogPostDao.findById(id).get();
 				User authDbUser = userDao.findById(userId).get();
 				User blogpostAuthor = bp.getAuthor();
+
 				if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
+
 					deletedBlogPost = BlogPostResponse.convertBlogPostRespons(bp);
 					// delete the comments as well
 					for (Comment c : bp.getComments()) {
@@ -205,13 +222,18 @@ public class BlogPostService {
 					}
 					deletedBlogPost.getComments().clear();
 					blogPostDao.deleteById(id);
-					try {
-						SendResult<String, String> res = kafkaTemplate
-								.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted BlogPost " + String.valueOf(id))
-								.get();
-					} catch (InterruptedException | ExecutionException e) {
-						e.printStackTrace();
-					}
+
+					CompletableFuture<SendResult<String, String>> future = kafkaTemplate
+							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted BlogPost " + String.valueOf(id));
+
+					future.whenComplete((result, exception) -> {
+						if (exception != null) {
+							throw new UnexpectedCustomException("Error occured while publishing the event");
+						} else {
+							logger.info("Successfully published the event...");
+						}
+					});
+
 					return deletedBlogPost;
 
 				} else {

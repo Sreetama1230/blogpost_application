@@ -18,7 +18,7 @@ import com.example.demo.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
 	@Autowired
@@ -34,7 +34,7 @@ public class UserController {
 		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(newUser), HttpStatus.CREATED);
 	}
 
-	@GetMapping("/{userId}/posts")
+	@GetMapping("/{userId}/post")
 	public ResponseEntity<BlogPostDetailsResponse> getPostsByUserId(@PathVariable long userId) {
 		User u = s.getbyId(userId);
 		logger.info("getting the post");

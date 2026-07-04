@@ -49,27 +49,27 @@ public class SecurityConfig {
                 			).permitAll()
 
                 			// Blogs
-                			.requestMatchers(HttpMethod.POST, "/blogs/**").hasAnyRole("EDITOR", "ADMIN")
-                			.requestMatchers(HttpMethod.PUT, "/blogs/**").hasAnyRole("EDITOR", "ADMIN")
-                			.requestMatchers(HttpMethod.DELETE, "/blogs/**").hasAnyRole("EDITOR", "ADMIN") 
-                			.requestMatchers(HttpMethod.GET, "/blogs/**").permitAll()
+                			.requestMatchers(HttpMethod.POST, "/blog/**").hasAnyRole("EDITOR", "ADMIN")
+                			.requestMatchers(HttpMethod.PUT, "/blog/**").hasAnyRole("EDITOR", "ADMIN")
+                			.requestMatchers(HttpMethod.DELETE, "/blog/**").hasAnyRole("EDITOR", "ADMIN") 
+                			.requestMatchers(HttpMethod.GET, "/blog/**").permitAll()
 
                 			// Users
-                			.requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("EDITOR", "ADMIN") 
-                			.requestMatchers(HttpMethod.GET, "/users/**").permitAll() 
-                			.requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("EDITOR", "ADMIN")
-                			.requestMatchers("/users/register").permitAll() 
+                			.requestMatchers(HttpMethod.PUT, "/user/**").hasAnyRole("EDITOR", "ADMIN") 
+                			.requestMatchers(HttpMethod.GET, "/user/**").permitAll() 
+                			.requestMatchers(HttpMethod.DELETE, "/user/**").hasAnyRole("EDITOR", "ADMIN")
+                			.requestMatchers(HttpMethod.POST,"/user/register").permitAll() 
 
                 			// Categories
-                			.requestMatchers(HttpMethod.POST, "/categories/**").hasAnyRole("EDITOR", "ADMIN") 
-                			.requestMatchers(HttpMethod.DELETE, "/categories/**").hasRole( "ADMIN") 
-                			.requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                			.requestMatchers(HttpMethod.POST, "/category/**").hasAnyRole("EDITOR", "ADMIN") 
+                			.requestMatchers(HttpMethod.DELETE, "/category/**").hasRole( "ADMIN") 
+                			.requestMatchers(HttpMethod.GET, "/category/**").permitAll()
 
                 			// Comments
-                			.requestMatchers(HttpMethod.POST, "/comments/**").hasAnyRole("USER", "EDITOR", "ADMIN") 
-                			.requestMatchers(HttpMethod.PUT, "/comments/**").hasAnyRole("USER", "EDITOR", "ADMIN") 
-                			.requestMatchers(HttpMethod.DELETE, "/comments/**").hasAnyRole("EDITOR", "ADMIN","USER")
-                			.requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
+                			.requestMatchers(HttpMethod.POST, "/comment/**").hasAnyRole("USER", "EDITOR", "ADMIN") 
+                			.requestMatchers(HttpMethod.PUT, "/comment/**").hasAnyRole("USER", "EDITOR", "ADMIN") 
+                			.requestMatchers(HttpMethod.DELETE, "/comment/**").hasAnyRole("EDITOR", "ADMIN","USER")
+                			.requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
 
                 			// GraphQL
                 			.requestMatchers("/graphql/**", "/graphiql/**").permitAll() 

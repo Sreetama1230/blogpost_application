@@ -117,7 +117,7 @@ public class CommentControllerUnitTest {
 
 		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L))).thenReturn(blogPostResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments").param("blogPostId", "1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isCreated()).andDo(print())
@@ -133,7 +133,7 @@ public class CommentControllerUnitTest {
 		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L)))
 				.thenThrow(new ResourceNotFoundException("no blog post found with this id"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments").param("blogPostId", "1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isNotFound()).andDo(print())
@@ -152,7 +152,7 @@ public class CommentControllerUnitTest {
 
 		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L))).thenReturn(blogPostResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/comments").param("blogPostId", "1")
+		mockMvc.perform(MockMvcRequestBuilders.put("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isOk()).andDo(print())
@@ -171,7 +171,7 @@ public class CommentControllerUnitTest {
 		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L)))
 				.thenThrow(new ResourceNotFoundException("No comment is present with the provided id..."));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments").param("blogPostId", "1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isNotFound()).andDo(print())
@@ -190,7 +190,7 @@ public class CommentControllerUnitTest {
 
 				.thenThrow(new DoNotHavePermissionError("You can not make changes on this comment!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments").param("blogPostId", "1")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isForbidden()).andDo(print())
@@ -204,7 +204,7 @@ public class CommentControllerUnitTest {
 		CommentResponse commentResponse = CommentResponse.convertCommentResponse(comment);
 		when(commentService.getById(1L)).thenReturn(commentResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/comments/1")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/comment/1")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.id").value(1));
 
 		verify(commentService).getById(1L);
@@ -216,7 +216,7 @@ public class CommentControllerUnitTest {
 
 		when(commentService.getById(1L)).thenThrow(new ResourceNotFoundException("Resource is not present!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/comments/1")).andExpect(status().isNotFound()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/comment/1")).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Resource is not present!"));
 
 		verify(commentService).getById(1L);
@@ -236,7 +236,7 @@ public class CommentControllerUnitTest {
 
 		when(commentService.reactComment(any(CommentReact.class))).thenReturn(commentResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments/react")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment/react")
 				.content(objectMapper.writeValueAsString(commmentReact)).contentType(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.likeCount").value(1));
 		verify(commentService).reactComment(any(CommentReact.class));
@@ -256,7 +256,7 @@ public class CommentControllerUnitTest {
 		when(commentService.reactComment(any(CommentReact.class)))
 				.thenThrow(new InvalidReactException("You have already reacted!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/comments/react")
+		mockMvc.perform(MockMvcRequestBuilders.post("/comment/react")
 				.content(objectMapper.writeValueAsString(commmentReact)).contentType(MediaType.APPLICATION_JSON))
 
 				.andDo(print()).andExpect(status().isBadRequest()).andDo(print())
@@ -269,7 +269,7 @@ public class CommentControllerUnitTest {
 	public void testDeleteComment() throws Exception {
 		CommentResponse commentResponse = CommentResponse.convertCommentResponse(comment);
 		when(commentService.deleteComment(1L, 1L)).thenReturn(commentResponse);
-		mockMvc.perform(MockMvcRequestBuilders.delete("/comments/1/blogposts/1")).andExpect(status().isOk())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/comment/1/blogpost/1")).andExpect(status().isOk())
 				.andDo(print()).andExpect(jsonPath("$.id").value(1));
 
 		verify(commentService).deleteComment(1L, 1L);
@@ -281,7 +281,7 @@ public class CommentControllerUnitTest {
 		CommentResponse commentResponse = CommentResponse.convertCommentResponse(comment);
 		when(commentService.deleteComment(1L, 1L))
 				.thenThrow(new ResourceNotFoundException("Resource is not present..."));
-		mockMvc.perform(MockMvcRequestBuilders.delete("/comments/1/blogposts/1")).andExpect(status().isNotFound())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/comment/1/blogpost/1")).andExpect(status().isNotFound())
 				.andDo(print()).andExpect(jsonPath("$.msg").value("Resource is not present..."));
 
 		verify(commentService).deleteComment(1L, 1L);
@@ -293,7 +293,7 @@ public class CommentControllerUnitTest {
 
 		when(commentService.deleteComment(1L, 1L))
 				.thenThrow(new DoNotHavePermissionError("You are not allowed to change other's comment!"));
-		mockMvc.perform(MockMvcRequestBuilders.delete("/comments/1/blogposts/1")).andExpect(status().isForbidden())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/comment/1/blogpost/1")).andExpect(status().isForbidden())
 				.andDo(print()).andExpect(jsonPath("$.msg").value("You are not allowed to change other's comment!"));
 
 		verify(commentService).deleteComment(1L, 1L);

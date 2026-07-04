@@ -1,5 +1,6 @@
 package com.example.demo.service.unit;
 
+import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.ReactDTO;
@@ -237,10 +238,13 @@ public class GraphQlServiceTest {
 		// for kafka template
 		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
 		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+		
 		BlogPostResponse blogPostResponse = postsService.setReaction(request);
 		assertNotNull(blogPostResponse);
 		assertEquals(Optional.of(n + 1L).get(), blogPostResponse.getLikes());
 		assertEquals(blogPost.getContent(), blogPostResponse.getContent());
+		
+		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME,"User 1 has reacted to the post id 1");
 
 	}
 
@@ -273,6 +277,7 @@ public class GraphQlServiceTest {
 		assertEquals((Long) 1L, pinnedBlogPost.getBlogPostResponse().getId());
 		assertEquals(blogPost.getContent(), pinnedBlogPost.getBlogPostResponse().getContent());
 
+		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME , "User :  1 has pinned post : 1");
 	}
 
 	@Test
@@ -301,6 +306,8 @@ public class GraphQlServiceTest {
 		assertEquals(2, userResponses.size());
 		assertEquals(user.getUsername(), userResponses.get(0).getUsername());
 		assertEquals(user1.getUsername(), userResponses.get(1).getUsername());
+		
+		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME,"User id 2 has started following to the user id 1");
 	}
 
 	@Test
@@ -354,6 +361,8 @@ public class GraphQlServiceTest {
 		assertEquals(2, userResponses.size());
 		assertEquals(user.getUsername(), userResponses.get(0).getUsername());
 		assertEquals(user1.getUsername(), userResponses.get(1).getUsername());
+		
+		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME , "User id 1 has blocked user id 2");
 	}
 
 }

@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import java.util.*;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,19 +14,17 @@ public class Category {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column
 	private String name;
-	
+
 	@ManyToMany(mappedBy = "categories")
 	private Set<BlogPost> blogPosts = new HashSet<>();
-	
 
 	public Set<BlogPost> getBlogPosts() {
 		return blogPosts;
 	}
 
-	
 	public Long getId() {
 		return id;
 	}
@@ -43,6 +40,7 @@ public class Category {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public Category() {
 		super();
 	}
@@ -57,12 +55,15 @@ public class Category {
 		this.blogPosts = blogPosts;
 	}
 
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(name);
 	}
 
+	public Category(String name) {
+		super();
+		this.name = name;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -75,7 +76,5 @@ public class Category {
 		Category other = (Category) obj;
 		return Objects.equals(name, other.name);
 	}
-
-
 
 }

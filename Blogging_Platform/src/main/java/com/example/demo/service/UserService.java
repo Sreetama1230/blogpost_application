@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.example.demo.config.SecurityUtils;
@@ -12,13 +13,16 @@ import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.model.BlogPost;
 import jakarta.transaction.Transactional;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.slf4j.Logger;
 import com.example.demo.dao.UserDao;
+import com.example.demo.exception.CustomExceptionHandler;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvaildRoleException;
 import com.example.demo.exception.InvalidEmailIdError;
@@ -39,27 +43,47 @@ public class UserService {
 	@Autowired
 	KafkaTemplate<String, String> kafkaTemplate;
 
+	
+		Logger logger = LoggerFactory.getLogger(UserService.class);
+		
 	@Transactional
 	public User createUser(UserDTO u) {
 		if(!u.getEmail().contains("@")) {
 			throw new InvalidEmailIdError("Please enter a valid email id");
 		}
+		
+		if(u.getRoles().size() > 1){
+			throw new InvaildRoleException("Sorry! you can not provide more than one role for now.. we are working on this feature..than you!");
+		}
+		
+		
+		
 		User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
+		
+		
 		reqUser.setBio(u.getBio());
 		reqUser.setTotalPosts(0L);
 		reqUser.setFollowers(0L);
 		reqUser.setFollowing(0L);
-		reqUser.setBlogPosts(new ArrayList<>());
+		reqUser.setBlogPosts(new ArrayList<>());		
 		reqUser.setRoles(UserService.convertRoles(u.getRoles()));
+		
 		User newUser = userDao.save(reqUser);
 
-		try {
-			SendResult<String, String> res = kafkaTemplate
-					.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Created User " + String.valueOf(newUser.getId())).get();
-		} catch (InterruptedException | ExecutionException e) {
+	
+			
+			CompletableFuture<SendResult<String, String>> future = kafkaTemplate
+					.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Created User " + 
+			String.valueOf(newUser.getId()));
+			
+			future.whenComplete((result , exception) ->{
+				if(exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event.");
+				}else {
+					logger.info("Successfully published the event...");
+				}
+			});
 
-			e.printStackTrace();
-		}
 
 		return newUser;
 	}
@@ -71,20 +95,66 @@ public class UserService {
 
 			User targetUser = userDao.findById(id).get();
 			User currentUser = userDao.findById(SecurityUtils.getCurrentUserId()).get();
+			
 			if (canUpdateOrDelete(currentUser, targetUser)) {
-				targetUser.setBio(userDTO.getBio());
-				targetUser.setUsername(userDTO.getUsername());
-				targetUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+				
+				if(userDTO.getBio() != null) {
+					targetUser.setBio(userDTO.getBio());
+				}
+				
+				if(userDTO.getPassword() != null ) {
+					targetUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+				}
+				
+				if(userDTO.getEmail() != null ) {
+					if(! userDTO.getEmail().equals(targetUser.getEmail())){
+						throw new UnexpectedCustomException("You can not change the registed email id. ");
+
+					}
+				}
+				
+				if(userDTO.getUsername() != null) {
+					targetUser.setUsername(userDTO.getUsername());
+				}
+				
+				if(userDTO.getRoles() != null || userDTO.getRoles().size() > 0) {
+					
+					if(userDTO.getRoles().size() > 1){
+						throw new InvaildRoleException("Sorry! you can not provide more than one role for now.. we are working on this feature..than you!");
+					}
+					
+					for(String role : userDTO.getRoles()) {
+						if(!(targetUser.getRoles().contains(role))) {
+							throw new UnexpectedCustomException("You can not change the role!");
+						}
+					}
+				}
+				
+				
 				//email can not be changed
 				userDao.save(targetUser);
 				
-				try {
-					SendResult<String, String> res = kafkaTemplate
-							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Updated User " + String.valueOf(targetUser.getId())).get();
-				} catch (InterruptedException | ExecutionException e) {
+//				try {
+//					SendResult<String, String> res = kafkaTemplate
+//							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Updated User " + String.valueOf(targetUser.getId())).get();
+//				} catch (InterruptedException | ExecutionException e) {
+//
+//					e.printStackTrace();
+//				}
+				
+				//async
+				CompletableFuture<SendResult<String, String>> future = kafkaTemplate
+						.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Updated User " + 
+				String.valueOf(targetUser.getId()));
+				
+				future.whenComplete((result , exception) ->{
+					if(exception != null) {
+						throw new UnexpectedCustomException("Error occured while publishing the event");
+					}else {
+						logger.info("Successfully published the event...");
+					}
+				});
 
-					e.printStackTrace();
-				}
 				
 				return targetUser;
 			} else {
@@ -129,13 +199,29 @@ public class UserService {
 				}
 				UserResponse resp = UserResponse.convertUserResponse(dbUser);
 				userDao.deleteById(id);
-				try {
-					SendResult<String, String> res = kafkaTemplate
-							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted User " + String.valueOf(id)).get();
-				} catch (InterruptedException | ExecutionException e) {
-
-					e.printStackTrace();
-				}
+				
+				
+//				try {
+//					SendResult<String, String> res = kafkaTemplate
+//							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted User " + String.valueOf(id)).get();
+//				} catch (InterruptedException | ExecutionException e) {
+//
+//					e.printStackTrace();
+//				}
+//				
+				//async
+				CompletableFuture<SendResult<String, String>> future = kafkaTemplate
+						.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted User " + 
+				String.valueOf(id));
+				
+				future.whenComplete((result , exception) ->{
+					if(exception != null) {
+						throw new UnexpectedCustomException("Error occured while publishing the event");
+					}else {
+						logger.info("Successfully published the event...");
+					}
+				});
+				
 				return resp;
 			} else {
 				throw new DoNotHavePermissionError("You can not delete the user!");

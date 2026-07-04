@@ -18,7 +18,7 @@ import com.example.demo.response.CategoryResponse;
 import com.example.demo.service.CategoryService;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/category")
 public class CategoryController {
 
 	@Autowired

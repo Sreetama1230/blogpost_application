@@ -89,7 +89,7 @@ public class GraphQlController {
 		return postservice.setReaction(request);
 	}
 
-	@MutationMapping("pinnedPost")
+	@MutationMapping("pinPost")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'USER') and #uId == authentication.principal.id")
 	public PinnedBlogPost pinnedPost(@Argument long uId, @Argument long bpId) {
 		return postservice.pinnedPost(uId, bpId);

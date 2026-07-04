@@ -1,6 +1,7 @@
 package com.example.demo.error;
 
 public class ErrorDetails {
+
 	private String message;
 	private int status;
 
@@ -29,6 +30,11 @@ public class ErrorDetails {
 		super();
 		this.message = msg;
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return "ErrorDetails [message=" + message + ", status=" + status + "]";
 	}
 
 }

@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.demo.config.SecurityUtils;
+import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.UserDTO;
@@ -100,7 +101,9 @@ public class UserServiceUnitTest {
 		when(userDao.save(any(User.class))).thenReturn(user);
 
 		// for kafka template
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
+		CompletableFuture<SendResult<String, String>> future =
+       CompletableFuture.completedFuture(null);
+		
 		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 
 		User newUser = userService.createUser(userDTO);
@@ -108,6 +111,10 @@ public class UserServiceUnitTest {
 		assertEquals(user.getBio(), newUser.getBio());
 		assertEquals(user.getId(), newUser.getId());
 
+	    verify(kafkaTemplate).send(
+                AppConstants.ADMINTOOL_TOPIC_NAME,
+                "Created User 1"
+        );
 		verify(userDao).save(user);
 	}
 
@@ -164,6 +171,9 @@ public class UserServiceUnitTest {
 			assertEquals(user.getEmail(), newUser.getEmail());
 
 			verify(userDao).save(user);
+			
+			verify(kafkaTemplate).
+			send(AppConstants.ADMINTOOL_TOPIC_NAME , "Updated User 1");
 
 		}
 
@@ -197,6 +207,11 @@ public class UserServiceUnitTest {
 			assertNotNull(resourceNotFoundException);
 			assertEquals("No user present with the provided id", resourceNotFoundException.getMessage());
 
+			verify(kafkaTemplate , never()).
+			send(AppConstants.ADMINTOOL_TOPIC_NAME , "Updated User 1");
+
+		
+		
 		}
 
 	}
@@ -241,6 +256,10 @@ public class UserServiceUnitTest {
 			assertNotNull(doNotHavePermissionError);
 			assertEquals("You don't have proper role to update the user!", doNotHavePermissionError.getMessage());
 
+			verify(kafkaTemplate , never()).
+			send(AppConstants.ADMINTOOL_TOPIC_NAME , "Updated User 1");
+
+		
 		}
 
 	}
@@ -308,6 +327,8 @@ public class UserServiceUnitTest {
 			assertEquals(1L, userResponse.getId());
 
 			verify(userDao).deleteById(1L);
+			
+			verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME , "Deleted User 1");
 
 		}
 	}
@@ -324,6 +345,9 @@ public class UserServiceUnitTest {
 
 		assertNotNull(resourceNotFoundException);
 		assertEquals("No value is present with that id!", resourceNotFoundException.getMessage());
+	
+		verify(kafkaTemplate , never()).send(AppConstants.ADMINTOOL_TOPIC_NAME , "Deleted User 1");
+
 	}
 	
 	
@@ -357,6 +381,8 @@ public class UserServiceUnitTest {
 			
 			assertNotNull(doNotHavePermissionError);
 			assertEquals("You can not delete the user!", doNotHavePermissionError.getMessage());
+
+			verify(kafkaTemplate , never()).send(AppConstants.ADMINTOOL_TOPIC_NAME , "Deleted User 1");
 
 		}
 

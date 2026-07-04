@@ -109,7 +109,7 @@ public class BlogPostControllerUnitTest {
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
 		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenReturn(blogPostResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/blogs").content(objectMapper.writeValueAsString(blogPostDTO))
+		mockMvc.perform(MockMvcRequestBuilders.post("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isCreated()).andDo(print()).andExpect(jsonPath("$.id").value(1L))
@@ -133,7 +133,7 @@ public class BlogPostControllerUnitTest {
 
 				new CategoryException("You have to specify a category to proceed"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/blogs").content(objectMapper.writeValueAsString(blogPostDTO))
+		mockMvc.perform(MockMvcRequestBuilders.post("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isBadRequest()).andDo(print())
@@ -160,7 +160,7 @@ public class BlogPostControllerUnitTest {
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
 		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenReturn(blogPostResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/blogs").content(objectMapper.writeValueAsString(blogPostDTO))
+		mockMvc.perform(MockMvcRequestBuilders.put("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isOk()).andDo(print()).andExpect(jsonPath("$.id").value(1L))
@@ -183,7 +183,7 @@ public class BlogPostControllerUnitTest {
 
 				new DoNotHavePermissionError("You can not do the update!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/blogs").content(objectMapper.writeValueAsString(blogPostDTO))
+		mockMvc.perform(MockMvcRequestBuilders.post("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isForbidden()).andDo(print())
@@ -198,7 +198,7 @@ public class BlogPostControllerUnitTest {
 		BlogPostResponse blogPostResponses = BlogPostResponse.convertBlogPostRespons(blogPost);
 		when(blogPostService.deleteBlogPost(1L)).thenReturn(blogPostResponses);
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/blogs/1")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/blog/1")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.title").value("blog title"))
 				.andExpect(jsonPath("$.author.username").value("fake-username"));
 
@@ -210,7 +210,7 @@ public class BlogPostControllerUnitTest {
 
 		when(blogPostService.deleteBlogPost(1L)).thenThrow(new ResourceNotFoundException("Resource is not found!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/blogs/1")).andExpect(status().isNotFound()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/blog/1")).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Resource is not found!"));
 
 		verify(blogPostService).deleteBlogPost(1L);
@@ -223,7 +223,7 @@ public class BlogPostControllerUnitTest {
 
 		when(blogPostService.deleteBlogPost(1L)).thenThrow(new DoNotHavePermissionError("You are not the author of this post or an admin!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/blogs/1")).andExpect(status().isForbidden()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/blog/1")).andExpect(status().isForbidden()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You are not the author of this post or an admin!"));
 
 		verify(blogPostService).deleteBlogPost(1L);
@@ -239,7 +239,7 @@ public class BlogPostControllerUnitTest {
 		BlogPostResponse blogPostResponses = BlogPostResponse.convertBlogPostRespons(blogPost);
 		when(blogPostService.getBlogsByTitleAndUserId("blog title", 1L)).thenReturn(List.of(blogPostResponses));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/blogs/title/blog title/user/1")).andExpect(status().isOk())
+		mockMvc.perform(MockMvcRequestBuilders.get("/blog/title/blog title/user/1")).andExpect(status().isOk())
 				.andDo(print()).andExpect(jsonPath("$[0].id").value(1L))
 				.andExpect(jsonPath("$[0].title").value("blog title"))
 				.andExpect(jsonPath("$[0].author.username").value("fake-username"));

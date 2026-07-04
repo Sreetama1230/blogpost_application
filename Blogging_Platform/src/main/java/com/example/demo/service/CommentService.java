@@ -1,13 +1,12 @@
 package com.example.demo.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.constants.AppConstants;
-import com.example.demo.constants.Reaction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import com.example.demo.dto.CommentReact;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.*;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
@@ -88,13 +88,16 @@ public class CommentService {
 
 						commentDao.save(existingComment);
 
-						try {
-							SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-									"Updated Comment " + String.valueOf(existingComment.getId())).get();
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+								"Updated Comment " + String.valueOf(existingComment.getId()));
+						
+						future.whenComplete((result , exception) ->{
+							if(exception != null) {
+								throw new UnexpectedCustomException("Error occured while publishing the event");
+							}else {
+								logger.info("Successfully published the event...");
+							}
+						});
 
 					}
 
@@ -107,13 +110,25 @@ public class CommentService {
 		} else {
 			Comment savedComment = commentDao.save(newComment);
 
-			try {
-				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						"Created Comment " + String.valueOf(savedComment.getId())).get();
+//			try {
+//				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//						"Created Comment " + String.valueOf(savedComment.getId())).get();
+//
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			
+			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					"Created Comment " + String.valueOf(savedComment.getId()));
+			
+			future.whenComplete((result , exception) ->{
+				if(exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				}else {
+					logger.info("Successfully published the event...");
+				}
+			});
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 
 			exitsingComments.add(newComment);
 		}
@@ -141,14 +156,27 @@ public class CommentService {
 				blogPost.getComments().remove(c);
 				commentAuthor.getComments().remove(c);
 				commentDao.deleteById(c.getId());
-				try {
-					SendResult<String, String> res = kafkaTemplate
-							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted Comment " + String.valueOf(c.getId()))
-							.get();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				
+//				try {
+//					SendResult<String, String> res = kafkaTemplate
+//							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted Comment " + String.valueOf(c.getId()))
+//							.get();
+//
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//				
+				
+				CompletableFuture<SendResult<String, String>> future =  kafkaTemplate
+						.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted Comment " + String.valueOf(c.getId()));
+				
+				future.whenComplete((result , exception) ->{
+					if(exception != null) {
+						throw new UnexpectedCustomException("Error occured while publishing the event");
+					}else {
+						logger.info("Successfully published the event...");
+					}
+				});
 
 				return cr;
 			} else {
@@ -199,13 +227,28 @@ public class CommentService {
 
 			dbComment.getReactedUsers().add(dbUser);
 			commentDao.save(dbComment);
-			try {
-				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						"Reacted Comment " + String.valueOf(commentReact.getId())).get();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			
+			
+//			try {
+//				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//						"Reacted Comment " + String.valueOf(commentReact.getId())).get();
+//
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+			
+			CompletableFuture<SendResult<String, String>> future =  kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					"Reacted Comment " + String.valueOf(commentReact.getId()));
+			
+			future.whenComplete((result , exception) ->{
+				if(exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				}else {
+					logger.info("Successfully published the event...");
+				}
+			});			
+			
+			
 			return CommentResponse.convertCommentResponse(dbComment);
 		} else {
 			throw new ResourceNotFoundException("Resource is not present!");

@@ -136,7 +136,7 @@ public class CategoryServiceUnitTest {
 			categoryService.getById(1L);
 		});
 		assertNotNull(resourceNotFoundException);
-		assertEquals("Category with provided id is not present", resourceNotFoundException.getMessage());
+		assertEquals("Category with provided id is not present.", resourceNotFoundException.getMessage());
 
 	}
 
@@ -234,7 +234,7 @@ public class CategoryServiceUnitTest {
 		});
 
 		assertNotNull(resourceNotFoundException);
-		assertEquals("Category with provided name is not present.", resourceNotFoundException.getMessage());
+		assertEquals("Category with provided id is not present.", resourceNotFoundException.getMessage());
 
 	}
 

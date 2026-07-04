@@ -108,7 +108,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.createCategory(any(Category.class))).thenReturn(category);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/categories").content(objectMapper.writeValueAsString(categoryDto))
+		mockMvc.perform(MockMvcRequestBuilders.post("/category").content(objectMapper.writeValueAsString(categoryDto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andDo(print())
 				.andExpect(jsonPath("$.id").value(2)).andExpect(jsonPath("$.name").value("#new-test-category"));
 
@@ -129,7 +129,7 @@ public class CategoryControllerUnitTest {
 		when(categoryService.getByName(category.getName())).thenReturn(category);
 
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/categories").content(objectMapper.writeValueAsString(categoryDto))
+		mockMvc.perform(MockMvcRequestBuilders.post("/category").content(objectMapper.writeValueAsString(categoryDto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Category is already present with the provided name..."));
 
@@ -147,7 +147,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.getAll()).thenReturn(List.of(category));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/categories")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/category")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$[0].id").value(2L)).andExpect(jsonPath("$[0].name").value("#test-category"));
 
 		verify(categoryService).getAll();
@@ -166,7 +166,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.listBlogsByCategory(category.getName())).thenReturn(List.of(blogPostResponse));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/categories/name").param("name", "#test-category"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/category/name").param("name", "#test-category"))
 				.andExpect(status().isOk()).andDo(print()).andExpect(jsonPath("$[0].id").value(1L));
 
 		verify(categoryService).listBlogsByCategory("#test-category");
@@ -181,7 +181,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.listBlogsByCategory("#sample")).thenThrow(new ResourceNotFoundException("Category with provided name is not present."));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/categories/name").param("name", "#sample"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/category/name").param("name", "#sample"))
 		
 		.andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Category with provided name is not present."));
@@ -198,7 +198,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.deleteById(2L)).thenReturn(category);
 
-		mockMvc.perform((MockMvcRequestBuilders.delete("/categories/2"))).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform((MockMvcRequestBuilders.delete("/category/2"))).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.id").value(2));
 
 		verify(categoryService).deleteById(2L);
@@ -213,7 +213,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.deleteById(2L)).thenThrow(new ResourceNotFoundException("Category with provided name is not present."));
 
-		mockMvc.perform((MockMvcRequestBuilders.delete("/categories/2"))).andExpect(status().isNotFound()).andDo(print())
+		mockMvc.perform((MockMvcRequestBuilders.delete("/category/2"))).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Category with provided name is not present."));
 
 		verify(categoryService).deleteById(2L);
@@ -228,7 +228,7 @@ public class CategoryControllerUnitTest {
 
 		when(categoryService.deleteById(2L)).thenThrow(new CategoryLinkedToBlogs("Some Blogs are linked with this category!..can not be deleted!"));
 
-		mockMvc.perform((MockMvcRequestBuilders.delete("/categories/2"))).andExpect(status().isBadRequest()).andDo(print())
+		mockMvc.perform((MockMvcRequestBuilders.delete("/category/2"))).andExpect(status().isBadRequest()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Some Blogs are linked with this category!..can not be deleted!"));
 
 		verify(categoryService).deleteById(2L);

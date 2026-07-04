@@ -99,7 +99,7 @@ public class UserControllerUnitTest {
 		userResponse.setId(1L);
 		when(userService.getAll()).thenReturn(List.of(userResponse));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/users"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/user"))
 
 				.andExpect(status().isOk()).andDo(print()).andExpect(jsonPath("$.size()").value(1))
 
@@ -114,7 +114,7 @@ public class UserControllerUnitTest {
 
 		when(userService.getbyId(1L)).thenReturn(user);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/users/1/posts")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/user/1/post")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.username").value("fake-username"))
 				.andExpect(jsonPath("$.blogPosts.size()").value(1L)).andExpect(jsonPath("$.blogPosts[0].id").value(1L))
 				.andExpect(jsonPath("$.blogPosts[0].title").value("blog title"));
@@ -128,7 +128,7 @@ public class UserControllerUnitTest {
 
 		when(userService.getbyId(1L)).thenThrow(new ResourceNotFoundException("No user present with the provided id"));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/users/1/posts")).andExpect(status().isNotFound()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/user/1/post")).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("No user present with the provided id"));
 
 		verify(userService).getbyId(1L);
@@ -139,7 +139,7 @@ public class UserControllerUnitTest {
 	public void testGetById() throws Exception {
 		when(userService.getbyId(1L)).thenReturn(user);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/users/1")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.get("/user/1")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.username").value("fake-username"));
 
 		verify(userService).getbyId(1L);
@@ -150,7 +150,7 @@ public class UserControllerUnitTest {
 	public void testGetById_WithInvalidUserId_FailureWithResourceNotFoundException() throws Exception {
 		when(userService.getbyId(1L)).thenThrow(new ResourceNotFoundException("No user present with the provided id"));
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/users/1"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/user/1"))
 
 				.andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("No user present with the provided id"));
@@ -176,7 +176,7 @@ public class UserControllerUnitTest {
 		newUser.setBio(dto.getBio());
 		when(userService.createUser(any(UserDTO.class))).thenReturn(newUser);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/users/register").content(objectMapper.writeValueAsString(dto))
+		mockMvc.perform(MockMvcRequestBuilders.post("/user/register").content(objectMapper.writeValueAsString(dto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andDo(print())
 				.andExpect(jsonPath("$.username").value("fake-username"))
 				.andExpect(jsonPath("$.bio").value("fake-bio"));
@@ -198,7 +198,7 @@ public class UserControllerUnitTest {
 		when(userService.createUser(any(UserDTO.class)))
 				.thenThrow(new InvalidEmailIdError("Please enter a valid email id"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/users/register").content(objectMapper.writeValueAsString(dto))
+		mockMvc.perform(MockMvcRequestBuilders.post("/user/register").content(objectMapper.writeValueAsString(dto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Please enter a valid email id"));
 
@@ -224,7 +224,7 @@ public class UserControllerUnitTest {
 
 		when(userService.updateUser(any(UserDTO.class))).thenReturn(newUser);
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/users").content(objectMapper.writeValueAsString(dto))
+		mockMvc.perform(MockMvcRequestBuilders.put("/user").content(objectMapper.writeValueAsString(dto))
 
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.bio").value("fake-bio"))
@@ -249,7 +249,7 @@ public class UserControllerUnitTest {
 		when(userService.updateUser(any(UserDTO.class)))
 				.thenThrow(new DoNotHavePermissionError("You don't have proper role to update the user!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/users").content(objectMapper.writeValueAsString(dto))
+		mockMvc.perform(MockMvcRequestBuilders.put("/user").content(objectMapper.writeValueAsString(dto))
 
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You don't have proper role to update the user!"));
@@ -273,7 +273,7 @@ public class UserControllerUnitTest {
 		when(userService.updateUser(any(UserDTO.class)))
 				.thenThrow(new ResourceNotFoundException("No user present with the provided id"));
 
-		mockMvc.perform(MockMvcRequestBuilders.put("/users").content(objectMapper.writeValueAsString(dto))
+		mockMvc.perform(MockMvcRequestBuilders.put("/user").content(objectMapper.writeValueAsString(dto))
 
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("No user present with the provided id"));
@@ -287,7 +287,7 @@ public class UserControllerUnitTest {
 		UserResponse userResponse = UserResponse.convertUserResponse(user);
 		when(userService.deleteUser(1L)).thenThrow(new DoNotHavePermissionError("You can not delete the user!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/users/1")).andExpect(status().isForbidden()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/user/1")).andExpect(status().isForbidden()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You can not delete the user!"));
 
 		verify(userService).deleteUser(1L);
@@ -299,7 +299,7 @@ public class UserControllerUnitTest {
 		UserResponse userResponse = UserResponse.convertUserResponse(user);
 		when(userService.deleteUser(1L)).thenThrow(new ResourceNotFoundException("No value is present with that id!"));
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/users/1")).andExpect(status().isNotFound()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/user/1")).andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("No value is present with that id!"));
 
 		verify(userService).deleteUser(1L);
@@ -311,7 +311,7 @@ public class UserControllerUnitTest {
 		UserResponse userResponse = UserResponse.convertUserResponse(user);
 		when(userService.deleteUser(1L)).thenReturn(userResponse);
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/users/1")).andExpect(status().isOk()).andDo(print())
+		mockMvc.perform(MockMvcRequestBuilders.delete("/user/1")).andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.username").value("fake-username"));
 
 		verify(userService).deleteUser(1L);

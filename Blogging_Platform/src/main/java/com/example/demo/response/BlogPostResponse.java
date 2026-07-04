@@ -180,4 +180,11 @@ public class BlogPostResponse {
 
 	}
 
+	@Override
+	public String toString() {
+		return "BlogPostResponse [id=" + id + ", title=" + title + ", content=" + content + ", author=" + author
+				+ ", categories=" + categories + ", comments=" + comments + ", createAt=" + createAt + ", updateAt="
+				+ updateAt + ", likes=" + likes + ", dislikes=" + dislikes + "]";
+	}
+
 }

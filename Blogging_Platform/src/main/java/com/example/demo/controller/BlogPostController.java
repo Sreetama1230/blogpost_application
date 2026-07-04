@@ -26,7 +26,7 @@ import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
 
 @RestController
-@RequestMapping("/blogs")
+@RequestMapping("/blog")
 public class BlogPostController {
 
 	@Autowired

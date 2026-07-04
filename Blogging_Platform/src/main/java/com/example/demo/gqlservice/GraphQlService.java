@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.example.demo.exception.BlockUnBlockException;
@@ -31,6 +32,9 @@ import com.example.demo.response.PinnedBlogPost;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.UserService;
+
+import jakarta.transaction.Transactional;
+
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnexpectedCustomException;
 
@@ -54,6 +58,7 @@ public class GraphQlService {
 
 	Logger logger = LoggerFactory.getLogger(GraphQlService.class);
 
+	@Transactional
 	public List<BlogPostResponse> searchPosts(String keyword) {
 
 		return dao.searchPosts(keyword).stream().map(BlogPostResponse::convertBlogPostRespons).toList();
@@ -61,12 +66,14 @@ public class GraphQlService {
 	}
 
 	// With pagination
+	@Transactional
 	public Page<BlogPostResponse> getPosts(int page, int size) {
 		PageRequest pageable = PageRequest.of(page, size);
 		Page<BlogPost> re = dao.findAll(pageable);
 		return re.map(r -> BlogPostResponse.convertBlogPostRespons(r));
 	}
-
+	
+	@Transactional
 	public List<PinnedBlogPost> getPinnedPostsOfTheUser(long uId) {
 
 		try {
@@ -83,7 +90,8 @@ public class GraphQlService {
 		}
 
 	}
-
+	
+	@Transactional
 	public List<UserResponse> getFollowers(long uId) {
 		if (uId <= 0) {
 			throw new InvalidIdException("Invalid ID!");
@@ -91,7 +99,8 @@ public class GraphQlService {
 		return userDao.findById(uId).get().getListfollowers().stream().map(UserResponse::convertUserResponse).toList();
 
 	}
-
+	
+	@Transactional
 	public List<UserResponse> getFollowings(long uId) {
 		if (uId <= 0) {
 			throw new InvalidIdException("Invalid ID!");
@@ -102,13 +111,16 @@ public class GraphQlService {
 	}
 
 	// top 10 most liked posts
+	@Transactional
 	public Page<BlogPostResponse> trendingPosts() {
 		PageRequest pageable = PageRequest.of(0, 10);
 		Page<BlogPost> re = dao.findTopNByOrderByLikesDesc(pageable);
 		return re.map(r -> BlogPostResponse.convertBlogPostRespons(r));
 
 	}
+	
 
+	@Transactional
 	public List<BlogPostResponse> userLikedPost(long uId) {
 
 		if (uId <= 0) {
@@ -204,8 +216,19 @@ public class GraphQlService {
 			userDao.save(u);
 			dao.save(bp);
 
-			SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-					"User " + String.valueOf(u.getId()) + "has reacted to the post id " + bp.getId()).get();
+			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					"User " + String.valueOf(u.getId()) + " has reacted to the post id " + bp.getId());
+
+			future.whenComplete((result, exception) -> {
+				if (exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				} else {
+					logger.info("Successfully published the event...");
+				}
+			});
+
+//			SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//					"User " + String.valueOf(u.getId()) + " has reacted to the post id " + bp.getId()).get();
 
 			return BlogPostResponse.convertBlogPostRespons(bp);
 
@@ -217,6 +240,7 @@ public class GraphQlService {
 
 	}
 
+	@Transactional
 	public PinnedBlogPost pinnedPost(long uId, long bpId) {
 
 		if (uId <= 0 || bpId <= 0) {
@@ -239,8 +263,19 @@ public class GraphQlService {
 
 			pinnedPosts.add(bp);
 
-			SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-					"User :  " + String.valueOf(u.getId()) + "has pinned post : " + bp.getId()).get();
+//			SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//					"User :  " + String.valueOf(u.getId()) + " has pinned post : " + bp.getId()).get();
+
+			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					"User :  " + String.valueOf(u.getId()) + " has pinned post : " + bp.getId());
+
+			future.whenComplete((result, exception) -> {
+				if (exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				} else {
+					logger.info("Successfully published the event...");
+				}
+			});
 
 			return PinnedBlogPost.convertPinnedBlogPosts(bp);
 		} catch (ResourceNotFoundException exception) {
@@ -252,6 +287,7 @@ public class GraphQlService {
 
 	}
 
+	@Transactional
 	public List<UserResponse> followOrUnFollowAuthor(long follower, long followee) {
 
 		if (followee <= 0 || followee <= 0) {
@@ -283,10 +319,23 @@ public class GraphQlService {
 			userDao.save(followeeUser);
 			userDao.save(followerUser);
 
-			SendResult<String, String> res = kafkaTemplate
-					.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-							"User id " + String.valueOf(follower + " has started following to the user id " + followee))
-					.get();
+			CompletableFuture<SendResult<String, String>> future =
+
+					kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME, "User id " + String.valueOf(follower)
+							+ " has started following to the user id " + String.valueOf(followee));
+
+			future.whenComplete((result, exception) -> {
+				if (exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				} else {
+					logger.info("Successfully published the event...");
+				}
+			});
+
+//			SendResult<String, String> res = kafkaTemplate
+//					.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//							"User id " + String.valueOf(follower)+ " has started following to the user id " + String.valueOf(followee))
+//					.get();
 
 			List<User> users = new ArrayList<>(List.of(followeeUser, followerUser));
 			return users.stream().map(f -> UserResponse.convertUserResponse(f)).toList();
@@ -343,12 +392,26 @@ public class GraphQlService {
 			userDao.save(bu);
 			List<User> users = new ArrayList<>(List.of(b, bu));
 
-			try {
-				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						"User id " + String.valueOf(b.getId() + " has blocked user id " + bu.getId())).get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+//						"User id " + String.valueOf(b.getId() + " has blocked user id " + bu.getId())).get();
+//			} catch (InterruptedException | ExecutionException e) {
+//				e.printStackTrace();
+//			}
+			
+			
+			CompletableFuture<SendResult<String, String>> future =
+
+					kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+							"User id " + String.valueOf(b.getId() + " has blocked user id " + bu.getId()));
+
+			future.whenComplete((result, exception) -> {
+				if (exception != null) {
+					throw new UnexpectedCustomException("Error occured while publishing the event");
+				} else {
+					logger.info("Successfully published the event...");
+				}
+			});
 
 			return users.stream().map(u -> UserResponse.convertUserResponse(u)).toList();
 		} catch (ResourceNotFoundException exception) {
