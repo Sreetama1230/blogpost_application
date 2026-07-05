@@ -8,10 +8,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.gqlcontroller.GraphQlController;
 import com.example.demo.gqlservice.GraphQlService;
 import com.example.demo.response.BlogPostResponse;
-import com.example.demo.response.PinnedBlogPost;
 import com.example.demo.response.UserResponse;
-
-import io.netty.channel.unix.Errors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -106,28 +102,27 @@ public class GraphQlControllerTest {
 		response1.setId(1L);
 		response1.setTitle("Title 1");
 		response1.setContent("Content 1");
-		PinnedBlogPost pinned1 = new PinnedBlogPost(LocalDateTime.now(), response1);
+		BlogPostResponse pinned1 = response1;
 		BlogPostResponse response2 = new BlogPostResponse();
 		response2.setId(2L);
 		response2.setTitle("Title 2");
 		response2.setContent("Content 2");
-		PinnedBlogPost pinned2 = new PinnedBlogPost(LocalDateTime.now(), response2);
+		BlogPostResponse pinned2 =  response2;
 
-		List<PinnedBlogPost> pinnedBlogPosts = List.of(pinned1, pinned2);
+		List<BlogPostResponse> pinnedBlogPosts = List.of(pinned1, pinned2);
 		when(postsService.getPinnedPostsOfTheUser(1L)).thenReturn(pinnedBlogPosts);
 
 		graphQlTester.document("""
 				         query GetPinnedPostsOfTheUser {
 				          getPinnedPostsOfTheUser(uId:1){
-				           pinnedDate,
-				           blogPostResponse {
+				           
 				            content
-				           }
+				           
 				          }
 				        }
 
-				""").execute().path("getPinnedPostsOfTheUser").entityList(PinnedBlogPost.class).hasSize(2)
-				.matches(l -> l.get(0).getBlogPostResponse().getContent().equals("Content 1"));
+				""").execute().path("getPinnedPostsOfTheUser").entityList(BlogPostResponse.class).hasSize(2)
+				.matches(l -> l.get(0).getContent().equals("Content 1"));
 
 	}
 
@@ -140,10 +135,8 @@ public class GraphQlControllerTest {
 		graphQlTester.document("""
 				         query GetPinnedPostsOfTheUser {
 				          getPinnedPostsOfTheUser(uId:1){
-				           pinnedDate,
-				           blogPostResponse {
-				            content
-				           }
+				           	content
+				           
 				          }
 				        }
 
@@ -337,7 +330,7 @@ public class GraphQlControllerTest {
 	// mutation
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
-	void testSetReaction_WithInvalidUser_FailureWithResourceNotFoundException() {
+	void testSetReaction_WithInvalidUser_FailureWithResourceNotFoundException() throws Exception {
 		ReactDTO reactDTO = new ReactDTO(1L, true, 1L);
 
 		BlogPostResponse response1 = new BlogPostResponse();
@@ -374,7 +367,7 @@ public class GraphQlControllerTest {
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
-	void testSetReaction() {
+	void testSetReaction() throws Exception {
 		ReactDTO reactDTO = new ReactDTO(1L, true, 1L);
 
 		BlogPostResponse response1 = new BlogPostResponse();
@@ -408,38 +401,37 @@ public class GraphQlControllerTest {
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
-	void testPinnedPost() {
+	void testPinnedPost() throws Exception {
 
 		BlogPostResponse response1 = new BlogPostResponse();
 		response1.setId(1L);
 		response1.setTitle("Title 1");
 		response1.setContent("Content 1");
-		PinnedBlogPost pinned1 = new PinnedBlogPost(LocalDateTime.now(), response1);
+		BlogPostResponse pinned1 =  response1;
 
-		when(postsService.pinnedPost(1L, 1L)).thenReturn(pinned1);
+		when(postsService.postPinnedUnpinned(1L, 1L)).thenReturn(pinned1);
 
 		graphQlTester.document("""
 
 
 				mutation PinAPost {
-				 pinPost(uId:1 , bpId: 1 ){
-				   pinnedDate
-				    blogPostResponse {
-				      content
-				     }
+				 pinUnpinPost(uId:1 , bpId: 1 ){
+				  
+				  		content
+				     
 				  }
 				}
 
 
 
-				""").execute().path("pinPost").entity(PinnedBlogPost.class).get().getBlogPostResponse().getContent()
+				""").execute().path("pinUnpinPost").entity(BlogPostResponse.class).get().getContent()
 				.equals("Content 1");
 
 	}
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
-	void testFollowOrUnFollowAuthor_SameFollowFollowee_FailureWithFollowUnFollowException() {
+	void testFollowOrUnFollowAuthor_SameFollowFollowee_FailureWithFollowUnFollowException() throws Exception {
 		UserResponse userResponse = new UserResponse();
 		userResponse.setId(1L);
 		userResponse.setTotalPosts(1L);
@@ -468,7 +460,7 @@ public class GraphQlControllerTest {
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
-	void testFollowOrUnFollowAuthor() {
+	void testFollowOrUnFollowAuthor() throws Exception {
 		UserResponse userResponse = new UserResponse();
 		userResponse.setId(1L);
 		userResponse.setTotalPosts(1L);
@@ -500,7 +492,7 @@ public class GraphQlControllerTest {
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR" })
-	void testBlockUser() {
+	void testBlockUser() throws Exception {
 		UserResponse userResponse = new UserResponse();
 		userResponse.setId(1L);
 		userResponse.setTotalPosts(1L);
@@ -517,7 +509,7 @@ public class GraphQlControllerTest {
 		userResponse1.setUsername("fake1_username");
 		userResponse1.setRoles(new HashSet<>(Set.of("ROLE_FAKE1")));
 
-		when(postsService.blockUser(1L, 2L)).thenReturn(List.of(userResponse, userResponse1));
+		when(postsService.blockUnblockUser(1L, 2L)).thenReturn(List.of(userResponse, userResponse1));
 
 		graphQlTester.document("""
 				        mutation BlockUser{
@@ -531,7 +523,7 @@ public class GraphQlControllerTest {
 
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR" })
-	void testBlockUser_WithInvalidId_FailureWith_ResourceNotFoundException() {
+	void testBlockUser_WithInvalidId_FailureWith_ResourceNotFoundException() throws Exception {
 		UserResponse userResponse = new UserResponse();
 		userResponse.setId(1L);
 		userResponse.setTotalPosts(1L);
@@ -548,7 +540,7 @@ public class GraphQlControllerTest {
 		userResponse1.setUsername("fake1_username");
 		userResponse1.setRoles(new HashSet<>(Set.of("ROLE_FAKE1")));
 
-		when(postsService.blockUser(1L, 2L))
+		when(postsService.blockUnblockUser(1L, 2L))
 				.thenThrow(new ResourceNotFoundException("Either the blocker or the blocking user is not present!"));
 
 		graphQlTester.document("""

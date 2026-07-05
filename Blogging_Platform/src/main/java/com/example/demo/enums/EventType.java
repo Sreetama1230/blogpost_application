@@ -1,0 +1,7 @@
+package com.example.demo.enums;
+
+public enum EventType {
+
+	CREATE,UPDATE,DELETE,REACT,REMOVE_REACT,LIKE,DISLIKE,
+	PIN,UNPIN,FOLLOW,UNFOLLOW,BLOCK,UNBLOCK
+}

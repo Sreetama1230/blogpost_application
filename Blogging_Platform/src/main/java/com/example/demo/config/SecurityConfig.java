@@ -74,6 +74,8 @@ public class SecurityConfig {
                 			// GraphQL
                 			.requestMatchers("/graphql/**", "/graphiql/**").permitAll() 
                 			
+                			//timeline
+                			.requestMatchers("/timeline").permitAll()
                
 
                 			.anyRequest().authenticated()

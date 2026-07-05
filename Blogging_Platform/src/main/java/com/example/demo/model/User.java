@@ -40,8 +40,15 @@ public class User  implements Comparable<User>{
 	private List<Comment> comments= new ArrayList<>(); ;
 
 	  // any particular user has pinned some posts
-	@OneToMany(mappedBy = "pinnedBy")
-	private List<BlogPost> pinnedBlogPosts= new ArrayList<>(); 
+	@ManyToMany
+	@JoinTable(
+			
+			name="pinned_posts",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "post_id")
+			)
+	
+	private Set<BlogPost> pinnedBlogPosts= new HashSet<>(); 
 
 	@ManyToMany
 			
@@ -230,13 +237,14 @@ private List<BlogPost> dislikedBlogPosts= new ArrayList<>();
 	public void setTotalPosts(Long totalPosts) {
 		this.totalPosts = totalPosts;
 	}
-	public List<BlogPost> getPinnedBlogPosts() {
+	
+	
+	public Set<BlogPost> getPinnedBlogPosts() {
 		return pinnedBlogPosts;
 	}
-	public void setPinnedBlogPosts(List<BlogPost> pinnedBlogPosts) {
+	public void setPinnedBlogPosts(Set<BlogPost> pinnedBlogPosts) {
 		this.pinnedBlogPosts = pinnedBlogPosts;
 	}
-
 	public Set<String> getRoles() {
 		return roles;
 	}

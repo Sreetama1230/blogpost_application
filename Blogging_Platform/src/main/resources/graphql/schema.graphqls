@@ -46,10 +46,6 @@ likes: Int
 dislikes: Int
 }
 
-type PinnedBlogPosts{
-blogPostResponse: BlogPostResponse
-pinnedDate:String
-}
 
 type UserResponse{
 id:ID!
@@ -84,7 +80,7 @@ createAt:String
 type Query{
 searchPosts(keyword:String):[BlogPostResponse]
 getPosts(page:Int,size:Int):[BlogPostResponse]
-getPinnedPostsOfTheUser(uId: Int): [PinnedBlogPosts]
+getPinnedPostsOfTheUser(uId: Int): [BlogPostResponse]
 getFollowers(uId : ID): [UserResponse]
 getFollowings(uId : ID): [UserResponse]
 trendingPosts: [BlogPostResponse]
@@ -100,7 +96,7 @@ reaction: Boolean!
 
 type Mutation{
 setReaction(request : ReactDTO ):BlogPostResponse
-pinPost(uId : Int, bpId : Int) : PinnedBlogPosts
+pinUnpinPost(uId : Int, bpId : Int) : BlogPostResponse
 followOrUnFollowAuthor( follower:Int  , followee : Int) : [UserResponse]
 blockUser(blockerId:Int! , blockedUserId:Int!) : [UserResponse]
 }

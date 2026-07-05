@@ -159,7 +159,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testGetAll() {
+	public void testGetAll() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@12345gmail.com");
@@ -191,7 +191,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testListBlogsByCategory() {
+	public void testListBlogsByCategory() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -229,7 +229,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testDeleteById() {
+	public void testDeleteById() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@12345gmail.com");
@@ -276,7 +276,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testDeleteByIdWithCategoryLinkedToBlogs() {
+	public void testDeleteByIdWithCategoryLinkedToBlogs() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -317,7 +317,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testDeleteByIdWithResourceNotFoundException() {
+	public void testDeleteByIdWithResourceNotFoundException() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");

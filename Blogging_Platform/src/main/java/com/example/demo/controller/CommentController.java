@@ -20,6 +20,7 @@ import com.example.demo.dto.CommentReact;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
 import com.example.demo.service.CommentService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 @RequestMapping("/comment")
@@ -32,14 +33,14 @@ public class CommentController {
 
 	@PostMapping
 	public ResponseEntity<BlogPostResponse> addComments(@RequestBody CommentDTO c,
-			@RequestParam long blogPostId) {
+			@RequestParam long blogPostId) throws JsonProcessingException {
 
 		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment( c, blogPostId),
 				HttpStatus.CREATED);
 	}
 
 	@PutMapping
-	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) {
+	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) throws JsonProcessingException {
 		logger.info("started request for editing comment {}", c.getMessage());
 		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.OK);
 	}
@@ -51,13 +52,13 @@ public class CommentController {
 	
 	
 	@PostMapping("/react")
-	public ResponseEntity<CommentResponse> reactComment(  @RequestBody CommentReact reactComment){
+	public ResponseEntity<CommentResponse> reactComment(  @RequestBody CommentReact reactComment) throws JsonProcessingException{
 		return new ResponseEntity<CommentResponse>(commentService.reactComment(reactComment) ,HttpStatus.CREATED);
 	}
 	
 
 	@DeleteMapping("/{cId}/blogpost/{bpId}")
-	public ResponseEntity<CommentResponse> deleteComment(  @PathVariable long cId, @PathVariable long bpId) {
+	public ResponseEntity<CommentResponse> deleteComment(  @PathVariable long cId, @PathVariable long bpId) throws JsonProcessingException {
 		logger.info("started request for deleting the comment id="+cId);
 		return new ResponseEntity<CommentResponse>(commentService.deleteComment( cId, bpId), HttpStatus.OK);
 	}

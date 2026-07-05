@@ -9,15 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.StreamSupport;
 
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,24 +24,25 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.CommentDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.UserDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.error.ErrorDetails;
-import com.example.demo.model.BlogPost;
-import com.example.demo.model.Category;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
@@ -73,10 +68,10 @@ public class BlogPostControllerIntegrationTest {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	private EmbeddedKafkaBroker embeddedKafkaBroker;
-
-	@Autowired
 	private BlogPostDao blogPostDao;
+	
+	@Autowired
+	private EventDao eventDao;
 
 	@Autowired
 	private UserDao userDao;
@@ -117,6 +112,8 @@ public class BlogPostControllerIntegrationTest {
 	}
 
 	@Test
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreateBlogPost() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -147,31 +144,29 @@ public class BlogPostControllerIntegrationTest {
 		ResponseEntity<BlogPostResponse> resp = testRestTemplate.exchange(createURLWithPort(), HttpMethod.POST, entity,
 				BlogPostResponse.class);
 
-		// message is getting consumed by consumer
-		Map<String, Object> props = KafkaTestUtils.consumerProps("blog-create-test-group", "true", embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-		
-	
 		BlogPostResponse blogPostResponse = resp.getBody();
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Created BlogPost " + blogPostResponse.getId()));
+		
+		
 		// new category will be created
 		Long categoryId = categoryDao.findByName("#fake-category").get().getId();
-		boolean isCategoryEventPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Created Category " + categoryId));
 
 		assertNotNull(blogPostResponse);
-		assertTrue(isPresent);
-		assertTrue(isCategoryEventPresent);
 		assertEquals("Fake Content", blogPostResponse.getContent());
 		assertEquals("Fake Title", blogPostResponse.getTitle());
 
-		consumer.close();
+		
+		List<Event> events = eventDao.findAll();
+		
+		assertEquals(1, events.size());
+		Event event = events.get(0);
+		assertEquals(EventType.CREATE, event.getEventType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+		assertEquals(
+		        String.valueOf(blogPostResponse.getId()),
+		        event.getTransactionId());
 
+		assertEquals(0, event.getRetryCount());
 	}
 
 	@Test
@@ -210,26 +205,15 @@ public class BlogPostControllerIntegrationTest {
 		ResponseEntity<BlogPostResponse> resp = testRestTemplate.exchange(createURLWithPort(), HttpMethod.PUT, entity,
 				BlogPostResponse.class);
 
-		// message is getting consumed by consumer
-		Map<String, Object> props = KafkaTestUtils.consumerProps("blog-update-test-group", "true", embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
 
 		BlogPostResponse updatedBlogPostResponse = resp.getBody();
 
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Updated BlogPost " + updatedBlogPostResponse.getId()));
-
+		
 		assertNotNull(updatedBlogPostResponse);
-		assertTrue(isPresent);
 		assertEquals("updated-fake-content", updatedBlogPostResponse.getContent());
 		assertEquals("Fake Title", updatedBlogPostResponse.getTitle());
 
-		consumer.close();
+
 	}
 
 	@Test
@@ -342,7 +326,7 @@ public class BlogPostControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		userService.createUser(newUser);
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -367,23 +351,7 @@ public class BlogPostControllerIntegrationTest {
 				createURLWithPort() + "/" + blogPostResponse.getId(), HttpMethod.DELETE, entity,
 				BlogPostResponse.class);
 
-		// message is getting consumed by consumer
-		Map<String, Object> props = KafkaTestUtils.consumerProps("blog-delete-test-group", "true", embeddedKafkaBroker);
-
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
-		BlogPostResponse deletedBlogPostResponse = resp.getBody();
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Deleted BlogPost " + deletedBlogPostResponse.getId()));
-
 		BlogPostResponse response = resp.getBody();
-		assertTrue(isPresent);
 		assertNotNull(resp);
 		assertNotNull("Fake & Title", response.getTitle());
 		assertNotNull("Fake Content", response.getContent());

@@ -1,23 +1,28 @@
 package com.example.demo.service.unit;
 
-import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.ReactDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.FollowUnFollowException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.gqlservice.GraphQlService;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
-import com.example.demo.response.PinnedBlogPost;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,11 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 @ExtendWith(MockitoExtension.class)
 public class GraphQlServiceTest {
@@ -54,7 +56,9 @@ public class GraphQlServiceTest {
 	GraphQlService postsService;
 
 	@Mock
-	KafkaTemplate<String, String> kafkaTemplate;
+	private EventDao eventDao;
+	@Mock
+	ObjectMapper objectMapper;
 
 	private User user;
 	private User user1;
@@ -123,22 +127,22 @@ public class GraphQlServiceTest {
 
 	@Test
 	void testGetPinnedPostsOfTheUser() {
-		blogPost.setPinnedBy(user);
-		user.setPinnedBlogPosts(List.of(blogPost));
+		blogPost.setPinnedBy(Set.of(user));
+		user.setPinnedBlogPosts(Set.of(blogPost));
 
 		// logged in user
 		when(userDao.findById(1L)).thenReturn(Optional.of(user));
-		List<PinnedBlogPost> blogPosts = postsService.getPinnedPostsOfTheUser(1L);
+		List<BlogPostResponse> blogPosts = postsService.getPinnedPostsOfTheUser(1L);
 
-		assertEquals(user.getPinnedBlogPosts().size(), blogPosts.size());
-		assertEquals(user.getPinnedBlogPosts().get(0).getContent(),
-				blogPosts.get(0).getBlogPostResponse().getContent());
+		assertEquals("fake-content", blogPosts.get(0).getContent());
+		assertEquals("fake-title", blogPosts.get(0).getTitle());
+
 	}
 
 	@Test
 	void testGetPinnedPostsOfTheUser_WithInvalidUserId_FailureWithResourceNotFoundException() {
-		blogPost.setPinnedBy(user);
-		user.setPinnedBlogPosts(List.of(blogPost));
+		blogPost.setPinnedBy(Set.of(user));
+		user.setPinnedBlogPosts(Set.of(blogPost));
 
 		// logged in user
 		when(userDao.findById(1L)).thenReturn(Optional.empty());
@@ -230,21 +234,63 @@ public class GraphQlServiceTest {
 
 	// @mutation
 	@Test
-	void testSetReaction() {
+	void testSetLikeReaction() throws Exception {
 		ReactDTO request = new ReactDTO(1L, true, 1L);
 		when(blogPostService.getById(request.getBpId())).thenReturn(blogPost);
 		when(userService.getbyId(request.getuId())).thenReturn(user);
 		long n = blogPost.getLikes();
-		// for kafka template
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-		
+
 		BlogPostResponse blogPostResponse = postsService.setReaction(request);
+
+		String payload = objectMapper.writeValueAsString(request);
+
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+		verify(eventDao).save(captor.capture());
+
+		Event event = captor.getValue();
+
+		assertEquals(EventType.LIKE, event.getEventType());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(blogPostResponse.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
 		assertNotNull(blogPostResponse);
 		assertEquals(Optional.of(n + 1L).get(), blogPostResponse.getLikes());
 		assertEquals(blogPost.getContent(), blogPostResponse.getContent());
-		
-		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME,"User 1 has reacted to the post id 1");
+
+	}
+
+	@Test
+	void testSetDislikeReaction() throws Exception {
+		ReactDTO request = new ReactDTO(1L, false, 1L);
+		when(blogPostService.getById(request.getBpId())).thenReturn(blogPost);
+		when(userService.getbyId(request.getuId())).thenReturn(user);
+		long n = blogPost.getLikes();
+
+		BlogPostResponse blogPostResponse = postsService.setReaction(request);
+
+		String payload = objectMapper.writeValueAsString(request);
+
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+		verify(eventDao).save(captor.capture());
+
+		Event event = captor.getValue();
+
+		assertEquals(EventType.DISLIKE, event.getEventType());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(blogPostResponse.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
+		assertNotNull(blogPostResponse);
+		assertEquals(Optional.of(n).get(), blogPostResponse.getLikes());
+		assertEquals(Optional.of(n + 1L).get(), blogPostResponse.getDislikes());
+		assertEquals(blogPost.getContent(), blogPostResponse.getContent());
 
 	}
 
@@ -263,21 +309,60 @@ public class GraphQlServiceTest {
 	}
 
 	@Test
-	void testPinnedPost() {
+	void testPinnedPost() throws Exception {
 		when(blogPostService.getById(1L)).thenReturn(blogPost);
 
 		when(userService.getbyId(1L)).thenReturn(user);
 		int n = user.getPinnedBlogPosts().size();
-		// for kafka template
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-		PinnedBlogPost pinnedBlogPost = postsService.pinnedPost(1L, 1L);
+
+		BlogPostResponse pinnedBlogPost = postsService.postPinnedUnpinned(1L, 1L);
 		assertNotNull(pinnedBlogPost);
 		assertEquals(n + 1, user.getPinnedBlogPosts().size());
-		assertEquals((Long) 1L, pinnedBlogPost.getBlogPostResponse().getId());
-		assertEquals(blogPost.getContent(), pinnedBlogPost.getBlogPostResponse().getContent());
+		assertEquals((Long) 1L, pinnedBlogPost.getId());
+		assertEquals(blogPost.getContent(), pinnedBlogPost.getContent());
 
-		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME , "User :  1 has pinned post : 1");
+		String payload = objectMapper.writeValueAsString("User Id: 1 BlogPost Id: 1");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.PIN, event.getEventType());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(pinnedBlogPost.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
+	}
+
+	@Test
+	void testUnPinnedPost() throws Exception {
+
+		blogPost.setPinnedBy(new HashSet<>(Set.of(user)));
+		user.setPinnedBlogPosts(new HashSet<>(Set.of(blogPost)));
+
+		when(blogPostService.getById(1L)).thenReturn(blogPost);
+		when(userService.getbyId(1L)).thenReturn(user);
+
+		int n = user.getPinnedBlogPosts().size();
+		BlogPostResponse pinnedBlogPost = postsService.postPinnedUnpinned(1L, 1L);
+
+		assertNotNull(pinnedBlogPost);
+		assertEquals((Long) 1L, pinnedBlogPost.getId());
+		assertEquals(blogPost.getContent(), pinnedBlogPost.getContent());
+
+		String payload = objectMapper.writeValueAsString("User Id: 1 BlogPost Id: 1");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.UNPIN, event.getEventType());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(pinnedBlogPost.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
 	}
 
 	@Test
@@ -285,7 +370,8 @@ public class GraphQlServiceTest {
 		when(blogPostService.getById(1L)).thenThrow(ResourceNotFoundException.class);
 
 		ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> {
-			postsService.pinnedPost(1L, 1L);
+			postsService.postPinnedUnpinned(1L, 1L);
+
 		});
 
 		assertNotNull(ex);
@@ -293,21 +379,70 @@ public class GraphQlServiceTest {
 	}
 
 	@Test
-	void testFollowOrUnFollowAuthor() {
+	void testFollowAuthor() throws Exception {
 
 		when(userService.getbyId(1L)).thenReturn(user);
 		when(userService.getbyId(2L)).thenReturn(user1);
-		// for kafka template
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+
+		when(userDao.save(user)).thenReturn(user);
+		when(userDao.save(user1)).thenReturn(user1);
+
 		List<UserResponse> userResponses = postsService.followOrUnFollowAuthor(2L, 1L);
+
+		String payload = objectMapper.writeValueAsString("Follower Id: 2 Followee Id: 1");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.FOLLOW, event.getEventType());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals("2", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
 		assertEquals(true, user.getListfollowers().contains(user1));
 		assertEquals(true, user1.getListfollowing().contains(user));
 		assertEquals(2, userResponses.size());
 		assertEquals(user.getUsername(), userResponses.get(0).getUsername());
 		assertEquals(user1.getUsername(), userResponses.get(1).getUsername());
-		
-		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME,"User id 2 has started following to the user id 1");
+
+	}
+
+	@Test
+	void testUnFollowAuthor() throws Exception {
+
+		user.getListfollowing().add(user1);
+		user1.getListfollowers().add(user);
+		user.setFollowing(user.getFollowing());
+		user1.setFollowers(user1.getFollowers());
+
+		when(userService.getbyId(1L)).thenReturn(user1);
+		when(userService.getbyId(2L)).thenReturn(user);
+
+		when(userDao.save(user)).thenReturn(user);
+		when(userDao.save(user1)).thenReturn(user1);
+
+		List<UserResponse> userResponses = postsService.followOrUnFollowAuthor(2L, 1L);
+
+		String payload = objectMapper.writeValueAsString("Follower Id: 2 Followee Id: 1");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.UNFOLLOW, event.getEventType());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals("2", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
+		assertEquals(false, user.getListfollowers().contains(user1));
+		assertEquals(false, user1.getListfollowing().contains(user));
+		assertEquals(2, userResponses.size());
+		assertEquals(user.getUsername(), userResponses.get(1).getUsername());
+		assertEquals(user1.getUsername(), userResponses.get(0).getUsername());
+
 	}
 
 	@Test
@@ -340,7 +475,7 @@ public class GraphQlServiceTest {
 		when(userService.getbyId(1L)).thenThrow(ResourceNotFoundException.class);
 
 		ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
-			postsService.blockUser(1L, 2L);
+			postsService.blockUnblockUser(1L, 2L);
 		});
 
 		assertNotNull(resourceNotFoundException);
@@ -349,20 +484,68 @@ public class GraphQlServiceTest {
 	}
 
 	@Test
-	void testBlockUser() {
+	void testBlockUser() throws Exception {
 		when(userService.getbyId(1L)).thenReturn(user);
 		when(userService.getbyId(2L)).thenReturn(user1);
 
-		// for kafka template
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-		List<UserResponse> userResponses = postsService.blockUser(1L, 2L);
+		when(userDao.save(user)).thenReturn(user);
+		when(userDao.save(user1)).thenReturn(user1);
+		
+
+		List<UserResponse> userResponses = postsService.blockUnblockUser(1L, 2L);
+		
+		String payload = objectMapper.writeValueAsString("Blocker Id: 1 BlockedUser Id: 2");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.BLOCK, event.getEventType());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals("1", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+		
+		
 		assertEquals(true, user.getBlockedUsers().contains(user1));
 		assertEquals(2, userResponses.size());
 		assertEquals(user.getUsername(), userResponses.get(0).getUsername());
 		assertEquals(user1.getUsername(), userResponses.get(1).getUsername());
-		
-		verify(kafkaTemplate).send(AppConstants.ADMINTOOL_TOPIC_NAME , "User id 1 has blocked user id 2");
+
 	}
 
+	
+	@Test
+	void testUnblockUser() throws Exception {
+
+		user.getBlockedUsers().add(user1);
+		user1.getBlockedByUsers().add(user);
+		
+	
+		when(userService.getbyId(1L)).thenReturn(user);
+		when(userService.getbyId(2L)).thenReturn(user1);
+
+		when(userDao.save(user)).thenReturn(user);
+		when(userDao.save(user1)).thenReturn(user1);
+
+		List<UserResponse> userResponses = postsService.blockUnblockUser(1L, 2L);
+		String payload = objectMapper.writeValueAsString("Blocker Id: 1 BlockedUser Id: 2");
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+		verify(eventDao).save(captor.capture());
+		Event event = captor.getValue();
+
+		assertEquals(EventType.UNBLOCK, event.getEventType());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals("1", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+		
+		
+		assertEquals(false, user.getBlockedUsers().contains(user1));
+		assertEquals(2, userResponses.size());
+		assertEquals(user.getUsername(), userResponses.get(0).getUsername());
+		assertEquals(user1.getUsername(), userResponses.get(1).getUsername());
+
+	}
 }

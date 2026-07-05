@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -24,22 +26,29 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.demo.config.SecurityUtils;
-import com.example.demo.constants.Reaction;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CommentDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.Reaction;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
 import com.example.demo.service.CommentService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
 public class CommentServiceUnitTest {
@@ -57,8 +66,11 @@ public class CommentServiceUnitTest {
 	private UserDao userDao;
 
 	@Mock
-	private KafkaTemplate<String, String> kafkaTemplate;
-
+	private EventDao eventDao;
+	@Mock
+	private ObjectMapper objectMapper;
+	
+	
 	User user;
 	BlogPost blogPost;
 	Comment comment;
@@ -113,7 +125,7 @@ public class CommentServiceUnitTest {
 	}
 
 	@Test
-	public void testCreateComment() {
+	public void testCreateComment() throws JsonProcessingException {
 
 		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
 				Mockito.CALLS_REAL_METHODS)) {
@@ -127,21 +139,34 @@ public class CommentServiceUnitTest {
 			when(commentDao.save(any(Comment.class))).thenReturn(comment);
 			when(blogPostDao.save(blogPost)).thenReturn(blogPost);
 
-			// for kafka template, mocking it
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 
 			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L);
 
 			assertEquals(comment.getId(), blogPostResponse.getComments().get(0).getId());
 			assertEquals(comment.getContent(), blogPostResponse.getComments().get(0).getContent());
+			
+			
+			String payload = objectMapper.writeValueAsString(newComment);
+			
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+			verify(eventDao).save(captor.capture());
+
+			Event event = captor.getValue();
+
+			assertEquals(EventType.CREATE, event.getEventType());
+			assertEquals(TransactionType.COMMENT, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(blogPostResponse.getId()+"" ,  event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
 
 		}
 
 	}
 
 	@Test
-	public void testUpdateComment() {
+	public void testUpdateComment() throws JsonProcessingException {
 
 		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
 				Mockito.CALLS_REAL_METHODS)) {
@@ -157,16 +182,30 @@ public class CommentServiceUnitTest {
 			when(commentDao.save(any(Comment.class))).thenReturn(comment);
 			when(blogPostDao.save(blogPost)).thenReturn(blogPost);
 
-			// for kafka template, mocking it
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-
 			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L);
 
 			assertEquals(comment.getId(), blogPostResponse.getComments().get(0).getId());
 			assertEquals(newComment.getMessage() + "(edited)", blogPostResponse.getComments().get(0).getContent());
 			assertEquals(comment.getContent(), blogPostResponse.getComments().get(0).getContent());
 
+		
+
+			String payload = objectMapper.writeValueAsString(newComment);
+			
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+			verify(eventDao).save(captor.capture());
+
+			Event event = captor.getValue();
+
+			assertEquals(EventType.UPDATE, event.getEventType());
+			assertEquals(TransactionType.COMMENT, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(blogPostResponse.getId()+"" ,  event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
+		
+		
 		}
 
 	}
@@ -190,9 +229,6 @@ public class CommentServiceUnitTest {
 			when(commentDao.save(any(Comment.class))).thenReturn(comment);
 			when(blogPostDao.save(blogPost)).thenReturn(blogPost);
 
-			// for kafka template, mocking it
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 
 			ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
 				commentService.createOrUpdateComment(newComment, 1L);
@@ -230,10 +266,6 @@ public class CommentServiceUnitTest {
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
 			when(commentDao.findById(1L)).thenReturn(Optional.of(comment));
 
-			// for kafka template, mocking it
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-
 			DoNotHavePermissionError doNotHavePermissionError = assertThrows(DoNotHavePermissionError.class, () -> {
 				commentService.createOrUpdateComment(newComment, 1L);
 			});
@@ -246,7 +278,7 @@ public class CommentServiceUnitTest {
 	}
 
 	@Test
-	public void testDeleteComment() {
+	public void testDeleteComment() throws JsonProcessingException {
 
 		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
 				Mockito.CALLS_REAL_METHODS)) {
@@ -257,12 +289,25 @@ public class CommentServiceUnitTest {
 			when(userDao.findById(1L)).thenReturn(Optional.of(user));
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
 
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-
 			CommentResponse commentResponse = commentService.deleteComment(1L, 1L);
 
 			assertEquals("test comment", commentResponse.getContent());
+			
+
+			String payload = objectMapper.writeValueAsString(commentResponse.getId());
+			
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+			verify(eventDao).save(captor.capture());
+
+			Event event = captor.getValue();
+
+			assertEquals(EventType.DELETE, event.getEventType());
+			assertEquals(TransactionType.COMMENT, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(commentResponse.getId()+"" ,  event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
 
 		}
 
@@ -293,9 +338,7 @@ public class CommentServiceUnitTest {
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
 			when(commentDao.findById(1L)).thenReturn(Optional.of(comment));
 			when(commentDao.findCommentByIdAndBlogPostId(1L, 1L)).thenReturn(Optional.of(comment));
-			// for kafka template, mocking it
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+
 
 			DoNotHavePermissionError doNotHavePermissionError = assertThrows(DoNotHavePermissionError.class, () -> {
 				commentService.deleteComment(1L, 1L);
@@ -351,7 +394,7 @@ public class CommentServiceUnitTest {
 	}
 
 	@Test
-	public void testCommentReact() {
+	public void testCommentReact() throws JsonProcessingException {
 		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
 				Mockito.CALLS_REAL_METHODS)) {
 
@@ -360,12 +403,26 @@ public class CommentServiceUnitTest {
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
 			when(commentDao.findById(1L)).thenReturn(Optional.of(comment));
 			comment.setReactedUsers(new HashSet<>());
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+		
+			
 			when(commentDao.save(comment)).thenReturn(comment);
 			CommentReact commentReact = new CommentReact(1L, Reaction.LOVE);
 			CommentResponse commentResponse = commentService.reactComment(commentReact);
+			String payload = objectMapper.writeValueAsString(commentReact);
+			
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
 
+			verify(eventDao).save(captor.capture());
+
+			Event event = captor.getValue();
+
+			assertEquals(EventType.REACT, event.getEventType());
+			assertEquals(TransactionType.COMMENT, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(commentResponse.getId()+"" ,  event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
+			
 			assertEquals(comment.getFunnyCount(), commentResponse.getFunnyCount());
 			assertEquals(comment.getLikeCount(), commentResponse.getLikeCount());
 			assertEquals(comment.getLoveCount(), commentResponse.getLoveCount());
@@ -384,9 +441,6 @@ public class CommentServiceUnitTest {
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
 			when(commentDao.findById(1L)).thenReturn(Optional.of(comment));
 			when(commentDao.save(comment)).thenReturn(comment);
-
-			CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-			when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
 
 			CommentReact commentReact = new CommentReact(1L, Reaction.LOVE);
 			InvalidReactException invalidReactException = assertThrows(InvalidReactException.class, () -> {

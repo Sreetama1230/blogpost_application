@@ -24,10 +24,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.example.demo.config.JwtAuthFilter;
 import com.example.demo.config.JwtUtils;
-import com.example.demo.constants.Reaction;
 import com.example.demo.controller.CommentController;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
+import com.example.demo.enums.Reaction;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;

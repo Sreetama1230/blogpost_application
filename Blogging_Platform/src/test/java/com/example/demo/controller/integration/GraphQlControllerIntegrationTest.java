@@ -52,24 +52,28 @@ import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.CommentDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.ReactDTO;
 import com.example.demo.dto.UserDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.error.ErrorDetails;
 import com.example.demo.exception.FollowUnFollowException;
 import com.example.demo.exception.InvalidEmailIdError;
 import com.example.demo.gqlservice.GraphQlService;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostDetailsResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
-import com.example.demo.response.PinnedBlogPost;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
@@ -112,14 +116,15 @@ public class GraphQlControllerIntegrationTest {
 	private CategoryDao categoryDao;
 
 	@Autowired
+	private EventDao eventDao;
+	
+	@Autowired
 	private AuthService authService;
 
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@Autowired
-	private EmbeddedKafkaBroker embeddedKafkaBroker;
 
 	@BeforeAll
 	public static void init() {
@@ -130,7 +135,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	public void testSearchPosts() {
+	public void testSearchPosts() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -168,7 +173,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testGetPost() {
+	void testGetPost() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -223,7 +228,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testGetPinnedPostsOfTheUser() {
+	void testGetPinnedPostsOfTheUser() throws Exception {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -242,7 +247,7 @@ public class GraphQlControllerIntegrationTest {
 
 		BlogPostResponse response = blogPostService.createOrUpdateBlogPost(post);
 
-		graphQlService.pinnedPost(user.getId(), response.getId());
+		graphQlService.postPinnedUnpinned(user.getId(), response.getId());
 
 		HttpGraphQlTester authenticatedTester = graphQlTester.mutate().headers(headers -> {
 			headers.setBearerAuth(authResp.getToken());
@@ -250,17 +255,16 @@ public class GraphQlControllerIntegrationTest {
 		String query = """
 				query GetPinnedPostsOfTheUser {
 				          getPinnedPostsOfTheUser(uId:%d){
-				           pinnedDate,
-				           blogPostResponse {
+				         
 				            content
-				           }
+				           
 				          }
 				        }
 				""".formatted(user.getId());
-		authenticatedTester.document(query).execute().path("getPinnedPostsOfTheUser").entityList(PinnedBlogPost.class)
+		authenticatedTester.document(query).execute().path("getPinnedPostsOfTheUser").entityList(BlogPostResponse.class)
 				.hasSize(1).satisfies(pinnedPost -> {
 
-					assertEquals("post-content", pinnedPost.get(0).getBlogPostResponse().getContent());
+					assertEquals("post-content", pinnedPost.get(0).getContent());
 
 				});
 
@@ -269,7 +273,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testGetFollowers() {
+	void testGetFollowers() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -318,7 +322,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testGetFollowerings() {
+	void testGetFollowerings() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -367,7 +371,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testTrendingPosts() {
+	void testTrendingPosts() throws JsonProcessingException {
 		// top 10 posts based on like in desc order
 
 		UserDTO userDto = new UserDTO();
@@ -418,7 +422,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testUserLikedPost() {
+	void testUserLikedPost() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
@@ -488,7 +492,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testBlockedUsers() {
+	void testBlockedUsers() throws JsonProcessingException {
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
 		userDto.setPassword("pass123");
@@ -564,7 +568,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testSetReaction() {
+	void testSetReaction() throws JsonProcessingException {
 
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test4");
@@ -626,30 +630,18 @@ public class GraphQlControllerIntegrationTest {
 		BlogPostResponse blogPost = authTester.document(query).execute().path("setReaction")
 				.entity(BlogPostResponse.class).get();
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("blog-react-test-group", "true", embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false).anyMatch(record -> record.value()
-				.contains("User " + user3.getId() + " has reacted to the post id " + blogPost.getId()));
-
-//		consumerRecords.forEach(record -> {
-//		    System.out.println( "Sree"+record.value());
-//		});
-//		System.out.println("User " + user3.getId() + " has reacted to the post id " + blogPost.getId());
-
-		assertTrue(isPresent);
+	Event event =	eventDao.findByTransactionIdAndEventType(blogpost1.getId()+"", EventType.LIKE).get();
 		assertEquals("1", blogPost.getLikes().toString());
 		assertEquals("fake-content-1", blogPost.getContent());
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
 	}
 
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testPinnedPost() {
+	void testPinnedPost() throws JsonProcessingException {
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test51");
@@ -684,44 +676,36 @@ public class GraphQlControllerIntegrationTest {
 
 		String query = """
 
-				mutation PinPost {
-				 pinPost(uId:%d , bpId: %d ){
-				   pinnedDate
-				    blogPostResponse {
+				mutation PinUnpinPost {
+				 pinUnpinPost(uId:%d , bpId: %d ){
+				
 				      content
 				      id
 				      author{
 				      username
 				     }
-				  }
+				  
 				}
 				}
 
 				""".formatted(user3.getId(), createdBlogpost.getId());
 
-		PinnedBlogPost pinnedBlogPost = authTester.document(query).execute().path("pinPost")
-				.entity(PinnedBlogPost.class).get();
+		BlogPostResponse pinnedBlogPost = authTester.document(query).execute().path("pinUnpinPost")
+				.entity(BlogPostResponse.class).get();
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("blog-pin-test-group", "true", embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("User :  " + user3.getId() + " has pinned post : "
-						+ pinnedBlogPost.getBlogPostResponse().getId()));
-
-		assertTrue(isPresent);
-		assertEquals("fake-content-1", pinnedBlogPost.getBlogPostResponse().getContent());
-		assertEquals("test51", pinnedBlogPost.getBlogPostResponse().getAuthor().getUsername());
+		assertEquals("fake-content-1", pinnedBlogPost.getContent());
+		assertEquals("test51", pinnedBlogPost.getAuthor().getUsername());
+		Event event =	eventDao.findByTransactionIdAndEventType(blogpost1.getId()+"", EventType.PIN).get();
+		assertEquals("fake-content-1", pinnedBlogPost.getContent());
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
 	}
 
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testFollowOrUnFollowAuthor() {
+	void testFollowOrUnFollowAuthor() throws JsonProcessingException {
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test4");
 		userDto.setPassword("pass123");
@@ -756,31 +740,27 @@ public class GraphQlControllerIntegrationTest {
 
 		List<UserResponse> userResp = authTester.document(query).execute().path("followOrUnFollowAuthor")
 				.entityList(UserResponse.class).get();
-
-		Map<String, Object> props = KafkaTestUtils.consumerProps("user-follow-unfollow-test-group", "true", embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("User id " + user2.getId() + " has started following to the user id "
-						+ user1.getId()));
-
-		assertTrue(isPresent);
 			
+		System.out.println("Sree"+userResp.get(0));
 		// followeeUser
 		assertEquals("test4", userResp.get(0).getUsername());
 		// followerUser
 		assertEquals("test5", userResp.get(1).getUsername());
+		
+		Event event = eventDao.findByTransactionIdAndEventType(user2.getId()+"", EventType.FOLLOW).get();
+		
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		
+		
 
 	}
 
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testFollowOrUnFollowAuthor_SameFollowFollowee_FailureWithFollowUnFollowException() {
+	void testFollowOrUnFollowAuthor_SameFollowFollowee_FailureWithFollowUnFollowException() throws JsonProcessingException {
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test4");
 		userDto.setPassword("pass123");
@@ -814,7 +794,7 @@ public class GraphQlControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	void testBlockUser() {
+	void testBlockUser() throws JsonProcessingException {
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test4");
 		userDto.setPassword("pass123");
@@ -848,22 +828,15 @@ public class GraphQlControllerIntegrationTest {
 
 	List<UserResponse>  userReps=	authTester.document(query).execute().path("blockUser").entityList(UserResponse.class).get();
 		
-	Map<String, Object> props = KafkaTestUtils.consumerProps("user-block-unblock-test-group", "true", embeddedKafkaBroker);
-	Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-			new StringDeserializer()).createConsumer();
-
-	embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-	ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
-	boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-			.anyMatch(record -> record.value().contains("User id " + user1.getId() + " has blocked user id "
-					+ user2.getId()));
-
-	assertTrue(isPresent);
-	
 	assertTrue(userReps.size() == 2);
 	assertEquals("test4", user1.getUsername());
 	assertEquals("test5", user2.getUsername());
+	
+	Event event = eventDao.findByTransactionIdAndEventType(user1.getId()+"", EventType.BLOCK).get();
+	
+	assertNotNull(event);
+	assertEquals(EventStatus.PENDING, event.getStatus());
+	assertEquals(TransactionType.USER, event.getTransactionType());
 	
 	}
 

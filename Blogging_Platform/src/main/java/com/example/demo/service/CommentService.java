@@ -17,9 +17,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CommentDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -27,6 +31,8 @@ import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.*;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -43,28 +49,33 @@ public class CommentService {
 	private UserDao userdao;
 
 	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private EventDao eventDao;
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	Logger logger = LoggerFactory.getLogger(Comment.class);
 
 	@Transactional
-	public BlogPostResponse createOrUpdateComment(CommentDTO c, long blogPostId) {
-		
+	public BlogPostResponse createOrUpdateComment(CommentDTO c, long blogPostId) throws JsonProcessingException {
+
 		logger.info("request started processing for " + c.getMessage());
-		
+		Comment upsertComment = null;
+
+		Event event = new Event();
 		long userId = SecurityUtils.getCurrentUserId();
 
 		if (!blogPostDao.findById(blogPostId).isPresent()) {
 			throw new ResourceNotFoundException("no blog post found with this id");
 		}
-		
+
 		BlogPost dbBlogPost = blogPostDao.findById(blogPostId).get();
-		
+
 		User authDbUser = userdao.findById(userId).get();
-		
+
 		logger.info("adding new comment : {}", c.getMessage());
-		
+
 		List<Comment> exitsingComments = dbBlogPost.getComments();
-		
+
 		Comment newComment = new Comment(c.getMessage(), authDbUser, dbBlogPost, LocalDateTime.now(), 0L, 0L, 0L,
 				new TreeSet<>());
 
@@ -86,18 +97,10 @@ public class CommentService {
 					if (!existingComment.getContent().equals(c.getMessage())) { // if the message did not change
 						existingComment.setContent(c.getMessage() + "(edited)");
 
-						commentDao.save(existingComment);
+						upsertComment = commentDao.save(existingComment);
 
-						CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-								"Updated Comment " + String.valueOf(existingComment.getId()));
-						
-						future.whenComplete((result , exception) ->{
-							if(exception != null) {
-								throw new UnexpectedCustomException("Error occured while publishing the event");
-							}else {
-								logger.info("Successfully published the event...");
-							}
-						});
+						authDbUser.getComments().add(upsertComment);
+						event.setEventType(EventType.UPDATE);
 
 					}
 
@@ -108,44 +111,36 @@ public class CommentService {
 			}
 
 		} else {
-			Comment savedComment = commentDao.save(newComment);
-
-//			try {
-//				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-//						"Created Comment " + String.valueOf(savedComment.getId())).get();
-//
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			
-			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-					"Created Comment " + String.valueOf(savedComment.getId()));
-			
-			future.whenComplete((result , exception) ->{
-				if(exception != null) {
-					throw new UnexpectedCustomException("Error occured while publishing the event");
-				}else {
-					logger.info("Successfully published the event...");
-				}
-			});
-
-
+			upsertComment = commentDao.save(newComment);
 			exitsingComments.add(newComment);
+			authDbUser.getComments().add(upsertComment);
+			event.setEventType(EventType.CREATE);
 		}
 
 		BlogPost newBlogPostWithComment = blogPostDao.save(dbBlogPost);
-		authDbUser.getComments().add(newComment);
+
 		userdao.save(authDbUser);
+
+		event.setCreatedAt(LocalDateTime.now());
+		event.setPayload(objectMapper.writeValueAsString(c));
+		event.setPublishedAt(LocalDateTime.now());
+		event.setStatus(EventStatus.PENDING);
+		event.setTransactionId(String.valueOf(upsertComment.getId()));
+		event.setTransactionType(TransactionType.COMMENT);
+		event.setRetryCount(0);
+		eventDao.save(event);
+
 		logger.info("returning response... " + newBlogPostWithComment.getContent());
 		return BlogPostResponse.convertBlogPostRespons(newBlogPostWithComment);
 	}
 
 	@Transactional
-	public CommentResponse deleteComment(long id, long blogpostid) {
+	public CommentResponse deleteComment(long id, long blogpostid) throws JsonProcessingException {
 
 		long userId = SecurityUtils.getCurrentUserId();
 
 		if (commentDao.findCommentByIdAndBlogPostId(id, blogpostid).isPresent()) {
+
 			Comment c = commentDao.findCommentByIdAndBlogPostId(id, blogpostid).get();
 			User authDbUser = userdao.findById(userId).get();
 			User commentAuthor = userdao.findById(c.getUser().getId()).get();
@@ -156,27 +151,17 @@ public class CommentService {
 				blogPost.getComments().remove(c);
 				commentAuthor.getComments().remove(c);
 				commentDao.deleteById(c.getId());
-				
-//				try {
-//					SendResult<String, String> res = kafkaTemplate
-//							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted Comment " + String.valueOf(c.getId()))
-//							.get();
-//
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//				
-				
-				CompletableFuture<SendResult<String, String>> future =  kafkaTemplate
-						.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted Comment " + String.valueOf(c.getId()));
-				
-				future.whenComplete((result , exception) ->{
-					if(exception != null) {
-						throw new UnexpectedCustomException("Error occured while publishing the event");
-					}else {
-						logger.info("Successfully published the event...");
-					}
-				});
+
+				Event event = new Event();
+				event.setEventType(EventType.DELETE);
+				event.setCreatedAt(LocalDateTime.now());
+				event.setPayload(objectMapper.writeValueAsString(id));
+				event.setPublishedAt(LocalDateTime.now());
+				event.setStatus(EventStatus.PENDING);
+				event.setTransactionId(String.valueOf(c.getId()));
+				event.setTransactionType(TransactionType.COMMENT);
+				event.setRetryCount(0);
+				eventDao.save(event);
 
 				return cr;
 			} else {
@@ -198,7 +183,7 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponse reactComment(CommentReact commentReact) {
+	public CommentResponse reactComment(CommentReact commentReact) throws JsonProcessingException {
 		long id = SecurityUtils.getCurrentUserId();
 		User dbUser = userdao.findById(id).get();
 
@@ -226,30 +211,21 @@ public class CommentService {
 			}
 
 			dbComment.getReactedUsers().add(dbUser);
-			commentDao.save(dbComment);
-			
-			
-//			try {
-//				SendResult<String, String> res = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-//						"Reacted Comment " + String.valueOf(commentReact.getId())).get();
-//
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-			
-			CompletableFuture<SendResult<String, String>> future =  kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-					"Reacted Comment " + String.valueOf(commentReact.getId()));
-			
-			future.whenComplete((result , exception) ->{
-				if(exception != null) {
-					throw new UnexpectedCustomException("Error occured while publishing the event");
-				}else {
-					logger.info("Successfully published the event...");
-				}
-			});			
-			
-			
-			return CommentResponse.convertCommentResponse(dbComment);
+			Comment reactedComment = commentDao.save(dbComment);
+
+			Event event = new Event();
+
+			event.setEventType(EventType.REACT);
+			event.setCreatedAt(LocalDateTime.now());
+			event.setPayload(objectMapper.writeValueAsString(commentReact));
+			event.setPublishedAt(LocalDateTime.now());
+			event.setStatus(EventStatus.PENDING);
+			event.setTransactionId(String.valueOf(reactedComment.getId()));
+			event.setTransactionType(TransactionType.COMMENT);
+			event.setRetryCount(0);
+			eventDao.save(event);
+
+			return CommentResponse.convertCommentResponse(reactedComment);
 		} else {
 			throw new ResourceNotFoundException("Resource is not present!");
 		}

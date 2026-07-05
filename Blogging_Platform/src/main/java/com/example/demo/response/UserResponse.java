@@ -12,85 +12,52 @@ import com.example.demo.model.User;
 
 import jakarta.persistence.Column;
 
-
 public class UserResponse {
-
-	@Override
-	public String toString() {
-		return "UserResponse [id=" + id + ", username=" + username + ", followers=" + followers + ", following="
-				+ following + ", bio=" + bio + ", totalPosts=" + totalPosts + ", roles=" + roles + ", email=" + email
-				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
-	}
-
-
-
-
-
 
 	private long id;
 	private String username;
 
 	private Long followers;
 	private Long following;
-	private String bio;	
+	private String bio;
 	private Long totalPosts;
 	private Set<String> roles;
 	private String email;
-	private List<BlogPostResponse> blogPosts= new ArrayList<>(); 
+	private List<BlogPostResponse> blogPosts = new ArrayList<>();
 
-	private List<CommentResponse> comments= new ArrayList<>(); 
-
+	private List<CommentResponse> comments = new ArrayList<>();
 
 	public Long getFollowers() {
 		return followers;
 	}
 
-
-
 	public void setFollowers(Long followers) {
 		this.followers = followers;
 	}
-
-
 
 	public Set<String> getRoles() {
 		return roles;
 	}
 
-
-
 	public void setRoles(Set<String> roles) {
 		this.roles = roles;
 	}
-
-
 
 	public Long getFollowing() {
 		return following;
 	}
 
-
-
 	public void setFollowing(Long following) {
 		this.following = following;
 	}
-
-
-
 
 	public Long getTotalPosts() {
 		return totalPosts;
 	}
 
-
-
 	public void setTotalPosts(Long totalPosts) {
 		this.totalPosts = totalPosts;
 	}
-
-
-
-
 
 	public UserResponse(long id, String username, Long followers, Long following, String bio, Long totalPosts,
 			String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments) {
@@ -106,55 +73,37 @@ public class UserResponse {
 		this.comments = comments;
 	}
 
-
-
 	public String getBio() {
 		return bio;
 	}
-
-
 
 	public void setBio(String bio) {
 		this.bio = bio;
 	}
 
-
-
 	public long getId() {
 		return id;
 	}
-
-
 
 	public void setId(long id) {
 		this.id = id;
 	}
 
-
-
 	public List<BlogPostResponse> getBlogPosts() {
 		return blogPosts;
 	}
-
-
 
 	public void setBlogPosts(List<BlogPostResponse> blogPosts) {
 		this.blogPosts = blogPosts;
 	}
 
-
-
 	public List<CommentResponse> getComments() {
 		return comments;
 	}
 
-
-
 	public void setComments(List<CommentResponse> comments) {
 		this.comments = comments;
 	}
-
-
 
 	public String getUsername() {
 		return username;
@@ -163,7 +112,6 @@ public class UserResponse {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-
 
 	public String getEmail() {
 		return email;
@@ -178,8 +126,6 @@ public class UserResponse {
 
 	}
 
-
-
 	public UserResponse(long id, String username, String email) {
 		super();
 		this.id = id;
@@ -187,42 +133,38 @@ public class UserResponse {
 		this.email = email;
 	}
 
+	public static UserResponse convertUserResponse(User u) {
+		if (u != null) {
+			List<BlogPost> dbBlogPosts = u.getBlogPosts();
+			List<BlogPostResponse> blogPostResponses = new ArrayList<>();
+			for (BlogPost b : dbBlogPosts) {
+				blogPostResponses.add(BlogPostResponse.convertBlogPostRespons(b));
+			}
+			List<Comment> dbComments = u.getComments();
+			List<CommentResponse> commentResponses = new ArrayList<>();
 
-
-
-
-
-public static UserResponse convertUserResponse(User u) {
-	if(u != null) {
-		List<BlogPost> dbBlogPosts=   u.getBlogPosts();
-		List<BlogPostResponse> blogPostResponses = new ArrayList<>();
-		for(BlogPost b : dbBlogPosts) {
-			blogPostResponses.add(BlogPostResponse.convertBlogPostRespons(b));
+			for (Comment c : dbComments) {
+				commentResponses.add(CommentResponse.convertCommentResponse(c));
+			}
+			UserResponse resp = new UserResponse(u.getId(), u.getUsername(), u.getFollowers(), u.getFollowing(),
+					u.getBio(), u.getTotalPosts(), u.getEmail(), blogPostResponses, commentResponses);
+			resp.setFollowers(u.getFollowers());
+			resp.setFollowing(u.getFollowing());
+			resp.setTotalPosts((long) u.getBlogPosts().size());
+			resp.setRoles(u.getRoles());
+			resp.setId(u.getId());
+			return resp;
 		}
-		List<Comment> dbComments = u.getComments();
-		List<CommentResponse> commentResponses = new ArrayList<>();
-		
-		for(Comment c : dbComments  ) {
-			commentResponses.add(CommentResponse.convertCommentResponse(c));
-		}
-		  UserResponse resp= 
-				  new UserResponse(u.getId(),
-						  u.getUsername(),u.getFollowers(),
-						  u.getFollowing(),u.getBio(),
-						  u.getTotalPosts(),u.getEmail(),blogPostResponses,commentResponses);
-		  resp.setFollowers(u.getFollowers());
-		  resp.setFollowing(u.getFollowing());
-		  resp.setTotalPosts((long)u.getBlogPosts().size());
-		  resp.setRoles(u.getRoles());
-		  resp.setId(u.getId());
-		  return resp;
+
+		return null;
+
 	}
 	
-	return null;
-	
-	  
-}
+	@Override
+	public String toString() {
+		return "UserResponse [id=" + id + ", username=" + username + ", followers=" + followers + ", following="
+				+ following + ", bio=" + bio + ", totalPosts=" + totalPosts + ", roles=" + roles + ", email=" + email
+				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
+	}
 
-
-	
 }

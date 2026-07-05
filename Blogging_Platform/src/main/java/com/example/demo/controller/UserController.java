@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.UserDTO;
@@ -14,6 +13,7 @@ import com.example.demo.model.User;
 import com.example.demo.response.BlogPostDetailsResponse;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.validation.Valid;
 
@@ -29,7 +29,7 @@ public class UserController {
 
 	
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserDTO u) {
+	public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserDTO u) throws JsonProcessingException {
 		User newUser = s.createUser(u);
 		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(newUser), HttpStatus.CREATED);
 	}
@@ -57,14 +57,14 @@ public class UserController {
 
 
 	@PutMapping
-	public ResponseEntity<UserResponse> updateUser( @RequestBody UserDTO userDTO) {
+	public ResponseEntity<UserResponse> updateUser( @RequestBody UserDTO userDTO) throws JsonProcessingException {
 		User user = s.updateUser(userDTO);
 		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(user),HttpStatus.OK);
 	}
 
 
 	@DeleteMapping("/{id}")
-	public  ResponseEntity<UserResponse> deleteUser(  @PathVariable  long id){
+	public  ResponseEntity<UserResponse> deleteUser(  @PathVariable  long id) throws JsonProcessingException{
 		logger.info("deleting in progress...");
 		return new ResponseEntity<UserResponse>(s.deleteUser(id),HttpStatus.OK);
 
