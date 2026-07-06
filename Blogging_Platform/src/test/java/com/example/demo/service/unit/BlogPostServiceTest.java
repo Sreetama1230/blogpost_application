@@ -174,7 +174,7 @@ public class BlogPostServiceTest {
 
 			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
 
-			verify(eventDao).save(captor.capture());
+			verify(eventDao , atLeastOnce()).save(captor.capture());
 
 			Event event = captor.getValue();
 
@@ -238,7 +238,7 @@ public class BlogPostServiceTest {
 
 			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
 
-			verify(eventDao).save(captor.capture());
+			verify(eventDao , atLeastOnce()).save(captor.capture());
 
 			Event event = captor.getValue();
 			

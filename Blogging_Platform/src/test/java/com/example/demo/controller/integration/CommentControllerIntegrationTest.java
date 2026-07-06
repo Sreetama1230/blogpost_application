@@ -13,6 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import com.example.demo.dao.*;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
+import com.example.demo.model.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -38,10 +43,6 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.example.demo.constants.AppConstants;
-import com.example.demo.dao.BlogPostDao;
-import com.example.demo.dao.CategoryDao;
-import com.example.demo.dao.CommentDao;
-import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
@@ -50,10 +51,6 @@ import com.example.demo.dto.CommentReact;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.Reaction;
 import com.example.demo.error.ErrorDetails;
-import com.example.demo.model.BlogPost;
-import com.example.demo.model.Category;
-import com.example.demo.model.Comment;
-import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CategoryResponse;
@@ -65,9 +62,9 @@ import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @ActiveProfiles("test")
 public class CommentControllerIntegrationTest {
 
@@ -98,9 +95,13 @@ public class CommentControllerIntegrationTest {
 	@Autowired
 	private AuthService authService;
 
+    @Autowired
+    private EventDao eventDao;
+
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
 
 	@BeforeAll
 	public static void init() {
@@ -167,16 +168,9 @@ public class CommentControllerIntegrationTest {
 
 	}
 
-	@AfterEach
-	public void cleanUp() {
-		commentDao.deleteAll();
-		postDao.deleteAll();
-		categoryDao.deleteAll();
-		userDao.deleteAll();
-
-	}
-
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testAddComment() throws JsonProcessingException {
 
 		headers.setBearerAuth(authResp.getToken());
@@ -193,9 +187,18 @@ public class CommentControllerIntegrationTest {
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals(1L, postResponse.getComments().size());
 
+        Event event = eventDao.findByTransactionIdAndEventType( postResponse.getComments().get(0).getId()+"" , EventType.CREATE).get();
+
+        assertNotNull(event);
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.COMMENT, event.getTransactionType());
+
 	}
 
-	@Test
+
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testUpdateComment() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -222,11 +225,20 @@ public class CommentControllerIntegrationTest {
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(1L, postResponse.getComments().size());
+        assertNotNull(postResponse.getComments().get(0));
 		assertEquals("updated-comment(edited)", response.getBody().getComments().get(0).getContent());
 
+        Event event = eventDao.findByTransactionIdAndEventType( postResponse.getComments().get(0).getId()+"" , EventType.UPDATE).get();
+
+        assertNotNull(event);
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.COMMENT, event.getTransactionType());
 	}
 
-	@Test
+
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetCommentById() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -247,7 +259,9 @@ public class CommentControllerIntegrationTest {
 
 	}
 
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetDeleteById() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -270,7 +284,9 @@ public class CommentControllerIntegrationTest {
 
 	}
 
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testReactComment() throws JsonProcessingException {
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
 

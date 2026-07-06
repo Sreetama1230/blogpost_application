@@ -1,3 +1,6 @@
+
+DELETE FROM event;
+
 DELETE FROM comment_reactions;
 DELETE FROM post_categories;
 DELETE FROM user_blocked_users;
@@ -11,7 +14,7 @@ DELETE FROM blog_post;
 DELETE FROM category;
 DELETE FROM user;
 
-DELETE FROM event;
+
 
 
 

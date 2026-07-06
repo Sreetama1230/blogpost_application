@@ -84,7 +84,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @AutoConfigureHttpGraphQlTester
 @ActiveProfiles("test")
 public class GraphQlControllerIntegrationTest {

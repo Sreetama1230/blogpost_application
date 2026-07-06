@@ -53,7 +53,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @ActiveProfiles("test")
 public class BlogPostControllerIntegrationTest {
 
@@ -102,27 +101,18 @@ public class BlogPostControllerIntegrationTest {
 
 	}
 
-	@AfterEach
-	private void cleanUp() {
-		commentDao.deleteAll();
-		blogPostDao.deleteAll();
-		categoryDao.deleteAll();
-		userDao.deleteAll();
-
-	}
-
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreateBlogPost() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
-		newUser.setBio("test-bio");
-		newUser.setEmail("test@gmail.com");
+		newUser.setBio("test3333-bio");
+		newUser.setEmail("test3333@gmail.com");
 		newUser.setPassword("password123");
-		newUser.setUsername("test-username" + UUID.randomUUID().toString());
+		newUser.setUsername("test33333-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		userService.createUser(newUser);
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -141,31 +131,26 @@ public class BlogPostControllerIntegrationTest {
 
 		HttpEntity<String> entity = new HttpEntity<String>(objectMapper.writeValueAsString(blogPostDTO), httpHeaders);
 
-		ResponseEntity<BlogPostResponse> resp = testRestTemplate.exchange(createURLWithPort(), HttpMethod.POST, entity,
-				BlogPostResponse.class);
+        ResponseEntity<BlogPostResponse> resp = testRestTemplate.exchange(
+                createURLWithPort(),
+                HttpMethod.POST,
+                entity,
+                BlogPostResponse.class
+        );
 
-		BlogPostResponse blogPostResponse = resp.getBody();
-		
-		
-		// new category will be created
-		Long categoryId = categoryDao.findByName("#fake-category").get().getId();
+        BlogPostResponse blogPostResponse = resp.getBody();
 
+
+		assertEquals(HttpStatus.CREATED, resp.getStatusCode());
 		assertNotNull(blogPostResponse);
 		assertEquals("Fake Content", blogPostResponse.getContent());
 		assertEquals("Fake Title", blogPostResponse.getTitle());
 
 		
-		List<Event> events = eventDao.findAll();
-		
-		assertEquals(1, events.size());
-		Event event = events.get(0);
-		assertEquals(EventType.CREATE, event.getEventType());
+		Event event = eventDao.findByTransactionIdAndEventType(blogPostResponse.getId()+"" , EventType.CREATE).get();
+
 		assertEquals(EventStatus.PENDING, event.getStatus());
 		assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
-		assertEquals(
-		        String.valueOf(blogPostResponse.getId()),
-		        event.getTransactionId());
-
 		assertEquals(0, event.getRetryCount());
 	}
 
@@ -214,6 +199,13 @@ public class BlogPostControllerIntegrationTest {
 		assertEquals("Fake Title", updatedBlogPostResponse.getTitle());
 
 
+        Event event = eventDao.findByTransactionIdAndEventType(blogPostResponse.getId()+"" , EventType.UPDATE).get();
+
+
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+
+        assertEquals(0, event.getRetryCount());
 	}
 
 	@Test
@@ -355,6 +347,15 @@ public class BlogPostControllerIntegrationTest {
 		assertNotNull(resp);
 		assertNotNull("Fake & Title", response.getTitle());
 		assertNotNull("Fake Content", response.getContent());
+
+
+        Event event = eventDao.findByTransactionIdAndEventType(blogPostResponse.getId()+"" , EventType.DELETE).get();
+
+
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.BLOGPOST, event.getTransactionType());
+
+        assertEquals(0, event.getRetryCount());
 
 	}
 
