@@ -15,15 +15,32 @@ import com.example.demo.response.BlogPostResponse;
 @Repository
 public interface BlogPostDao extends JpaRepository<BlogPost, Long> {
 
-	@Query(value="Select b from BlogPost b where b.content Like concat('%',:keyword,'%') or b.title Like concat('%',:keyword,'%')")
-	public List<BlogPost> searchPosts(  @Param(value="keyword")  String keyword);
-	
+	@Query(value = "Select b from BlogPost b where b.content Like concat('%',:keyword,'%') or b.title Like concat('%',:keyword,'%')")
+	public List<BlogPost> searchPosts(@Param(value = "keyword") String keyword);
+
 	public Page<BlogPost> findAll(Pageable pageable);
 
 	@Query("SELECT bp FROM BlogPost bp ORDER BY bp.likes DESC")
 	public Page<BlogPost> findTopNByOrderByLikesDesc(Pageable pageable);
-	
-	 @Query("SELECT bp FROM BlogPost bp WHERE bp.title = :title AND bp.author.id = :authorId")
-		public List<BlogPost> findByTitleAndAuthor(  @Param(value="title")  String title,@Param(value="authorId") Long id);
 
+	@Query("SELECT bp FROM BlogPost bp WHERE bp.title = :title AND bp.author.id = :authorId")
+	public List<BlogPost> findByTitleAndAuthor(@Param(value = "title") String title,
+			@Param(value = "authorId") Long id);
+
+	@Query("SELECT bp FROM BlogPost bp ORDER BY (bp.likes- bp.dislikes) DESC, bp.createAt DESC ")
+	public List<BlogPost> findPostByCreateTimeAndReactCount(Pageable page);
+
+	@Query("""
+			SELECT bp FROM BlogPost bp
+			WHERE bp.author.id IN :authorIds
+			ORDER BY (bp.likes- bp.dislikes) DESC, bp.createAt DESC
+			""")
+	public List<BlogPost> findPostsInListAuthors(@Param("authorIds") List<Long> authorIds, Pageable page);
+
+	@Query("""
+			SELECT bp FROM BlogPost bp
+			WHERE bp.author.id NOT IN :authorIds
+			ORDER BY (bp.likes- bp.dislikes) DESC, bp.createAt DESC
+			""")
+	public List<BlogPost> findPostsNotInListOfAuthor(@Param("authorIds") List<Long> authorIds, Pageable page);
 }

@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-import com.example.demo.constants.Reaction;
+import com.example.demo.enums.Reaction;
 
 public class CommentReact {
 

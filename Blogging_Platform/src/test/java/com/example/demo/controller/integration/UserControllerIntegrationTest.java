@@ -40,13 +40,18 @@ import org.springframework.test.context.jdbc.Sql;
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.UserDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.error.ErrorDetails;
 import com.example.demo.exception.InvalidEmailIdError;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostDetailsResponse;
@@ -58,7 +63,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @ActiveProfiles("test")
 public class UserControllerIntegrationTest {
 
@@ -83,15 +87,15 @@ public class UserControllerIntegrationTest {
 	@Autowired
 	private AuthService authService;
 
-	private  HttpHeaders headers;
+	@Autowired
+	private EventDao eventDao;
+
+	private HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@Autowired
-	private EmbeddedKafkaBroker embeddedKafkaBroker;
-
 	@BeforeEach
-	public  void init() {
+	public void init() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 	}
@@ -101,13 +105,11 @@ public class UserControllerIntegrationTest {
 
 	}
 
-
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreate() throws JsonProcessingException {
 
-		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("mytest-bio");
 		newUser.setEmail("mytest444@gmail.com");
@@ -122,29 +124,19 @@ public class UserControllerIntegrationTest {
 		ResponseEntity<UserResponse> resp = template.exchange(createURLWithPort() + "/register", HttpMethod.POST,
 				entity, UserResponse.class);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("test-create-user-group", "true", embeddedKafkaBroker);
-
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-
 		UserResponse createdUser = resp.getBody();
-	
-		assertEquals(HttpStatus.CREATED, resp.getStatusCode());
-		
-		ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer);
 
-		boolean isPresent = StreamSupport.stream(records.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Created User " + createdUser.getId()));
+		Event event = eventDao.findByTransactionIdAndEventType(createdUser.getId()+"", EventType.CREATE).get();
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(String.valueOf(createdUser.getId()), event.getTransactionId());
 
-		assertTrue(isPresent);
 		assertNotNull(createdUser);
 		assertEquals(newUser.getUsername(), createdUser.getUsername());
 		assertEquals(newUser.getEmail(), createdUser.getEmail());
 
 	}
-
 
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -174,7 +166,7 @@ public class UserControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	public void testGetPostsByUserId() {
+	public void testGetPostsByUserId() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
@@ -211,7 +203,7 @@ public class UserControllerIntegrationTest {
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-	public void testGetById() {
+	public void testGetById() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
@@ -261,7 +253,7 @@ public class UserControllerIntegrationTest {
 	}
 
 	@Test
-	public void testGetAll() {
+	public void testGetAll() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
@@ -321,37 +313,26 @@ public class UserControllerIntegrationTest {
 
 				new HttpEntity<>(objectMapper.writeValueAsString(newUser), headers);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("update-test-group", "true", embeddedKafkaBroker);
-
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-
 		ResponseEntity<UserResponse> resp = template.exchange(createURLWithPort(), HttpMethod.PUT, entity,
 				UserResponse.class);
 
-		UserResponse createdUser = resp.getBody();
+		UserResponse updatedUser = resp.getBody();
 
-		ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer);
-
-		System.out.print(resp.getStatusCode());
+		Event event = eventDao.
+		findByTransactionIdAndEventType(updatedUser.getId()+"", EventType.UPDATE).get();
+	
 		User dbUser = userDao.findById(savedUser.getId()).get();
 
-		boolean isPresent = StreamSupport.stream(records.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Updated User " + dbUser.getId()));
-
-		assertTrue(isPresent);
-
-		assertNotNull(createdUser);
+		assertNotNull(updatedUser);
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		assertEquals(newUser.getUsername(), dbUser.getUsername());
-		assertEquals("updated-test-bio", createdUser.getBio());
+		assertEquals("updated-test-bio", updatedUser.getBio());
 		assertEquals(newUser.getEmail(), dbUser.getEmail());
-
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.USER, event.getTransactionType());
 	}
 
-	
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -376,13 +357,11 @@ public class UserControllerIntegrationTest {
 		newUser.setEmail("testupdated@gmail.com");
 		newUser.setId(savedUser.getId());
 
-		HttpEntity<String> entity =
-		new HttpEntity<>(objectMapper.writeValueAsString(newUser), headers);
+		HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newUser), headers);
 		ResponseEntity<ErrorDetails> resp = template.exchange(createURLWithPort(), HttpMethod.PUT, entity,
 				ErrorDetails.class);
 
 		ErrorDetails errorDetails = resp.getBody();
-
 
 		assertNotNull(errorDetails);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
@@ -390,7 +369,6 @@ public class UserControllerIntegrationTest {
 
 	}
 
-	
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -413,31 +391,21 @@ public class UserControllerIntegrationTest {
 
 		headers.setBearerAuth(authResp.getToken());
 
-		HttpEntity<String> entity =
-
-				new HttpEntity<>(null, headers);
-
-		Map<String, Object> props = KafkaTestUtils.consumerProps("delete-test-group", "true", embeddedKafkaBroker);
-
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
+		HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
 		ResponseEntity<UserResponse> resp = template.exchange(createURLWithPort() + "/" + savedUser.getId(),
 				HttpMethod.DELETE, entity, UserResponse.class);
 
 		UserResponse createdUser = resp.getBody();
 
-		ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer);
+		Event event = eventDao.findByTransactionIdAndEventType(createdUser.getId() + "", EventType.DELETE).get();
 
-		System.out.print(resp.getStatusCode());
-
-		boolean isPresent = StreamSupport.stream(records.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Deleted User " + dbUser.getId()));
+		assertNotNull(event);
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.USER, event.getTransactionType());
+		assertEquals(String.valueOf(createdUser.getId()), event.getTransactionId());
 
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		assertTrue(isPresent);
 
 		assertNotNull(createdUser);
 
@@ -445,13 +413,13 @@ public class UserControllerIntegrationTest {
 		assertEquals(newUser.getEmail(), dbUser.getEmail());
 
 	}
-	
+
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testDeleteFailureWithDoNotHavePermissionError() throws JsonProcessingException {
-		
-		//AUTHENTICATED USER ID - EDITOR
+
+		// AUTHENTICATED USER ID - EDITOR
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test234@gmail.com");
@@ -461,41 +429,35 @@ public class UserControllerIntegrationTest {
 
 		User savedUser = userService.createUser(newUser);
 
-
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
 		AuthResponse authResp = authService.login(authRequest);
 
 		headers.setBearerAuth(authResp.getToken());
-		
-		// WANT TO DELETE THE USER 	- ADMIN
+
+		// WANT TO DELETE THE USER - ADMIN
 		UserDTO newUser1 = new UserDTO();
 		newUser1.setBio("test-bio");
 		newUser1.setEmail("test456@gmail.com");
 		newUser1.setPassword("password123");
 		newUser1.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser1.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
-		
+
 		User savedUser1 = userService.createUser(newUser1);
-		
 
 		HttpEntity<String> entity =
 
 				new HttpEntity<>(null, headers);
 
-		
 		ResponseEntity<ErrorDetails> resp = template.exchange(createURLWithPort() + "/" + savedUser1.getId(),
 				HttpMethod.DELETE, entity, ErrorDetails.class);
 
 		ErrorDetails errorDetails = resp.getBody();
-
-
 
 		assertNotNull(errorDetails);
 		assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
 		assertEquals("You can not delete the user!", errorDetails.getMsg());
 
 	}
-
 
 }

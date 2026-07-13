@@ -1,9 +1,6 @@
 package com.example.demo.gqlcontroller;
 
 import java.util.List;
-
-import com.example.demo.exception.FollowUnFollowException;
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.gqlservice.GraphQlService;
 
 import org.slf4j.Logger;
@@ -18,7 +15,6 @@ import org.springframework.stereotype.Controller;
 
 import com.example.demo.dto.ReactDTO;
 import com.example.demo.response.BlogPostResponse;
-import com.example.demo.response.PinnedBlogPost;
 import com.example.demo.response.UserResponse;
 
 @Controller
@@ -48,7 +44,7 @@ public class GraphQlController {
 
 	@QueryMapping("getPinnedPostsOfTheUser")
 	@PreAuthorize("#uId == authentication.principal.id")
-	public List<PinnedBlogPost> getPinnedPostsOfTheUser(@Argument("uId") long uId) {
+	public List<BlogPostResponse> getPinnedPostsOfTheUser(@Argument("uId") long uId) {
 		return postservice.getPinnedPostsOfTheUser(uId);
 	}
 
@@ -84,20 +80,20 @@ public class GraphQlController {
 
 	@MutationMapping("setReaction")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'USER')")
-	public BlogPostResponse setReaction(@Argument ReactDTO request) {
+	public BlogPostResponse setReaction(@Argument ReactDTO request) throws Exception {
 
 		return postservice.setReaction(request);
 	}
 
-	@MutationMapping("pinPost")
+	@MutationMapping("pinUnpinPost")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'USER') and #uId == authentication.principal.id")
-	public PinnedBlogPost pinnedPost(@Argument long uId, @Argument long bpId) {
-		return postservice.pinnedPost(uId, bpId);
+	public BlogPostResponse pinnedPost(@Argument long uId, @Argument long bpId) throws Exception {
+		return postservice.postPinnedUnpinned(uId, bpId);
 	}
 
 	@MutationMapping("followOrUnFollowAuthor")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'USER') and #follower == authentication.principal.id")
-	public List<UserResponse> followOrUnFollowAuthor(@Argument long follower, @Argument long followee) {
+	public List<UserResponse> followOrUnFollowAuthor(@Argument long follower, @Argument long followee) throws Exception {
 
 		return postservice.followOrUnFollowAuthor(follower, followee);
 
@@ -106,9 +102,10 @@ public class GraphQlController {
 	// Always validate user ID arguments against the authenticated user’s ID.
 	@MutationMapping("blockUser")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EDITOR')  and #blockerId == authentication.principal.id")
-	public List<UserResponse> blockUser(@Argument("blockerId") Long blockerId, @Argument Long blockedUserId) {
+	public List<UserResponse> blockUser(@Argument("blockerId") Long blockerId, @Argument Long blockedUserId)
+			throws Exception {
 
-		return postservice.blockUser(blockerId, blockedUserId);
+		return postservice.blockUnblockUser(blockerId, blockedUserId);
 	}
 
 }

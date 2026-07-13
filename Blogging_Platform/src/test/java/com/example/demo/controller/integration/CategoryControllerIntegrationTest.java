@@ -11,6 +11,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import com.example.demo.dao.EventDao;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
+import com.example.demo.model.Event;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -55,9 +60,9 @@ import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @ActiveProfiles("test")
 public class CategoryControllerIntegrationTest {
 
@@ -88,12 +93,11 @@ public class CategoryControllerIntegrationTest {
 	@Autowired
 	private CategoryService categoryService;
 
+    @Autowired
+    private EventDao eventDao;
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	@Autowired
-	private EmbeddedKafkaBroker embeddedKafkaBroker;
 
 	@BeforeAll
 	public static void init() {
@@ -106,15 +110,10 @@ public class CategoryControllerIntegrationTest {
 
 	}
 
-	@AfterEach
-	public void cleanUp() {
-		postDao.deleteAll();
-		categoryDao.deleteAll();
-		userDao.deleteAll();
 
-	}
-
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreateCategory() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -140,26 +139,20 @@ public class CategoryControllerIntegrationTest {
 		ResponseEntity<CategoryResponse> response = template.exchange(createURLWithPort(), HttpMethod.POST, entity,
 				CategoryResponse.class);
 
-		// message is getting consumed by consumer
-		Map<String, Object> props = KafkaTestUtils.consumerProps("category-create-test-group", "true",
-				embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
 		CategoryResponse categoryResponse = response.getBody();
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Created Category " + categoryResponse.getId()));
-		assertTrue(isPresent);
+
 		assertNotNull(categoryResponse);
 		assertEquals("#fake-category", categoryResponse.getName());
 
+       Event event =  eventDao.findByTransactionIdAndEventType(categoryResponse.getId()+"" , EventType.CREATE).get();
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.CATEGORY, event.getTransactionType());
 	}
 
-	@Test
-	public void testGetAll() {
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	public void testGetAll() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@12345gmail.com");
@@ -190,8 +183,11 @@ public class CategoryControllerIntegrationTest {
 		assertEquals("#fake-category", categoryResponse.getName());
 	}
 
-	@Test
-	public void testListBlogsByCategory() {
+
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	public void testListBlogsByCategory() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -229,7 +225,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testDeleteById() {
+	public void testDeleteById() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@12345gmail.com");
@@ -247,36 +243,26 @@ public class CategoryControllerIntegrationTest {
 
 		Category category = categoryDao.save(new Category("#fake-category", new HashSet<>()));
 
-		HttpEntity<String> entity =
-
-				new HttpEntity<>(null, headers);
-
-		Map<String, Object> props = KafkaTestUtils.consumerProps("category-delete-test-group", "true", embeddedKafkaBroker);
-
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
+		HttpEntity<String> entity = 	new HttpEntity<>(null, headers);
 
 		ResponseEntity<Category> resp = template.exchange(createURLWithPort() + "/" + category.getId(),
 				HttpMethod.DELETE, entity, Category.class);
 
-		ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer);
-
 		Category deletedResponse = resp.getBody();
 
-		boolean isPresent = StreamSupport.stream(records.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Deleted Category " + category.getId()));
-
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
-		assertTrue(isPresent);
 		assertEquals("#fake-category", deletedResponse.getName());
 		assertNotNull(deletedResponse);
 
+        Event event = eventDao.findByTransactionIdAndEventType(category.getId()+"" , EventType.DELETE).get();
+
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+        assertEquals(0, event.getRetryCount());
 	}
 
 	@Test
-	public void testDeleteByIdWithCategoryLinkedToBlogs() {
+	public void testDeleteByIdWithCategoryLinkedToBlogs() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -317,7 +303,7 @@ public class CategoryControllerIntegrationTest {
 	}
 
 	@Test
-	public void testDeleteByIdWithResourceNotFoundException() {
+	public void testDeleteByIdWithResourceNotFoundException() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");

@@ -24,6 +24,7 @@ import com.example.demo.response.BlogPostResponse;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 @RequestMapping("/blog")
@@ -37,7 +38,7 @@ public class BlogPostController {
 
 
 	@PostMapping
-	public ResponseEntity<BlogPostResponse> createBlogPost( @RequestBody BlogPostDTO bp) {
+	public ResponseEntity<BlogPostResponse> createBlogPost( @RequestBody BlogPostDTO bp) throws JsonProcessingException {
   	return new ResponseEntity<>(service.createOrUpdateBlogPost(bp),HttpStatus.CREATED);
 	}
 	
@@ -47,13 +48,13 @@ public class BlogPostController {
 	}
 	
 	@PutMapping
-	public ResponseEntity<BlogPostResponse> updateBlogPost(@RequestBody BlogPostDTO bp) {
+	public ResponseEntity<BlogPostResponse> updateBlogPost(@RequestBody BlogPostDTO bp) throws JsonProcessingException {
 			logger.info("Updating blog post...");
 		return new ResponseEntity<BlogPostResponse>(service.createOrUpdateBlogPost( bp),HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<BlogPostResponse> deleteBlogPost(@PathVariable long id){
+	public ResponseEntity<BlogPostResponse> deleteBlogPost(@PathVariable long id) throws Exception{
 		logger.info("Deleting blog post, id: {}",id);
 		return new ResponseEntity<BlogPostResponse>(service.deleteBlogPost(id),HttpStatus.OK);
 	}

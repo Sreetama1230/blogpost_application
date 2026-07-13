@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.demo.response.BlogPostResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -16,11 +19,16 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.CategoryDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.CategoryLinkedToBlogs;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.Category;
+import com.example.demo.model.Event;
 
 @Service
 public class CategoryService {
@@ -29,12 +37,14 @@ public class CategoryService {
 	private CategoryDao categoryDao;
 
 	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private EventDao eventDao;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
 	@Transactional
-	public Category createCategory(Category cg) {
+	public Category createCategory(Category cg) throws JsonProcessingException {
 		String s = cg.getName();
 		String str = null;
 		if (!(s.startsWith("#"))) {
@@ -43,17 +53,18 @@ public class CategoryService {
 
 		}
 		Category newCategory = categoryDao.save(cg);
+	
+		Event event = new Event();
 
-		CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-				"Created Category " + String.valueOf(newCategory.getId()));
-
-		future.whenComplete((result, exception) -> {
-			if (exception != null) {
-				throw new UnexpectedCustomException("Error occured while publishing the event");
-			} else {
-				logger.info("Successfully published the event...");
-			}
-		});
+		event.setEventType(EventType.CREATE);
+		event.setCreatedAt(LocalDateTime.now());
+		event.setPayload(objectMapper.writeValueAsString(cg));
+		event.setPublishedAt(LocalDateTime.now());
+		event.setStatus(EventStatus.PENDING);
+		event.setTransactionId(String.valueOf(newCategory.getId()));
+		event.setTransactionType(TransactionType.CATEGORY);
+		event.setRetryCount(0);
+		eventDao.save(event);
 
 		return newCategory;
 
@@ -83,7 +94,7 @@ public class CategoryService {
 	}
 
 	@Transactional
-	public Category deleteById(long id) {
+	public Category deleteById(long id) throws JsonProcessingException {
 
 		if (categoryDao.findById(id).isPresent()) {
 			Category c = categoryDao.findById(id).get();
@@ -91,18 +102,18 @@ public class CategoryService {
 			if (c.getBlogPosts().isEmpty()) {
 				categoryDao.deleteById(id);
 
-				CompletableFuture<SendResult<String, String>> future =
+				
+				Event event = new Event();
 
-						kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-								"Deleted Category " + String.valueOf(c.getId()));
-
-				future.whenComplete((result, exception) -> {
-					if (exception != null) {
-						throw new UnexpectedCustomException("Error occured while publishing the event");
-					} else {
-						logger.info("Successfully published the event...");
-					}
-				});
+				event.setEventType(EventType.DELETE);
+				event.setCreatedAt(LocalDateTime.now());
+				event.setPayload(objectMapper.writeValueAsString(id));
+				event.setPublishedAt(LocalDateTime.now());
+				event.setStatus(EventStatus.PENDING);
+				event.setTransactionId(String.valueOf(c.getId()));
+				event.setTransactionType(TransactionType.CATEGORY);
+				event.setRetryCount(0);
+				eventDao.save(event);
 
 				return c;
 			} else {

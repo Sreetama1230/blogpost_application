@@ -10,20 +10,24 @@ import java.util.concurrent.ExecutionException;
 
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.constants.AppConstants;
-import com.example.demo.dao.CommentDao;
-import com.example.demo.dao.UserDao;
+import com.example.demo.dao.*;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.exception.CategoryException;
 import com.example.demo.exception.CustomExceptionHandler;
 import com.example.demo.model.Comment;
+import com.example.demo.model.Event;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnexpectedCustomException;
@@ -31,6 +35,8 @@ import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -50,7 +56,12 @@ public class BlogPostService {
 	private CategoryService categoryService;
 
 	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private EventDao eventDao;
+	@Autowired
+	private ObjectMapper objectMapper;
+
+    @Autowired
+    private CategoryDao categoryDao;
 
 	Logger logger = LoggerFactory.getLogger(BlogPostService.class);
 
@@ -67,140 +78,158 @@ public class BlogPostService {
 	}
 
 	@Transactional
-	public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp) {
+    public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp) throws JsonProcessingException {
 
-		long userId = SecurityUtils.getCurrentUserId();
-		User u = userService.getbyId(userId);
-		Set<CategoryDTO> dtos = bp.getCategories();
-		HashSet<Category> catSet = new HashSet<>();
-		List<BlogPost> blogPosts = u.getBlogPosts();
-		BlogPost bpdata = new BlogPost();
-		BlogPost newBlogPost = new BlogPost();
+        Event event = new Event();
+        long userId = SecurityUtils.getCurrentUserId();
+        User u = userService.getbyId(userId);
+        Set<CategoryDTO> dtos = bp.getCategories();
+        HashSet<Category> catSet = new HashSet<>();
+        List<BlogPost> blogPosts = u.getBlogPosts();
+        BlogPost bpdata = new BlogPost();
+        BlogPost newBlogPost = new BlogPost();
 
-		// converting new categories
-		for (CategoryDTO c : dtos) {
+        // converting new categories
+        for (CategoryDTO c : dtos) {
 
-			try {
-				StringBuilder categoryName = new StringBuilder();
+            try {
+                StringBuilder categoryName = new StringBuilder();
 
-				if (!c.getName().startsWith("#")) {
-					categoryName.append("#");
-					categoryName.append(c.getName());
-				} else {
-					categoryName.append(c.getName());
-				}
-				if (categoryService.getByName(categoryName.toString()) != null) { // exception will be thrown
-					Category category = categoryService.getByName(categoryName.toString());
-					catSet.add(category);
-				}
-			} catch (ResourceNotFoundException e) {
-				logger.info("Adding new category...");
-				Category newCat = categoryService.createCategory(new Category(c.getName(), new HashSet<>()));
+                if (!c.getName().startsWith("#")) {
+                    categoryName.append("#");
+                    categoryName.append(c.getName());
+                } else {
+                    categoryName.append(c.getName());
+                }
+                if (categoryService.getByName(categoryName.toString()) != null) { // exception will be thrown
+                    Category category = categoryService.getByName(categoryName.toString());
+                    catSet.add(category);
+                }
+            } catch (ResourceNotFoundException e) {
+                logger.info("Adding new category...");
+                Category newCat = categoryService.createCategory(new Category(c.getName(), new HashSet<>()));
 
-				catSet.add(newCat);
+                Event subEvent = new Event();
 
-			} catch (Exception e) {
-				throw e;
-			}
+                subEvent.setEventType(EventType.CREATE);
+                subEvent.setCreatedAt(LocalDateTime.now());
+                subEvent.setPayload(objectMapper.writeValueAsString(c));
+                subEvent.setPublishedAt(LocalDateTime.now());
+                subEvent.setStatus(EventStatus.PENDING);
+                subEvent.setTransactionId(String.valueOf(newBlogPost.getId()));
+                subEvent.setTransactionType(TransactionType.CATEGORY);
+                subEvent.setRetryCount(0);
+                eventDao.save(subEvent);
 
-		}
-		// update
-		if (bp.getId() > 0 && blogPostDao.findById(bp.getId()).isPresent()) {
-			BlogPost existingBP = blogPostDao.findById(bp.getId()).get();
-			User blogpostAuthor = existingBP.getAuthor();
-			User authDbUser = userDao.findById(userId).get();
-			if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
+                catSet.add(newCat);
 
-				existingBP.setUpdateAt(LocalDateTime.now());
-				// sparse update
-				if (bp.getContent() != null) {
-					existingBP.setContent(bp.getContent());
-				}
+            } catch (Exception e) {
+                throw e;
+            }
 
-				// if not category is present then it will retain the old categories i.e. will
-				// not throw any exception
-				if (bp.getCategories() != null) {
-					existingBP.setCategories(catSet);
-				}
+        }
+        // update
+        if (bp.getId() > 0 && blogPostDao.findById(bp.getId()).isPresent()) {
+            BlogPost existingBP = blogPostDao.findById(bp.getId()).get();
+            User blogpostAuthor = existingBP.getAuthor();
+            User authDbUser = userDao.findById(userId).get();
+            if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
 
-				if (bp.getTitle() != null) {
-					existingBP.setTitle(bp.getTitle());
-				}
+                existingBP.setUpdateAt(LocalDateTime.now());
+                // sparse update
+                if (bp.getContent() != null) {
+                    existingBP.setContent(bp.getContent());
+                }
 
-				bpdata = existingBP;
-				newBlogPost = blogPostDao.save(existingBP);
+                // if not category is present then it will retain the old categories i.e. will
+                // not throw any exception
+                if (bp.getCategories() != null) {
+                    existingBP.setCategories(catSet);
+                }
 
-				CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
-						AppConstants.ADMINTOOL_TOPIC_NAME, "Updated BlogPost " + String.valueOf(newBlogPost.getId()));
+                if (bp.getTitle() != null) {
+                    existingBP.setTitle(bp.getTitle());
+                }
 
-				future.whenComplete((result, exception) -> {
-					if (exception != null) {
-						throw new UnexpectedCustomException("Error occured while publishing the event");
-					} else {
-						logger.info("Successfully published the event...");
-					}
-				});
+                bpdata = existingBP;
+                newBlogPost = blogPostDao.save(existingBP);
 
-			} else {
-				throw new DoNotHavePermissionError("You can not do the update!");
-			}
+                event.setEventType(EventType.UPDATE);
 
-		} else {
-			// Assuming while creating the blog post...it does not have any comments,likes
-			// or dislikes etc
 
-			// if no category is provided while creating the blog post
-			if (dtos.isEmpty()) {
-				throw new CategoryException("You have to specify a category to proceed");
-			}
+            } else {
+                throw new DoNotHavePermissionError("You can not do the update!");
+            }
 
-			BlogPost reqPost = new BlogPost(bp.getTitle(), bp.getContent(), u, catSet, new ArrayList<>(),
-					LocalDateTime.now(), LocalDateTime.now());
-			reqPost.setLikes(0L);
-			reqPost.setDislikes(0L);
+        } else {
+            // Assuming while creating the blog post...it does not have any comments,likes
+            // or dislikes etc
 
-			newBlogPost = blogPostDao.save(reqPost);
-			logger.info("blog post has been created  : ", reqPost.getContent());
+            // if no category is provided while creating the blog post
+            if (dtos.isEmpty()) {
+                throw new CategoryException("You have to specify a category to proceed");
+            }
 
-			CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-					"Created BlogPost " + String.valueOf(newBlogPost.getId()));
+            BlogPost reqPost = new BlogPost(bp.getTitle(), bp.getContent(), u, catSet, new ArrayList<>(),
+                    LocalDateTime.now(), LocalDateTime.now());
+            reqPost.setLikes(0L);
+            reqPost.setDislikes(0L);
 
-			future.whenComplete((result, exception) -> {
-				if (exception != null) {
-					throw new UnexpectedCustomException("Error occured while publishing the event");
-				} else {
-					logger.info("Successfully published the event...");
-				}
-			});
+            newBlogPost = blogPostDao.save(reqPost);
+            event.setEventType(EventType.CREATE);
+            logger.info("blog post has been created  : ", reqPost.getContent());
+            bpdata = newBlogPost;
+            // adding the new blog post in the user's blogs list
+            blogPosts.add(newBlogPost);
+        }
 
-			bpdata = reqPost;
-			// adding the new blog post in the user's blogs list
-			blogPosts.add(reqPost);
-		}
+        // Converting List to HashSet
+        HashSet<BlogPost> hs = new HashSet<>();
+        hs.addAll(blogPosts);
+        // updating categories ... setting categories
+        for (Category upCat : catSet) {
+            upCat.setBlogPosts(hs);
+            categoryDao.save(upCat);
+        }
 
-		// Converting List to HashSet
-		HashSet<BlogPost> hs = new HashSet<>();
-		for (BlogPost b : blogPosts) {
-			hs.add(b);
-		}
-		// updating categories ... setting categories
-		for (Category upCat : catSet) {
-			upCat.setBlogPosts(hs);
-			categoryService.createCategory(upCat);
-		}
 
-		// updating the user
-		u.setBlogPosts(blogPosts);
-		u.setTotalPosts((long) u.getBlogPosts().size());
-		logger.info("new blog post has beed added for {} ", u.getUsername());
-		userDao.save(u);
+        // updating the user
+        u.setBlogPosts(blogPosts);
+        u.setTotalPosts((long) u.getBlogPosts().size());
+        logger.info("new blog post has beed added for {} ", u.getUsername());
+        userDao.save(u);
 
-		return BlogPostResponse.convertBlogPostRespons(bpdata);
 
-	}
+        // need to publish the user update event
+        Event subEvent1 = new Event();
+
+        subEvent1.setEventType(EventType.UPDATE);
+        subEvent1.setCreatedAt(LocalDateTime.now());
+        subEvent1.setPayload(objectMapper.writeValueAsString("Updated User while creating the blogpost: " + u.getId()));
+        subEvent1.setPublishedAt(LocalDateTime.now());
+        subEvent1.setStatus(EventStatus.PENDING);
+        subEvent1.setTransactionId(String.valueOf(u.getId()));
+        subEvent1.setTransactionType(TransactionType.USER);
+        subEvent1.setRetryCount(0);
+        eventDao.save(subEvent1);
+
+
+        // blogpost  event
+        event.setCreatedAt(LocalDateTime.now());
+        event.setPayload(objectMapper.writeValueAsString(bp));
+        event.setPublishedAt(LocalDateTime.now());
+        event.setStatus(EventStatus.PENDING);
+        event.setTransactionId(String.valueOf(newBlogPost.getId()));
+        event.setTransactionType(TransactionType.BLOGPOST);
+        event.setRetryCount(0);
+        eventDao.save(event);
+
+        return BlogPostResponse.convertBlogPostRespons(bpdata);
+
+    }
 
 	@Transactional
-	public BlogPostResponse deleteBlogPost(long id) {
+	public BlogPostResponse deleteBlogPost(long id) throws Exception {
 
 		long userId = SecurityUtils.getCurrentUserId();
 		BlogPostResponse deletedBlogPost = new BlogPostResponse();
@@ -223,17 +252,20 @@ public class BlogPostService {
 					deletedBlogPost.getComments().clear();
 					blogPostDao.deleteById(id);
 
-					CompletableFuture<SendResult<String, String>> future = kafkaTemplate
-							.send(AppConstants.ADMINTOOL_TOPIC_NAME, "Deleted BlogPost " + String.valueOf(id));
+					
 
-					future.whenComplete((result, exception) -> {
-						if (exception != null) {
-							throw new UnexpectedCustomException("Error occured while publishing the event");
-						} else {
-							logger.info("Successfully published the event...");
-						}
-					});
+					Event event = new Event();
 
+					event.setEventType(EventType.DELETE);
+					event.setCreatedAt(LocalDateTime.now());
+					event.setPayload(objectMapper.writeValueAsString(id));
+					event.setPublishedAt(LocalDateTime.now());
+					event.setStatus(EventStatus.PENDING);
+					event.setTransactionId(String.valueOf(bp.getId()));
+					event.setTransactionType(TransactionType.BLOGPOST);
+					event.setRetryCount(0);
+					eventDao.save(event);
+					
 					return deletedBlogPost;
 
 				} else {
@@ -247,7 +279,7 @@ public class BlogPostService {
 		} catch (ResourceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		} catch (Exception e) {
-			throw new UnexpectedCustomException("Unexpected exception: " + e.getMessage());
+			throw e;
 
 		}
 

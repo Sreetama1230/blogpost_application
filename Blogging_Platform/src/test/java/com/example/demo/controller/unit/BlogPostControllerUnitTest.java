@@ -51,12 +51,12 @@ public class BlogPostControllerUnitTest {
 	@Autowired
 	MockMvc mockMvc;
 
+
 	@MockBean
 	JwtAuthFilter authFilter;
 
 	@MockBean
 	JwtUtils jwtUtils;
-
 	BlogPost blogPost;
 	User user;
 

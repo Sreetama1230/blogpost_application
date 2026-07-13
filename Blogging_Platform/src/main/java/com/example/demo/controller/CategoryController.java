@@ -16,6 +16,7 @@ import com.example.demo.dto.CategoryDTO;
 import com.example.demo.model.Category;
 import com.example.demo.response.CategoryResponse;
 import com.example.demo.service.CategoryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 @RequestMapping("/category")
@@ -27,7 +28,7 @@ public class CategoryController {
 	Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
 	@PostMapping
-	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto) {
+	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto) throws JsonProcessingException {
 		Category c = new Category();
 		String name = cdto.getName();
 		String normalizedName = name.startsWith("#") ? name : "#" + name;
@@ -69,7 +70,7 @@ public class CategoryController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Category> deleteById(@PathVariable Long id) {
+	public ResponseEntity<Category> deleteById(@PathVariable Long id) throws JsonProcessingException {
 		return new ResponseEntity<>(service.deleteById(id), HttpStatus.OK);
 	}
 }

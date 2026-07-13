@@ -5,32 +5,37 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.example.demo.dao.CategoryDao;
+import com.example.demo.dao.EventDao;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.CategoryLinkedToBlogs;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.service.CategoryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
 public class CategoryServiceUnitTest {
@@ -42,7 +47,9 @@ public class CategoryServiceUnitTest {
 	private CategoryService categoryService;
 
 	@Mock
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private EventDao eventDao;
+	@Mock
+	private ObjectMapper objectMapper;
 
 	User user;
 	BlogPost blogPost;
@@ -172,34 +179,62 @@ public class CategoryServiceUnitTest {
 	}
 
 	@Test
-	public void testCreateCategory() {
+	public void testCreateCategory() throws JsonProcessingException {
 
 		Category newCategory = new Category("#test", new HashSet<>());
 		when(categoryDao.save(newCategory)).thenReturn(newCategory);
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+
 		Category savedCategory = categoryService.createCategory(newCategory);
 
 		assertEquals(newCategory.getId(), savedCategory.getId());
 		assertEquals(newCategory.getName(), savedCategory.getName());
 
+		String payload = objectMapper.writeValueAsString(newCategory);
+
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+		verify(eventDao).save(captor.capture());
+
+		Event event = captor.getValue();
+
+		assertEquals(EventType.CREATE, event.getEventType());
+		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(savedCategory.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
+
 	}
 
 	@Test
-	public void testDeleteById() {
+	public void testDeleteById() throws JsonProcessingException {
 
 		Category newCategory = new Category("#test", new HashSet<>());
 		newCategory.setId(5L);
 
 		when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
+
 		Category deletedCategory = categoryService.deleteById(5L);
-	
+
 		assertEquals(newCategory.getId(), deletedCategory.getId());
 		assertEquals(newCategory.getName(), deletedCategory.getName());
 
 		verify(categoryDao).deleteById(5L);
+		
+		String payload = objectMapper.writeValueAsString(deletedCategory.getId());
+
+		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+		verify(eventDao).save(captor.capture());
+
+		Event event = captor.getValue();
+
+		assertEquals(EventType.DELETE, event.getEventType());
+		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(deletedCategory.getId() + "", event.getTransactionId());
+		assertEquals(0, event.getRetryCount());
+		assertEquals(payload, event.getPayload());
 
 	}
 
@@ -211,9 +246,6 @@ public class CategoryServiceUnitTest {
 
 		when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
 
-		CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-		when(kafkaTemplate.send(anyString(), anyString())).thenReturn(future);
-		
 		CategoryLinkedToBlogs categoryLinkedToBlogs = assertThrows(CategoryLinkedToBlogs.class, () -> {
 			categoryService.deleteById(5L);
 		});

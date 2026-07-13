@@ -13,6 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import com.example.demo.dao.*;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
+import com.example.demo.model.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -38,22 +43,14 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.example.demo.constants.AppConstants;
-import com.example.demo.constants.Reaction;
-import com.example.demo.dao.BlogPostDao;
-import com.example.demo.dao.CategoryDao;
-import com.example.demo.dao.CommentDao;
-import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
 import com.example.demo.dto.UserDTO;
+import com.example.demo.enums.Reaction;
 import com.example.demo.error.ErrorDetails;
-import com.example.demo.model.BlogPost;
-import com.example.demo.model.Category;
-import com.example.demo.model.Comment;
-import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CategoryResponse;
@@ -65,9 +62,9 @@ import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EmbeddedKafka(partitions = 1, topics = { AppConstants.ADMINTOOL_TOPIC_NAME })
 @ActiveProfiles("test")
 public class CommentControllerIntegrationTest {
 
@@ -98,15 +95,13 @@ public class CommentControllerIntegrationTest {
 	@Autowired
 	private AuthService authService;
 
-	@Autowired
-	private CategoryService categoryService;
+    @Autowired
+    private EventDao eventDao;
 
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@Autowired
-	private EmbeddedKafkaBroker embeddedKafkaBroker;
 
 	@BeforeAll
 	public static void init() {
@@ -133,7 +128,7 @@ public class CommentControllerIntegrationTest {
 	User user2;
 
 	@BeforeEach
-	public void setUp() {
+	public void setUp() throws JsonProcessingException {
 
 		newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -173,16 +168,9 @@ public class CommentControllerIntegrationTest {
 
 	}
 
-	@AfterEach
-	public void cleanUp() {
-		commentDao.deleteAll();
-		postDao.deleteAll();
-		categoryDao.deleteAll();
-		userDao.deleteAll();
-
-	}
-
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testAddComment() throws JsonProcessingException {
 
 		headers.setBearerAuth(authResp.getToken());
@@ -193,27 +181,24 @@ public class CommentControllerIntegrationTest {
 				createURLWithPort() + "?blogPostId=" + blogPostResponse.getId(), HttpMethod.POST, entity,
 				BlogPostResponse.class);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("comment-create-test-group", "true",
-				embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
+	
 		BlogPostResponse postResponse = response.getBody();
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false).anyMatch(
-				record -> record.value().contains("Created Comment " + postResponse.getComments().get(0).getId()));
-
-		assertTrue(isPresent);
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals(1L, postResponse.getComments().size());
 
+        Event event = eventDao.findByTransactionIdAndEventType( postResponse.getComments().get(0).getId()+"" , EventType.CREATE).get();
+
+        assertNotNull(event);
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.COMMENT, event.getTransactionType());
+
 	}
 
-	@Test
+
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testUpdateComment() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -236,28 +221,24 @@ public class CommentControllerIntegrationTest {
 				createURLWithPort() + "?blogPostId=" + blogPostResponse.getId(), HttpMethod.PUT, entity,
 				BlogPostResponse.class);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("comment-update-test-group", "true",
-				embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
 		BlogPostResponse postResponse = response.getBody();
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false).anyMatch(
-				record -> record.value().contains("Updated Comment " + postResponse.getComments().get(0).getId()));
-
-		assertTrue(isPresent);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(1L, postResponse.getComments().size());
+        assertNotNull(postResponse.getComments().get(0));
 		assertEquals("updated-comment(edited)", response.getBody().getComments().get(0).getContent());
 
+        Event event = eventDao.findByTransactionIdAndEventType( postResponse.getComments().get(0).getId()+"" , EventType.UPDATE).get();
+
+        assertNotNull(event);
+        assertEquals(EventStatus.PENDING, event.getStatus());
+        assertEquals(TransactionType.COMMENT, event.getTransactionType());
 	}
 
-	@Test
+
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetCommentById() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -278,7 +259,9 @@ public class CommentControllerIntegrationTest {
 
 	}
 
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetDeleteById() throws JsonProcessingException {
 
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
@@ -294,27 +277,16 @@ public class CommentControllerIntegrationTest {
 				createURLWithPort() + "/" + commet.getId() + "/blogpost/" + post.getId(), HttpMethod.DELETE, entity,
 				CommentResponse.class);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("comment-delete-test-group", "true",
-				embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
 		CommentResponse commentResponse = response.getBody();
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Deleted Comment " + commentResponse.getId()));
-
-		assertTrue(isPresent);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals("test-comment", commentResponse.getContent());
 
 	}
 
-	@Test
+    @Test
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testReactComment() throws JsonProcessingException {
 		BlogPost post = postDao.findById(blogPostResponse.getId()).get();
 
@@ -334,20 +306,7 @@ public class CommentControllerIntegrationTest {
 		ResponseEntity<CommentResponse> response = template.exchange(createURLWithPort() + "/react", HttpMethod.POST,
 				entity, CommentResponse.class);
 
-		Map<String, Object> props = KafkaTestUtils.consumerProps("comment-react-test-group", "true",
-				embeddedKafkaBroker);
-		Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-				new StringDeserializer()).createConsumer();
-
-		embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, AppConstants.ADMINTOOL_TOPIC_NAME);
-		ConsumerRecords<String, String> consumerRecords = KafkaTestUtils.getRecords(consumer);
-
 		CommentResponse commentResponse = response.getBody();
-
-		boolean isPresent = StreamSupport.stream(consumerRecords.spliterator(), false)
-				.anyMatch(record -> record.value().contains("Reacted Comment " + commentResponse.getId()));
-
-		assertTrue(isPresent);
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("1", commentResponse.getLoveCount().toString());

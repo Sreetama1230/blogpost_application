@@ -30,17 +30,15 @@ public class BlogPost {
 	@ManyToOne
 	private User author;
 	
-	@ManyToOne
-	private User pinnedBy;
+	@ManyToMany(mappedBy = "pinnedBlogPosts")
+	private Set<User> pinnedBy = new HashSet<>();
 
 	@Column
 	private  Long likes;
 	
 	@Column
 	private  Long dislikes;
-	
-	@Column
-	private LocalDateTime pinnedDate;
+
 	@CreatedDate
 	private LocalDateTime createAt;
 	@LastModifiedDate
@@ -190,11 +188,13 @@ public class BlogPost {
 		// TODO Auto-generated constructor stub
 	}
 
-	public User getPinnedBy() {
+	
+
+	public Set<User> getPinnedBy() {
 		return pinnedBy;
 	}
 
-	public void setPinnedBy(User pinnedBy) {
+	public void setPinnedBy(Set<User> pinnedBy) {
 		this.pinnedBy = pinnedBy;
 	}
 
@@ -204,14 +204,6 @@ public class BlogPost {
 
 	public void setDislikes(Long dislikes) {
 		this.dislikes = dislikes;
-	}
-
-	public LocalDateTime getPinnedDate() {
-		return pinnedDate;
-	}
-
-	public void setPinnedDate(LocalDateTime pinnedDate) {
-		this.pinnedDate = pinnedDate;
 	}
 
 	@Override
