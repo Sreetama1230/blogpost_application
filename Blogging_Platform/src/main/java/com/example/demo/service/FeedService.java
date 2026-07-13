@@ -30,13 +30,16 @@ public class FeedService {
 	private UserDao userDao;
 
 	@Transactional
-	public List<FeedItem> timeline( int start , int size ) {
+	public List<FeedItem> timeline(int start, int size) {
 
-		Long id = SecurityUtils.getCurrentUserId();
-		if ( id == null ) {
-			return loggedOutUser(start , size );
+		try {
+			Long id = SecurityUtils.getCurrentUserId();
+
+			return loggedInUser(id, start, size);
+
+		} catch (IllegalStateException exception) {
+			return loggedOutUser(start, size);
 		}
-		return loggedInUser(id, start , size );
 
 	}
 
@@ -53,8 +56,8 @@ public class FeedService {
 		}
 		List<BlogPost> feedPosts = new ArrayList<>();
 
-		if(followeeIds.isEmpty()) {
-			return loggedOutUser(start , size);
+		if (followeeIds.isEmpty()) {
+			return loggedOutUser(start, size);
 		}
 		feedPosts.addAll(blogPostDao.findPostsNotInListOfAuthor(followeeIds, PageRequest.of(start, size)));
 		feedPosts.addAll(blogPostDao.findPostsInListAuthors(followeeIds, PageRequest.of(start, size)));
@@ -62,9 +65,8 @@ public class FeedService {
 		// will return the final list based on count(like-dislike) and createAt at desc
 
 		feedItems = feedPosts.stream().distinct()
-				.sorted(Comparator.comparingLong(
-						(BlogPost bp) -> bp.getLikes() - bp.getDislikes()).reversed()
-						.thenComparing(BlogPost::getCreateAt , Comparator.reverseOrder()))
+				.sorted(Comparator.comparingLong((BlogPost bp) -> bp.getLikes() - bp.getDislikes()).reversed()
+						.thenComparing(BlogPost::getCreateAt, Comparator.reverseOrder()))
 				.limit(size).map(FeedItem::convertToFeedItem).toList();
 
 		return feedItems;

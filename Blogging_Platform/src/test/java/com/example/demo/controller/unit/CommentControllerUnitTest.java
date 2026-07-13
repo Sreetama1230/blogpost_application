@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.example.demo.config.JwtAuthFilter;
-import com.example.demo.config.JwtUtils;
 import com.example.demo.controller.CommentController;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
@@ -50,9 +49,6 @@ public class CommentControllerUnitTest {
 
 	@MockBean
 	JwtAuthFilter authFilter;
-
-	@MockBean
-	JwtUtils jwtUtils;
 
 	@Autowired
 	ObjectMapper objectMapper;
