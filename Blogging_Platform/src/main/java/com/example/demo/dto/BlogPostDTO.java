@@ -1,12 +1,7 @@
 package com.example.demo.dto;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
-
 import java.util.Set;
-
-
-import com.example.demo.model.Category;
 
 
 public class BlogPostDTO {

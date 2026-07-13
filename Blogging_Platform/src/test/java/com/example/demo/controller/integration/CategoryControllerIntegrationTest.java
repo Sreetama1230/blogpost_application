@@ -2,24 +2,12 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.StreamSupport;
 
-import com.example.demo.dao.EventDao;
-import com.example.demo.enums.EventStatus;
-import com.example.demo.enums.EventType;
-import com.example.demo.enums.TransactionType;
-import com.example.demo.model.Event;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,34 +21,33 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
-import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CategoryDao;
+import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.UserDTO;
+import com.example.demo.enums.EventStatus;
+import com.example.demo.enums.EventType;
+import com.example.demo.enums.TransactionType;
 import com.example.demo.error.ErrorDetails;
 import com.example.demo.model.Category;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CategoryResponse;
-import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.CategoryService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

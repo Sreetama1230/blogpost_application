@@ -1,14 +1,15 @@
 package com.example.demo.controller.unit;
 
-import com.example.demo.dto.ReactDTO;
-import com.example.demo.exception.CustomGraphQLExceptionHandler;
-import com.example.demo.exception.FollowUnFollowException;
-import com.example.demo.exception.InvalidIdException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.gqlcontroller.GraphQlController;
-import com.example.demo.gqlservice.GraphQlService;
-import com.example.demo.response.BlogPostResponse;
-import com.example.demo.response.UserResponse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +21,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static graphql.introspection.IntrospectionQueryBuilder.build;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.example.demo.dto.ReactDTO;
+import com.example.demo.exception.CustomGraphQLExceptionHandler;
+import com.example.demo.exception.FollowUnFollowException;
+import com.example.demo.exception.InvalidIdException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.gqlcontroller.GraphQlController;
+import com.example.demo.gqlservice.GraphQlService;
+import com.example.demo.response.BlogPostResponse;
+import com.example.demo.response.UserResponse;
 
 @GraphQlTest(GraphQlController.class)
 @Import(CustomGraphQLExceptionHandler.class)

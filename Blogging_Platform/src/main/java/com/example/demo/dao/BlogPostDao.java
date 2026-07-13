@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.BlogPost;
-import com.example.demo.response.BlogPostResponse;
 
 @Repository
 public interface BlogPostDao extends JpaRepository<BlogPost, Long> {

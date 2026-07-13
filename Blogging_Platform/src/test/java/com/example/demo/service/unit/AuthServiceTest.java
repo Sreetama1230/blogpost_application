@@ -1,12 +1,11 @@
 package com.example.demo.service.unit;
 
-import com.example.demo.config.JwtUtils;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
-import com.example.demo.customuserdetails.CustomUserDetails;
-import com.example.demo.customuserdetails.CustomUserDetailsService;
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.response.AuthResponse;
-import com.example.demo.service.AuthService;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,13 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.example.demo.config.JwtUtils;
+import com.example.demo.customuserdetails.CustomUserDetails;
+import com.example.demo.customuserdetails.CustomUserDetailsService;
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.response.AuthResponse;
+import com.example.demo.service.AuthService;
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
     @Mock

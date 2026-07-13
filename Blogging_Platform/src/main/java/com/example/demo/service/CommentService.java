@@ -3,18 +3,13 @@ package com.example.demo.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
-
-import com.example.demo.config.SecurityUtils;
-import com.example.demo.constants.AppConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CommentDao;
 import com.example.demo.dao.EventDao;
@@ -27,8 +22,10 @@ import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.UnexpectedCustomException;
-import com.example.demo.model.*;
+import com.example.demo.model.BlogPost;
+import com.example.demo.model.Comment;
+import com.example.demo.model.Event;
+import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,8 +1,6 @@
 package com.example.demo.dto;
 
 import com.example.demo.model.BlogPost;
-import com.example.demo.model.User;
-import com.example.demo.response.BlogPostResponse;
 
 public class FeedItem {
 

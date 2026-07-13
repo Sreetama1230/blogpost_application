@@ -1,18 +1,11 @@
 package com.example.demo.response;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.example.demo.model.BlogPost;
-import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
 import com.example.demo.model.User;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
 
 public class BlogPostDetailsResponse {
 	private String username;
