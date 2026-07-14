@@ -16,7 +16,8 @@ This project consists of two Spring Boot applications:
 ---
 
 ## Architecture
-<img width="4400" height="3600" alt="blogpost_architecture_expanded" src="https://github.com/user-attachments/assets/be68f181-eff1-4725-a428-0e943e6e03d6" />
+<img width="4400" height="3600" alt="blogpost_architecture_expanded (1)" src="https://github.com/user-attachments/assets/ef371a5a-6a5e-41cc-965b-124e4f423507" />
+
 
 
 ### Blogging Platform (Producer)
