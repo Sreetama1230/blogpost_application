@@ -2,33 +2,26 @@ package com.example.demo.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import com.example.demo.response.BlogPostResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.EventDao;
-import com.example.demo.dao.UserDao;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.CategoryLinkedToBlogs;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.Category;
 import com.example.demo.model.Event;
+import com.example.demo.response.BlogPostResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CategoryService {

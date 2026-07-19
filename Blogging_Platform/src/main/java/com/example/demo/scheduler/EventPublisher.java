@@ -1,9 +1,7 @@
 package com.example.demo.scheduler;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -11,14 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.EventDao;
 import com.example.demo.enums.EventStatus;
-import com.example.demo.exception.UnexpectedCustomException;
 import com.example.demo.model.Event;
 
 import jakarta.transaction.Transactional;

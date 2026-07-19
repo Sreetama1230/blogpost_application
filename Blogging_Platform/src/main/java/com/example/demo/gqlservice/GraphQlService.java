@@ -5,23 +5,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import com.example.demo.exception.BlockUnBlockException;
-import com.example.demo.exception.FollowUnFollowException;
-import com.example.demo.exception.InvalidIdException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
@@ -29,6 +20,10 @@ import com.example.demo.dto.ReactDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
+import com.example.demo.exception.BlockUnBlockException;
+import com.example.demo.exception.FollowUnFollowException;
+import com.example.demo.exception.InvalidIdException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Event;
 import com.example.demo.model.User;
@@ -39,9 +34,6 @@ import com.example.demo.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
-
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.exception.UnexpectedCustomException;
 
 @Service
 public class GraphQlService {

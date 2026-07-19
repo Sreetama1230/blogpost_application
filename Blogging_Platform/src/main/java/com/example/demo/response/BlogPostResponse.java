@@ -11,8 +11,6 @@ import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
 import com.example.demo.model.User;
 
-import jakarta.persistence.Column;
-
 public class BlogPostResponse {
 
 	private Long id;

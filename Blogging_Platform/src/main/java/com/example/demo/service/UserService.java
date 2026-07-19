@@ -1,45 +1,38 @@
 package com.example.demo.service;
 
-import java.beans.EventSetDescriptor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.example.demo.config.SecurityUtils;
-import com.example.demo.constants.AppConstants;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.UserDao;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
-import com.example.demo.model.BlogPost;
-import com.example.demo.model.Event;
-
-import jakarta.transaction.Transactional;
-
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import com.example.demo.dao.UserDao;
-import com.example.demo.exception.CustomExceptionHandler;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvaildRoleException;
 import com.example.demo.exception.InvalidEmailIdError;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.UnexpectedCustomException;
+import com.example.demo.model.BlogPost;
+import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {

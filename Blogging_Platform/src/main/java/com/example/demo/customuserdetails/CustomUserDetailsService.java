@@ -1,7 +1,8 @@
 package com.example.demo.customuserdetails;
 
-import com.example.demo.dao.UserDao;
-import com.example.demo.model.User;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
+import com.example.demo.dao.UserDao;
+import com.example.demo.model.User;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
