@@ -41,39 +41,18 @@ public class EventPublisher {
 			e.setLastAttemptAt(LocalDateTime.now());
 			eventDao.save(e);
 			
-		try {
-			
-			kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						e.getPayload()).get();
-			
-			e.setStatus(EventStatus.PUBLISHED);
+		kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
+					e.toString());
+		
+		e.setStatus(EventStatus.PUBLISHED);
 
-			e.setPublishedAt(LocalDateTime.now());
-			
-			eventDao.save(e);
-		} catch (InterruptedException | ExecutionException e1) {
+		e.setPublishedAt(LocalDateTime.now());
 		
-			   if (e1 instanceof InterruptedException) {
-			        Thread.currentThread().interrupt();
-			    }
-			   
-			logger.error("Error occured while publishing the event", e1);
-			
-			e.setRetryCount(e.getRetryCount() + 1 );
-			//retry when fails,  10 times
-			if(e.getRetryCount() >= AppConstants.MAX_RETRY_COUNT) {
-				e.setStatus(EventStatus.FAILED);
-			}else {
-				e.setStatus(EventStatus.PENDING);
-				
-			}
-			
-		
-			e.setLastAttemptAt(LocalDateTime.now());
-			eventDao.save(e);
-		}
+		eventDao.save(e);
 
 		}
 
 	}
+	
+	
 }

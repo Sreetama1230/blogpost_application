@@ -1,0 +1,1230 @@
+{
+  "info": {
+    "_postman_id": "2d2539d3-90c2-4b45-81d4-783d0b02dac9",
+    "name": "BlogPost_AdminTool_APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49200566",
+    "_collection_link": "https://go.postman.co/collection/49200566-2d2539d3-90c2-4b45-81d4-783d0b02dac9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "User Controller",
+      "item": [
+        {
+          "name": "/user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/user",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU'"
+          },
+          "response": []
+        },
+        {
+          "name": "/user/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"strin22g\",\n  \"password\": \"string\",\n  \"email\": \"string@string.dfg\",\n  \"bio\": \"string\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/user/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "register"
+              ]
+            },
+            "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU'"
+          },
+          "response": []
+        },
+        {
+          "name": "/user",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 22,\n  \"username\": \"sreetama124\",\n  \"password\": \"sree1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/user",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"id\": 22,\n  \"username\": \"sreetama1234\",\n  \"password\": \"sree1234\"\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "user/{id}/post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmZmZmZmdnZ2ciLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3ODQ0ODAzNDgsImV4cCI6MTc4NDQ4Mzk0OH0.xpretDUlj7Yo3UA4SzbBwMIMCXwD4gUydyQu_L-gSu4"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/user/25/post",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "25",
+                "post"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "user/{id}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NDAzOSwiZXhwIjoxNzg0NDg3NjM5fQ.3rSpKAFrsndoG_tzpuVM61Atni7OGcFeWWwxyrPFmHM",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/user/24",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "24"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "user/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NDAzOSwiZXhwIjoxNzg0NDg3NjM5fQ.3rSpKAFrsndoG_tzpuVM61Atni7OGcFeWWwxyrPFmHM"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/user/24",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "24"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "item": [
+        {
+          "name": "/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n \"username\": \"strin22g\",\n  \"password\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Controller",
+      "item": [
+        {
+          "name": "comment/react",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reaction\": \"LIKE\",\n  \"id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/comment/react",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment",
+                "react"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"comment-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/comment?blogPostId=15",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment"
+              ],
+              "query": [
+                {
+                  "key": "blogPostId",
+                  "value": "15"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "comment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"commentId\":1,\n    \"message\": \"comment-test-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/comment?blogPostId=15",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment"
+              ],
+              "query": [
+                {
+                  "key": "blogPostId",
+                  "value": "15"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "comment/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/comment/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "comment/{id}/blogpost/{id}|",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/comment/1/blogpost/15",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment",
+                "1",
+                "blogpost",
+                "15"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "BlogPost Controller",
+      "item": [
+        {
+          "name": "/blog",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": 15,\n    \"title\": \"today's blog\",\n    \"content\": \"started my day with a cup of tea...\",\n    \"categories\": [\n        {\n            \"name\": \"lifestyle\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/blog",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/blog",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n \n  \"title\": \"today's blog\",\n  \"content\": \"started my day with a cup of tea\",\n  \"categories\": [\n    {\n      \"name\": \"lifestyle\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/blog",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "blog/title/{title}/user/{userId}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/title/today's blog/user/26",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "title",
+                "today's blog",
+                "user",
+                "26"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "blog/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/12",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "12"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Category Controller",
+      "item": [
+        {
+          "name": "/category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"category-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/category",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/category",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"category-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/category",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "category/name?name=<name>",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"category-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/category",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "category/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"category-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/category/9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "category",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feed Controller",
+      "item": [
+        {
+          "name": "/timeline",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "/events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/events",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GraphQl Controller",
+      "item": [
+        {
+          "name": "mutation",
+          "item": [
+            {
+              "name": "setReaction",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 15,\n\t\t\t\t      uId: 27,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "pinUnpinPost",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation PinUnpinPost {\n\t\t\t\t pinUnpinPost(uId:27 , bpId: 15 ){\n\t\t\t\t\n\t\t\t\t      content\n\t\t\t\t      id\n\t\t\t\t      author{\n\t\t\t\t      username\n\t\t\t\t     }\n\t\t\t\t  \n\t\t\t\t}\n\t\t\t\t}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "followOrUnFollowAuthor",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "mutation FollowOrUnFollowAuthor{\n\t\t\t\t    followOrUnFollowAuthor(follower: 27, followee:26){\n\t\t\t\t        username\n\t\t\t\t        id\n\t\t\t\t    }\n\t\t\t\t}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "blockUser",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": " mutation BlockUser{\n\t\t\t\t           blockUser (blockerId: 27, blockedUserId:26){\n\t\t\t\t                username\n\t\t\t\t                id\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "query",
+          "item": [
+            {
+              "name": "trendingPosts",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query TrendingPosts{\n\t\t\t\t            trendingPosts{\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getPosts",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query Pagination{\n   getPosts(page: 0,size:2){\n    content\n   }\n}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getPinnedPostsOfTheUser",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4",
+                    "disabled": true
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": " query GetPinnedPostsOfTheUser {\n  getPinnedPostsOfTheUser(uId:27){\n\n\n    content\n    author{\n        username\n    }\n   \n  }\n}\n\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "searchPosts",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query Search{\n    searchPosts(keyword:\"today's\"){\n        title,\n        content\n        \n    }\n}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getFollowers",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query getFollowers{\n\t\t\t\t    getFollowers(uId:27){\n\t\t\t\t            username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getFollowings",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query GetFollowings{\n\t\t\t\t         getFollowings(uId:27){\n\t\t\t\t                username\n\t\t\t\t                }\n\t\t\t\t            }\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "userLikedPost",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query   UserLikedPost{\n\t\t\t\t           userLikedPost(uId:27){\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "blockedUsers",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                  }
+                ],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query BlockedUsers{\n\t\t\t\t  blockedUsers (uId:27){\n\t\t\t\t    id\n\t\t\t\t    username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/graphql",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "graphql"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AdminTool",
+      "item": [
+        {
+          "name": "/admintool",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/admintool",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "admintool"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
