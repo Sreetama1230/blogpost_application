@@ -112,7 +112,7 @@ public class BlogPostService {
                 subEvent.setPayload(objectMapper.writeValueAsString(c));
                 subEvent.setPublishedAt(LocalDateTime.now());
                 subEvent.setStatus(EventStatus.PENDING);
-                subEvent.setTransactionId(String.valueOf(newBlogPost.getId()));
+                subEvent.setTransactionId(String.valueOf(newCat.getId()));
                 subEvent.setTransactionType(TransactionType.CATEGORY);
                 subEvent.setRetryCount(0);
                 eventDao.save(subEvent);

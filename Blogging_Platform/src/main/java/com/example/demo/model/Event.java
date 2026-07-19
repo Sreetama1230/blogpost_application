@@ -146,6 +146,14 @@ public class Event {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	@Override
+	public String toString() {
+		return "Event [id=" + id + ", transactionType=" + transactionType + ", transactionId=" + transactionId
+				+ ", eventType=" + eventType + ", payload=" + payload + ", status=" + status + ", createdAt="
+				+ createdAt + ", publishedAt=" + publishedAt + ", lastAttemptAt=" + lastAttemptAt + ", retryCount="
+				+ retryCount + "]";
+	}
+	
 	
 	
 	

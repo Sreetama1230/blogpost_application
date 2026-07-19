@@ -44,7 +44,7 @@ public class EventPublisher {
 		try {
 			
 			kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME,
-						e.getPayload()).get();
+						e.toString()).get();
 			
 			e.setStatus(EventStatus.PUBLISHED);
 
