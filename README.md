@@ -54,11 +54,8 @@ Example Response:
 It may contain the request body or some custom messages to understand what operation someone has done.
 ```json
 [
-  "{\"id\":null,\"username\":\"sreetama\",\"password\":\"sree1234\",\"email\":\"sreet@gmail.com\",\"bio\":\"hii\",\"roles\":[\"admin\"]}",
-  "{\"id\":4,\"name\":\"#gg\",\"blogPosts\":[]}",
-  "{\"name\":\"gg\"}",
-  "\"Updated User while creating the blogpost: 22\"",
-  "{\"id\":0,\"title\":\"today\",\"content\":\"gg\",\"categories\":[{\"name\":\"gg\"}]}"
+  "Event [id=21, transactionType=USER, transactionId=25, eventType=DELETE, payload=25, status=PROCESSING, createdAt=2026-07-19T23:28:35.029139, publishedAt=2026-07-19T23:28:35.029202, lastAttemptAt=2026-07-19T23:28:37.583146210, retryCount=0]",
+  "Event [id=22, transactionType=USER, transactionId=24, eventType=DELETE, payload=24, status=PROCESSING, createdAt=2026-07-19T23:32:36.748003, publishedAt=2026-07-19T23:32:36.748039, lastAttemptAt=2026-07-19T23:32:37.790795975, retryCount=0]"
 ]
 ```
 
@@ -198,11 +195,9 @@ Examples of events:
 
 ```text
 [
-   "{\"id\":5,\"name\":\"#life\",\"blogPosts\":[]}",
-  "{\"name\":\"life\"}",
-  "\"Updated User while creating the blogpost: 23\"",
-  "{\"id\":0,\"title\":\"Today is a special day\",\"content\":\"lifestyle\",\"categories\":[{\"name\":\"life\"}]}",
-  "9"
+"Event [id=31, transactionType=CATEGORY, transactionId=8, eventType=CREATE, payload={\"name\":\"lifestyle\"}, status=PROCESSING, createdAt=2026-07-19T23:58:47.558106, publishedAt=2026-07-19T23:58:47.558196, lastAttemptAt=2026-07-19T23:58:47.596545236, retryCount=0]",
+  "Event [id=32, transactionType=USER, transactionId=26, eventType=UPDATE, payload=\"Updated User while creating the blogpost: 26\", status=PROCESSING, createdAt=2026-07-19T23:58:47.565348, publishedAt=2026-07-19T23:58:47.565394, lastAttemptAt=2026-07-19T23:58:47.596897418, retryCount=0]",
+  "Event [id=33, transactionType=BLOGPOST, transactionId=14, eventType=CREATE, payload={\"id\":0,\"title\":\"today's blog\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\"}]}, status=PROCESSING, createdAt=2026-07-19T23:58:47.566730, publishedAt=2026-07-19T23:58:47.566785, lastAttemptAt=2026-07-19T23:58:47.597109750, retryCount=0]"
 ]
 ```
 
