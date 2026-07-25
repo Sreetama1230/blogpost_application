@@ -8,6 +8,8 @@ The project follows an **event-driven architecture** using **Apache Kafka**. Whe
 
 Logging is implemented using **AOP and SLF4J.**
 
+Spring Boot **Actuator** is used to monitor, manage, and audit running applications.
+
 This project consists of two Spring Boot applications:
 
 * **Blogging_Platform** (Kafka Producer)
@@ -367,3 +369,29 @@ The project includes:
 * Service Layer Tests
 * Controller Layer Tests
 * Security Tests
+
+---
+## New Feature
+## Content Moderation
+
+The AI Content Moderation Service analyzes blog posts before they are published to help prevent harmful or inappropriate content from entering the platform.
+
+### How it Works
+
+1. The BlogPost service sends the blog title, content, and categories to the AI Content Moderation Service.
+2. The moderation service uses the **Google Gemini API** to evaluate the content against predefined safety guidelines.
+3. Based on the AI response, the service either:
+
+   * **Approves** the content for publishing, or
+   * **Rejects** the content if it contains harmful, violent, abusive, or illegal material.
+4. To improve reliability, the service is protected with **Resilience4j Retry** and **Circuit Breaker**. Temporary failures such as network issues or API outages are handled gracefully.
+5. If the Gemini API is unavailable due to **rate limiting (HTTP 429)**, the service automatically falls back to a local keyword-based moderation check to detect obvious harmful content, ensuring moderation continues even during temporary API quota exhaustion.
+
+### Technologies Used
+
+* Java 21
+* Spring Boot
+* Google Gemini API
+* Resilience4j (Retry & Circuit Breaker)
+* REST APIs
+
