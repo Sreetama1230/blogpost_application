@@ -19,12 +19,15 @@ import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationResponse;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.CategoryException;
 import com.example.demo.exception.DoNotHavePermissionError;
+import com.example.demo.exception.HarmfulContentException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.ServerUnavailableException;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
@@ -43,6 +46,9 @@ public class BlogPostService {
 	private BlogPostDao blogPostDao;
 	@Autowired
 	private UserDao userDao;
+	
+	@Autowired
+	private ModerationService moderationClient;
 
 	@Autowired
 	private CommentDao commentDao;
@@ -76,6 +82,17 @@ public class BlogPostService {
 	@Transactional
     public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp) throws JsonProcessingException {
 
+		ModerationResponse	filteredContent = moderationClient.checkContent(bp);
+		
+		if(!filteredContent.isApproved()) {
+			if(filteredContent.getResponse().toLowerCase().contains("rejected")) {
+				throw new HarmfulContentException("Please avoid harmful contents!");
+			}else {
+				throw new ServerUnavailableException("ContentModeration Service is not available..please try again later");
+			}
+		}
+		
+		
         Event event = new Event();
         long userId = SecurityUtils.getCurrentUserId();
         User u = userService.getbyId(userId);

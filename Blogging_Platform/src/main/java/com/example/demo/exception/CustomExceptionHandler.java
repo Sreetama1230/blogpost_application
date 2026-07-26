@@ -15,6 +15,20 @@ public class CustomExceptionHandler {
 		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.BAD_REQUEST.value());
 		return new ResponseEntity<ErrorDetails>(ed, HttpStatus.BAD_REQUEST);
 	}
+	
+
+	@ExceptionHandler
+	public ResponseEntity<ErrorDetails> handleServerUnavailableException(ServerUnavailableException e) {
+		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE.value());
+		return new ResponseEntity<ErrorDetails>(ed, HttpStatus.SERVICE_UNAVAILABLE);
+	}
+	
+	
+	@ExceptionHandler
+	public ResponseEntity<ErrorDetails> handleHarmfulContentException(HarmfulContentException e) {
+		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<ErrorDetails>(ed, HttpStatus.BAD_REQUEST);
+	}
 
 	@ExceptionHandler
 	public ResponseEntity<ErrorDetails> handleInvalidReactException(InvalidReactException e) {
