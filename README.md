@@ -203,11 +203,17 @@ Examples of events:
   "Event [id=33, transactionType=BLOGPOST, transactionId=14, eventType=CREATE, payload={\"id\":0,\"title\":\"today's blog\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\"}]}, status=PROCESSING, createdAt=2026-07-19T23:58:47.566730, publishedAt=2026-07-19T23:58:47.566785, lastAttemptAt=2026-07-19T23:58:47.597109750, retryCount=0]"
 ]
 ```
-## Toggling Feature
-GraphQl mutation operation has toggling feature
-setReaction,pinUnpinPost,followOrUnFollowAuthor and blockUser
+### Toggling Feature
+The following GraphQL mutation operations support toggling behavior:
+
+* `setReaction`
+* `pinUnpinPost`
+* `followOrUnFollowAuthor`
+* `blockUser`
+
+For example, invoking the same mutation twice will reverse the previous action (e.g., liking then unliking, following then unfollowing, or pinning then unpinning).
+
 <br>
-For example,
 For example, when you hit the endpoint for the first time, the reaction is added. If you hit the same endpoint again with the same request body, the reaction is removed.
 
 Try to mimic the behavior of popular social media platforms like Instagram or Facebook. When you click the Like button once, the post is liked. Clicking the Like button again removes the like.
@@ -348,7 +354,6 @@ http://localhost:8081/swagger-ui/index.html
 ```text
 http://localhost:8081/events
 ```
-
 ---
 
 ## Example Workflow
@@ -401,7 +406,29 @@ The project includes:
 ---
 ## New Feature
 
-## Content Moderation
+## 1)Content Moderation
+GitHub : https://github.com/Sreetama1230/AIContentModeration
+
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd AIContentModeration
+```
+
+### Start All Services
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+* AIContentModeration
+
+Access URL:
+`http://localhost:8089/moderate`
+
 
 The AI Content Moderation Service analyzes blog posts before they are published to help prevent harmful or inappropriate content from entering the platform.
 
@@ -416,11 +443,11 @@ The AI Content Moderation Service analyzes blog posts before they are published 
 4. To improve reliability, the service is protected with **Resilience4j Retry** and **Circuit Breaker**. Temporary failures such as network issues or API outages are handled gracefully.
 5. If the Gemini API is unavailable due to **rate limiting (HTTP 429)**, the service automatically falls back to a local keyword-based moderation check to detect obvious harmful content, ensuring moderation continues even during temporary API quota exhaustion.
 
-## Optimistic Locking
+## 2)Optimistic Locking
 Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided, a `StaleObjectError` will be thrown.
 
 
-## Idempotency 
+## 3)Idempotency 
 If you want to enable idempotency, include the `requestId` as a request parameter, as shown below.
 `http://localhost:8080/comment?blogPostId=1&requestId=67847`
 So, if you send the same `POST` request multiple times with the same `requestId`, the API will return the existing object/transaction, **regardless of the request body**.
