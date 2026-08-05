@@ -445,8 +445,14 @@ The AI Content Moderation Service analyzes blog posts before they are published 
 5. If the Gemini API is unavailable due to **rate limiting (HTTP 429)**, the service automatically falls back to a local keyword-based moderation check to detect obvious harmful content, ensuring moderation continues even during temporary API quota exhaustion.
 
 ## 2)Optimistic Locking
-Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided, a `StaleObjectError` will be thrown.
-
+Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided in the update operation, a `StaleObjectError` will be thrown.
+```{
+    "id": 23,
+    "username": "test-username-457",
+    "password": "passwrod@1234",
+    "syncToken": "0"
+}
+```
 
 ## 3)Idempotency 
 If you want to enable idempotency, include the `requestId` as a request parameter, as shown below.
