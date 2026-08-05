@@ -2,16 +2,22 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.example.demo.response.ModerationResponse;
+import com.example.demo.service.*;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,10 +48,6 @@ import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CategoryResponse;
-import com.example.demo.service.AuthService;
-import com.example.demo.service.BlogPostService;
-import com.example.demo.service.CategoryService;
-import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -85,12 +87,21 @@ public class CategoryControllerIntegrationTest {
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+    @MockBean
+    private ModerationService moderationClient;
 
-	@BeforeAll
-	public static void init() {
-		headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-	}
+    @BeforeEach
+    public  void init() {
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ModerationResponse response = new ModerationResponse();
+        response.setApproved(true);
+        response.setResponse("Approved");
+
+        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+                .thenReturn(response);
+    }
 
 	private String createURLWithPort() {
 		return "http://localhost:" + port + "/category";
@@ -109,7 +120,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -147,7 +158,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -183,7 +194,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-9" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -197,7 +208,7 @@ public class CategoryControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		ResponseEntity<List<BlogPostResponse>> response = template.exchange(
 				createURLWithPort() + "/name?name=" + categoryDTO.getName(), HttpMethod.GET, null,
@@ -220,7 +231,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -258,7 +269,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-9" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -274,7 +285,7 @@ public class CategoryControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		Category category = categoryService.getByName("#" + categoryDTO.getName());
 
@@ -299,7 +310,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-10-" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 

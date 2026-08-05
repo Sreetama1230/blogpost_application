@@ -2,16 +2,22 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.example.demo.response.ModerationResponse;
+import com.example.demo.service.ModerationService;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -85,11 +91,21 @@ public class BlogPostControllerIntegrationTest {
 	@Autowired
 	private CategoryDao categoryDao;
 
-	@BeforeAll
-	public static void init() {
-		httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-	}
+    @MockBean
+    private ModerationService moderationClient;
+
+    @BeforeEach
+    public  void init() {
+        httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        ModerationResponse response = new ModerationResponse();
+        response.setApproved(true);
+        response.setResponse("Approved");
+
+        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+                .thenReturn(response);
+    }
 
 	private String createURLWithPort() {
 		return "http://localhost:" + port + "/blog";
@@ -107,7 +123,7 @@ public class BlogPostControllerIntegrationTest {
 		newUser.setUsername("test33333-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -153,12 +169,12 @@ public class BlogPostControllerIntegrationTest {
 	public void testUpdateBlogPost() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
-		newUser.setEmail("test@gmail.com");
+		newUser.setEmail("test"+UUID.randomUUID()+"@gmail.com");
 		newUser.setPassword("password123");
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -175,11 +191,11 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		blogPostDTO.setId(blogPostResponse.getId());
 		blogPostDTO.setContent("updated-fake-content");
-
+        blogPostDTO.setSyncToken(Long.parseLong(blogPostResponse.getSyncToken()));
 		HttpEntity<String> entity = new HttpEntity<String>(objectMapper.writeValueAsString(blogPostDTO), httpHeaders);
 
 		ResponseEntity<BlogPostResponse> resp = testRestTemplate.exchange(createURLWithPort(), HttpMethod.PUT, entity,
@@ -209,12 +225,12 @@ public class BlogPostControllerIntegrationTest {
 		// blogpost owner
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
-		newUser.setEmail("test@gmail.com");
+		newUser.setEmail("test"+UUID.randomUUID()+"@gmail.com");
 		newUser.setPassword("password123");
 		newUser.setUsername("test-username-1-" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -231,16 +247,16 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		UserDTO authUser = new UserDTO();
 		authUser.setBio("test-bio");
-		authUser.setEmail("test123456@gmail.com");
+		authUser.setEmail("test123456"+UUID.randomUUID()+"@gmail.com");
 		authUser.setPassword("password123456");
 		authUser.setUsername("test-username-2-" + UUID.randomUUID().toString());
 		authUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(authUser);
+		userService.createUser(authUser,"");
 		authRequest = new AuthRequest(authUser.getUsername(), "password123456");
 
 		authResp = authService.login(authRequest);
@@ -250,7 +266,7 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setId(blogPostResponse.getId());
 		blogPostDTO.setContent("updated-fake-content");
-
+        blogPostDTO.setSyncToken( Long.parseLong( blogPostResponse.getSyncToken()));
 		HttpEntity<String> entity = new HttpEntity<String>(objectMapper.writeValueAsString(blogPostDTO), httpHeaders);
 
 		ResponseEntity<ErrorDetails> resp = testRestTemplate.exchange(createURLWithPort(), HttpMethod.PUT, entity,
@@ -273,7 +289,7 @@ public class BlogPostControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -290,7 +306,7 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		ResponseEntity<List<BlogPostResponse>> resp = testRestTemplate.exchange(
 				createURLWithPort() + "/title/" + blogPostResponse.getTitle() + "/user/" + savedUser.getId(),
@@ -308,12 +324,12 @@ public class BlogPostControllerIntegrationTest {
 	public void testDeleteBlogPost() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
-		newUser.setEmail("test@gmail.com");
+		newUser.setEmail("test"+UUID.randomUUID()+"@gmail.com");
 		newUser.setPassword("password123");
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -330,7 +346,7 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, httpHeaders);
 
@@ -360,12 +376,12 @@ public class BlogPostControllerIntegrationTest {
 		// blogpost owner
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
-		newUser.setEmail("test@gmail.com");
+		newUser.setEmail("test"+UUID.randomUUID()+"@gmail.com");
 		newUser.setPassword("password123");
 		newUser.setUsername("test-username-1-" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(newUser);
+		userService.createUser(newUser,"");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -382,16 +398,16 @@ public class BlogPostControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		UserDTO authUser = new UserDTO();
 		authUser.setBio("test-bio");
-		authUser.setEmail("test123456@gmail.com");
+		authUser.setEmail("test123456"+UUID.randomUUID()+"@gmail.com");
 		authUser.setPassword("password123456");
 		authUser.setUsername("test-username-2-" + UUID.randomUUID().toString());
 		authUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(authUser);
+		userService.createUser(authUser,"");
 		authRequest = new AuthRequest(authUser.getUsername(), "password123456");
 
 		authResp = authService.login(authRequest);
@@ -423,7 +439,7 @@ public class BlogPostControllerIntegrationTest {
 		authUser.setUsername("test-username-2-" + UUID.randomUUID().toString());
 		authUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		userService.createUser(authUser);
+		userService.createUser(authUser,"");
 		AuthRequest authRequest = new AuthRequest(authUser.getUsername(), "password123456");
 
 		AuthResponse authResp = authService.login(authRequest);

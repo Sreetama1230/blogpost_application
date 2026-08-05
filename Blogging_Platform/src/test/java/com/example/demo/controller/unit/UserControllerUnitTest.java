@@ -171,14 +171,14 @@ public class UserControllerUnitTest {
 		newUser.setId(2L);
 		newUser.setRoles(roles);
 		newUser.setBio(dto.getBio());
-		when(userService.createUser(any(UserDTO.class))).thenReturn(newUser);
+		when(userService.createUser(any(UserDTO.class) , any())).thenReturn(newUser);
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/user/register").content(objectMapper.writeValueAsString(dto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andDo(print())
 				.andExpect(jsonPath("$.username").value("fake-username"))
 				.andExpect(jsonPath("$.bio").value("fake-bio"));
 
-		verify(userService).createUser(any(UserDTO.class));
+		verify(userService).createUser(any(UserDTO.class) , any());
 	}
 
 	@Test
@@ -186,20 +186,20 @@ public class UserControllerUnitTest {
 			throws JsonProcessingException, Exception {
 		UserDTO dto = new UserDTO();
 		dto.setBio("fake-bio");
-		dto.setEmail("fake@gmail.com");
+		dto.setEmail("fake");
 		dto.setPassword("fake-password");
 		dto.setUsername("fake-username");
 		Set<String> roles = new HashSet<>(Set.of("ROLE_ADMIN"));
 		dto.setRoles(roles);
 
-		when(userService.createUser(any(UserDTO.class)))
+		when(userService.createUser(any(UserDTO.class) ,any()))
 				.thenThrow(new InvalidEmailIdError("Please enter a valid email id"));
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/user/register").content(objectMapper.writeValueAsString(dto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("Please enter a valid email id"));
 
-		verify(userService).createUser(any(UserDTO.class));
+		verify(userService).createUser(any(UserDTO.class) , any());
 	}
 
 	@Test

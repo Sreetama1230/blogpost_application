@@ -96,7 +96,7 @@ public class GraphQlServiceTest {
 		blogPost.setAuthor(user);
 		blogPost.setCategories(Set.of(category));
 		blogPost.setLikes(0L);
-
+		blogPost.setSyncToken(0L);
 		pageable = PageRequest.of(0, 10);
 		HashSet<BlogPost> set = new HashSet<>();
 		set.add(blogPost);
@@ -241,7 +241,7 @@ public class GraphQlServiceTest {
 	// @mutation
 	@Test
 	void testSetLikeReaction() throws Exception {
-		ReactDTO request = new ReactDTO(1L, true, 1L);
+		ReactDTO request = new ReactDTO(1L, true,0L, 1L);
 		when(blogPostService.getById(request.getBpId())).thenReturn(blogPost);
 		when(userService.getbyId(request.getuId())).thenReturn(user);
 		long n = blogPost.getLikes();
@@ -271,7 +271,7 @@ public class GraphQlServiceTest {
 
 	@Test
 	void testSetDislikeReaction() throws Exception {
-		ReactDTO request = new ReactDTO(1L, false, 1L);
+		ReactDTO request = new ReactDTO(1L, false,0L, 1L);
 		when(blogPostService.getById(request.getBpId())).thenReturn(blogPost);
 		when(userService.getbyId(request.getuId())).thenReturn(user);
 		long n = blogPost.getLikes();
@@ -302,7 +302,7 @@ public class GraphQlServiceTest {
 
 	@Test
 	void testSetReaction_WithInvalidId_FailureWithResourceNotFoundException() {
-		ReactDTO request = new ReactDTO(1L, true, 1L);
+		ReactDTO request = new ReactDTO(1L, true, 1L,0L);
 
 		when(blogPostService.getById(request.getBpId())).thenThrow(ResourceNotFoundException.class);
 

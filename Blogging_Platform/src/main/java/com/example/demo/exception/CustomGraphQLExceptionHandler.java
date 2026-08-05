@@ -26,6 +26,13 @@ public class CustomGraphQLExceptionHandler extends DataFetcherExceptionResolverA
                     .build();
         }
         
+        if (ex instanceof StaleObjectError) {
+            return GraphqlErrorBuilder.newError(env)
+                    .message(ex.getMessage())
+                    .errorType(ErrorType.NOT_FOUND)
+                    .build();
+        }
+        
         if(ex instanceof BlockUnBlockException) {
         	return GraphqlErrorBuilder.newError(env)
         			.message(ex.getMessage())

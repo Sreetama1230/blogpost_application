@@ -5,6 +5,8 @@ public class ReactDTO {
 	
 	private Long bpId;
 	private boolean reaction;
+	private Long syncToken;
+	
 	
 	private Long uId;
 
@@ -32,15 +34,25 @@ public class ReactDTO {
 		this.uId = uId;
 	}
 
-	public ReactDTO(Long bpId, boolean reaction, Long uId) {
+
+
+	public ReactDTO(Long bpId, boolean reaction, Long syncToken, Long uId) {
 		super();
 		this.bpId = bpId;
 		this.reaction = reaction;
+		this.syncToken = syncToken;
 		this.uId = uId;
 	}
-	
-	
-	
+
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
+	}
+
+
 
 	
 }

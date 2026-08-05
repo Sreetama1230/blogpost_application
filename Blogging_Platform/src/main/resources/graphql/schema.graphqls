@@ -7,12 +7,14 @@ categories:[Category]
 comments:[Comment]
 createAt:String
 updateAt:String
+syncToken:Int
 }
 
 type Category{
 id:ID!
 name:String
 blogPosts:[BlogPost]
+syncToken:Int
 }
 
 type  Comment {
@@ -21,6 +23,7 @@ content:String
 user:User
 blogPost:BlogPost
 createAt:String
+syncToken:Int
 }
 
 
@@ -31,6 +34,7 @@ password:String
 email:String
 blogPost:[BlogPost]
 comments:[Comment]
+syncToken:Int
 }
 
 type BlogPostResponse{
@@ -44,6 +48,7 @@ createAt:String
 updateAt:String
 likes: Int
 dislikes: Int
+syncToken:Int
 }
 
 
@@ -57,21 +62,25 @@ totalPosts:Int
 email:String
 blogPosts:[BlogPostResponse]
 comments:[CommentResponse]
+syncToken:Int
 }
 
 
 type BlogPostUserResponse{
 username:String
 email:String
+syncToken:Int
 }
 type CategoryResponse{
 id:ID!
 name:String
+syncToken:Int
 }
 
 type CommentResponse{
 content:String
 createAt:String
+syncToken:Int
 }
 
 
@@ -92,6 +101,7 @@ input ReactDTO{
 bpId: ID!
 uId: ID!
 reaction: Boolean!
+syncToken:Int
 }
 
 type Mutation{

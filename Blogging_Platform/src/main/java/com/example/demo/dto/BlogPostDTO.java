@@ -13,7 +13,7 @@ public class BlogPostDTO {
 
 	private Set<CategoryDTO> categories = new HashSet<>();
 
-
+	private Long syncToken;
 	
 	
 	public long getId() {
@@ -62,6 +62,24 @@ public class BlogPostDTO {
 	public void setCategories(Set<CategoryDTO> categories) {
 		this.categories = categories;
 	}
+
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
+	}
+
+	public BlogPostDTO(String title, String content, Set<CategoryDTO> categories, Long syncToken) {
+		super();
+		this.title = title;
+		this.content = content;
+		this.categories = categories;
+		this.syncToken = syncToken;
+	}
+
+
 
 
 }

@@ -106,13 +106,13 @@ public class CategoryControllerUnitTest {
 		when(categoryService.getByName(category.getName()))
 				.thenThrow(new ResourceNotFoundException("Category with provided name is not present"));
 
-		when(categoryService.createCategory(any(Category.class))).thenReturn(category);
+		when(categoryService.createCategory(any(Category.class) , any() )).thenReturn(category);
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/category").content(objectMapper.writeValueAsString(categoryDto))
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andDo(print())
 				.andExpect(jsonPath("$.id").value(2)).andExpect(jsonPath("$.name").value("#new-test-category"));
 
-		verify(categoryService).createCategory(any(Category.class));
+		verify(categoryService).createCategory(any(Category.class) , any());
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class CategoryControllerUnitTest {
 		 verify(categoryService).getByName("#new-test-category");
 
 		    verify(categoryService, never())
-		            .createCategory(any(Category.class));
+		            .createCategory(any(Category.class) , any());
 	}
 
 	@Test

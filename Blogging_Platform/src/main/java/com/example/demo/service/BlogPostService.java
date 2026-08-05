@@ -16,10 +16,10 @@ import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.CommentDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
-import com.example.demo.dto.ModerationResponse;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -28,12 +28,15 @@ import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.HarmfulContentException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.exception.ServerUnavailableException;
+import com.example.demo.exception.StaleObjectError;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
 import com.example.demo.model.Event;
+import com.example.demo.model.ServiceRequestId;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
+import com.example.demo.response.ModerationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,6 +50,9 @@ public class BlogPostService {
 	@Autowired
 	private UserDao userDao;
 	
+	
+	@Autowired
+	private ServiceRequestIdDao serviceRequestIdDao;
 	@Autowired
 	private ModerationService moderationClient;
 
@@ -80,8 +86,34 @@ public class BlogPostService {
 	}
 
 	@Transactional
-    public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp) throws JsonProcessingException {
+    public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp , String requestId) throws JsonProcessingException {
 
+			 
+        //check if there any service request is provided (only for create)
+        
+        if(  bp.getId() <= 0 && requestId != null && !requestId.isEmpty()  ) {
+        	
+        	try {
+        		if(!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId  , TransactionType.BLOGPOST).isEmpty()) {
+                	logger.info("returning the existing transaction");
+                	
+                	if(!blogPostDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId ,  TransactionType.BLOGPOST).get()).isPresent()) {
+                		throw new ResourceNotFoundException("Resource is not found!");
+                	}
+            		return BlogPostResponse.convertBlogPostRespons(
+            		 blogPostDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId ,  TransactionType.BLOGPOST).get()).get());
+
+        		}
+        	}catch(ResourceNotFoundException e) {
+        		// suppose the transaction gets deleted
+        		throw new ResourceNotFoundException(e.getMessage());
+        	}catch(Exception e ) {
+        		throw e;
+        	}
+        	
+        }
+        
+        
 		ModerationResponse	filteredContent = moderationClient.checkContent(bp);
 		
 		if(!filteredContent.isApproved()) {
@@ -120,8 +152,8 @@ public class BlogPostService {
                 }
             } catch (ResourceNotFoundException e) {
                 logger.info("Adding new category...");
-                Category newCat = categoryService.createCategory(new Category(c.getName(), new HashSet<>()));
-
+                // 	whatever requestid is provided we will attach that with blogpost only not with the category
+                Category newCat = categoryService.createCategory( new Category(c.getName(), new HashSet<>()) , "");
                 Event subEvent = new Event();
 
                 subEvent.setEventType(EventType.CREATE);
@@ -142,8 +174,14 @@ public class BlogPostService {
 
         }
         // update
+        //requestid will be ignored 
         if (bp.getId() > 0 && blogPostDao.findById(bp.getId()).isPresent()) {
             BlogPost existingBP = blogPostDao.findById(bp.getId()).get();
+            
+        	if(bp.getSyncToken() == null || bp.getSyncToken() != existingBP.getSyncToken()) {
+				throw new StaleObjectError("StaleObjectError : Please provide valid syncToken");
+			}
+        	
             User blogpostAuthor = existingBP.getAuthor();
             User authDbUser = userDao.findById(userId).get();
             if (canUpdateOrDelete(authDbUser, blogpostAuthor)) {
@@ -175,6 +213,7 @@ public class BlogPostService {
             }
 
         } else {
+        	
             // Assuming while creating the blog post...it does not have any comments,likes
             // or dislikes etc
 
@@ -189,6 +228,12 @@ public class BlogPostService {
             reqPost.setDislikes(0L);
 
             newBlogPost = blogPostDao.save(reqPost);
+            
+            // adding record to the service request DB
+            if(requestId != null && !requestId.equals("")) {
+            	serviceRequestIdDao.save(new ServiceRequestId(newBlogPost.getId(), requestId, TransactionType.BLOGPOST));
+            }
+         
             event.setEventType(EventType.CREATE);
             logger.info("blog post has been created  : ", reqPost.getContent());
             bpdata = newBlogPost;

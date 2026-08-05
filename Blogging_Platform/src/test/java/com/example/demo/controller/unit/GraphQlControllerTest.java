@@ -329,7 +329,7 @@ public class GraphQlControllerTest {
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
 	void testSetReaction_WithInvalidUser_FailureWithResourceNotFoundException() throws Exception {
-		ReactDTO reactDTO = new ReactDTO(1L, true, 1L);
+		ReactDTO reactDTO = new ReactDTO(1L, true,0L, 1L);
 
 		BlogPostResponse response1 = new BlogPostResponse();
 		response1.setId(1L);
@@ -366,7 +366,7 @@ public class GraphQlControllerTest {
 	@Test
 	@WithMockUser(username = "1", roles = { "ADMIN", "EDITOR", "USER" })
 	void testSetReaction() throws Exception {
-		ReactDTO reactDTO = new ReactDTO(1L, true, 1L);
+		ReactDTO reactDTO = new ReactDTO(1L, true,0L, 1L);
 
 		BlogPostResponse response1 = new BlogPostResponse();
 		response1.setId(1L);

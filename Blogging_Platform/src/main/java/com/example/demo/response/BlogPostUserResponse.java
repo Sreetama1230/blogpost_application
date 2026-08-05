@@ -9,21 +9,19 @@ public class BlogPostUserResponse {
 
 	private String email;
 
+	private String syncToken;
 
 	public String getUsername() {
 		return username;
 	}
 
-
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
-
 	public String getEmail() {
 		return email;
 	}
-
 
 	public void setEmail(String email) {
 		this.email = email;
@@ -48,14 +46,36 @@ public class BlogPostUserResponse {
 
 	}
 
+	public String getSyncToken() {
+		return syncToken;
+	}
+
+	public BlogPostUserResponse(String username, Long id, String email, String syncToken) {
+		super();
+		this.username = username;
+		this.id = id;
+		this.email = email;
+		this.syncToken = syncToken;
+	}
+
+	public void setSyncToken(String syncToken) {
+		this.syncToken = syncToken;
+	}
 
 	public BlogPostUserResponse(String username, String email) {
 		super();
 		this.username = username;
 		this.email = email;
 	}
-	
+
+	public BlogPostUserResponse(String username, String email, String syncToken) {
+		super();
+		this.username = username;
+		this.email = email;
+		this.syncToken = syncToken;
+	}
+
 	public static BlogPostUserResponse convertBlogPostUserResponse(User u) {
-		return new BlogPostUserResponse(u.getUsername(), u.getEmail(),u.getId());
+		return new BlogPostUserResponse(u.getUsername(), u.getId(), u.getEmail(), String.valueOf(u.getSyncToken()));
 	}
 }

@@ -2,7 +2,8 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
+import static org.mockito.ArgumentMatchers.any;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-
+import static org.mockito.Mockito.when;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
@@ -39,9 +40,11 @@ import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostDetailsResponse;
+import com.example.demo.response.ModerationResponse;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
+import com.example.demo.service.ModerationService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,11 +80,21 @@ public class UserControllerIntegrationTest {
 	private HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	
+	@MockBean
+	private ModerationService moderationClient;
+
 
 	@BeforeEach
 	public void init() {
-		headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		
+	     ModerationResponse response = new ModerationResponse();
+	        response.setApproved(true);
+	        response.setResponse("Approved");
+
+	        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+	                .thenReturn(response);
 	}
 
 	private String createURLWithPort() {
@@ -94,6 +107,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreate() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("mytest-bio");
 		newUser.setEmail("mytest444@gmail.com");
@@ -127,6 +143,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreateWithInvalidMailId() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("testgmail.com"); // Invalid email
@@ -152,6 +171,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetPostsByUserId() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
 		newUser.setEmail("test1@gmail.com");
@@ -159,7 +181,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test1-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "pwd123");
 
@@ -170,7 +192,7 @@ public class UserControllerIntegrationTest {
 		blogPostDTO.setContent("test-content");
 		blogPostDTO.setTitle("test title");
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostService.createOrUpdateBlogPost(blogPostDTO , "");
 
 		ResponseEntity<BlogPostDetailsResponse> resp = template.exchange(
 				createURLWithPort() + "/" + createdUser.getId() + "/post", HttpMethod.GET, null,
@@ -189,6 +211,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetById() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
 		newUser.setEmail("test1@gmail.com");
@@ -196,7 +221,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test1-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "pwd123");
 
@@ -207,7 +232,7 @@ public class UserControllerIntegrationTest {
 		blogPostDTO.setContent("test-content");
 		blogPostDTO.setTitle("test title");
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostService.createOrUpdateBlogPost(blogPostDTO, "");
 
 		ResponseEntity<UserResponse> resp = template.exchange(createURLWithPort() + "/" + createdUser.getId(),
 				HttpMethod.GET, null, UserResponse.class);
@@ -225,6 +250,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetByIdWithResourceNotFoundFailure() {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		ResponseEntity<ErrorDetails> resp = template.exchange(createURLWithPort() + "/2", HttpMethod.GET, null,
 				ErrorDetails.class);
 
@@ -239,6 +267,9 @@ public class UserControllerIntegrationTest {
 	@Test
 	public void testGetAll() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test1-bio");
 		newUser.setEmail("test1@gmail.com");
@@ -246,7 +277,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test1-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User createdUser = userService.createUser(newUser);
+		User createdUser = userService.createUser(newUser , "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "pwd123");
 
@@ -257,7 +288,7 @@ public class UserControllerIntegrationTest {
 		blogPostDTO.setContent("test-content");
 		blogPostDTO.setTitle("test title");
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostService.createOrUpdateBlogPost(blogPostDTO , "");
 
 		ResponseEntity<List<UserResponse>> resp = template.exchange(createURLWithPort(), HttpMethod.GET, null,
 				new ParameterizedTypeReference<List<UserResponse>>() {
@@ -275,6 +306,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testUpdate() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@gmail.com");
@@ -282,7 +316,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser , "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -291,11 +325,13 @@ public class UserControllerIntegrationTest {
 		headers.setBearerAuth(authResp.getToken());
 
 		// want to update bio
-		newUser.setBio("updated-test-bio");
-		newUser.setId(savedUser.getId());
+		UserDTO updateUser = new UserDTO();
+		updateUser.setBio("updated-test-bio");
+		updateUser.setId(savedUser.getId());
+		updateUser.setSyncToken(savedUser.getSyncToken());
 		HttpEntity<String> entity =
 
-				new HttpEntity<>(objectMapper.writeValueAsString(newUser), headers);
+				new HttpEntity<>(objectMapper.writeValueAsString(updateUser), headers);
 
 		ResponseEntity<UserResponse> resp = template.exchange(createURLWithPort(), HttpMethod.PUT, entity,
 				UserResponse.class);
@@ -317,19 +353,23 @@ public class UserControllerIntegrationTest {
 		assertEquals(TransactionType.USER, event.getTransactionType());
 	}
 
+
 	@Test
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testUpdateFailureWithCustomException() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@gmail.com");
 		newUser.setPassword("password123");
-		newUser.setUsername("test-username" + UUID.randomUUID().toString());
+		newUser.setUsername("test-username" + UUID.randomUUID().toString()+UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser , "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -337,11 +377,13 @@ public class UserControllerIntegrationTest {
 
 		headers.setBearerAuth(authResp.getToken());
 
-		// want to update bio
-		newUser.setEmail("testupdated@gmail.com");
-		newUser.setId(savedUser.getId());
+		UserDTO updateUser = new UserDTO();
+		updateUser.setId(savedUser.getId());
+		updateUser.setSyncToken(savedUser.getSyncToken());
+		updateUser.setEmail("testupdated@gmail.com");
 
-		HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newUser), headers);
+
+		HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(updateUser), headers);
 		ResponseEntity<ErrorDetails> resp = template.exchange(createURLWithPort(), HttpMethod.PUT, entity,
 				ErrorDetails.class);
 
@@ -358,6 +400,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testDelete() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
 		newUser.setEmail("test@gmail.com");
@@ -365,7 +410,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser , "");
 
 		User dbUser = userDao.findById(savedUser.getId()).get();
 
@@ -403,6 +448,9 @@ public class UserControllerIntegrationTest {
 	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testDeleteFailureWithDoNotHavePermissionError() throws JsonProcessingException {
 
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
 		// AUTHENTICATED USER ID - EDITOR
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -411,7 +459,7 @@ public class UserControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_EDITOR")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser , "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -427,7 +475,7 @@ public class UserControllerIntegrationTest {
 		newUser1.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser1.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser1 = userService.createUser(newUser1);
+		User savedUser1 = userService.createUser(newUser1 , "");
 
 		HttpEntity<String> entity =
 

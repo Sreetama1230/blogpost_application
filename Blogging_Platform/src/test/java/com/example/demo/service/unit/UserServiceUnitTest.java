@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
@@ -52,7 +53,9 @@ public class UserServiceUnitTest {
 
 	@Mock
 	BlogPostDao blogPostDao;
-
+	@Mock
+	ServiceRequestIdDao serviceRequestIdDao;
+	
 	@InjectMocks
 	UserService userService;
 	@Mock
@@ -77,6 +80,7 @@ public class UserServiceUnitTest {
 		user.setTotalPosts(0L);
 		user.setFollowing(0L);
 		user.setFollowers(0L);
+		user.setSyncToken(0L);
 		user.setPassword("fake-password");
 		Set<String> set = new HashSet<>();
 		set.add("ROLE_ADMIN");
@@ -107,7 +111,7 @@ public class UserServiceUnitTest {
 
 		when(userDao.save(any(User.class))).thenReturn(user);
 
-		User newUser = userService.createUser(userDTO);
+		User newUser = userService.createUser(userDTO,"");
 
 		String payload = objectMapper.writeValueAsString(userDTO);
 		
@@ -140,7 +144,7 @@ public class UserServiceUnitTest {
 
 		InvalidEmailIdError invalidEmailIdError = assertThrows(InvalidEmailIdError.class, () -> {
 
-			userService.createUser(userDTO);
+			userService.createUser(userDTO,"");
 		});
 
 		assertNotNull(invalidEmailIdError);
@@ -158,6 +162,7 @@ public class UserServiceUnitTest {
 		userDTO.setUsername(user.getUsername());
 		userDTO.setEmail(user.getEmail());
 		userDTO.setPassword("fake-password");
+		
 		userDTO.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
 		try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class, Mockito.CALLS_REAL_METHODS)) {
@@ -167,7 +172,7 @@ public class UserServiceUnitTest {
 			when(userDao.findById(1L)).thenReturn(Optional.of(user));
 
 			when(userDao.save(any(User.class))).thenReturn(user);
-
+			userDTO.setSyncToken(user.getSyncToken());
 			User newUser = userService.updateUser(userDTO);
 			
 			
@@ -252,6 +257,7 @@ public class UserServiceUnitTest {
 			userDTO.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
 			DoNotHavePermissionError doNotHavePermissionError = assertThrows(DoNotHavePermissionError.class, () -> {
+				userDTO.setSyncToken(user.getSyncToken());
 				userService.updateUser(userDTO);
 			});
 

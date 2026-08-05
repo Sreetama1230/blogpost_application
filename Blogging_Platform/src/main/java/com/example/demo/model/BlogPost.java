@@ -16,6 +16,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 
 @Entity
 public class BlogPost {
@@ -39,6 +40,9 @@ public class BlogPost {
 	@Column
 	private  Long dislikes;
 
+	@Version
+	private Long syncToken;
+	
 	@CreatedDate
 	private LocalDateTime createAt;
 	@LastModifiedDate
@@ -210,6 +214,17 @@ public class BlogPost {
 	public int hashCode() {
 		return Objects.hash(author, categories, content, createAt, title, updateAt);
 	}
+	
+	
+	
+
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -223,6 +238,25 @@ public class BlogPost {
 		return Objects.equals(author, other.author) && Objects.equals(categories, other.categories)
 				&& Objects.equals(content, other.content) && Objects.equals(createAt, other.createAt)
 				&& Objects.equals(title, other.title) && Objects.equals(updateAt, other.updateAt);
+	}
+
+	public BlogPost(String title, String content, User author, Set<User> pinnedBy, Long likes, Long dislikes,
+			Long syncToken, LocalDateTime createAt, LocalDateTime updateAt, Set<Category> categories,
+			List<Comment> comments, Set<User> likingUsers, Set<User> dislikingUsers) {
+		super();
+		this.title = title;
+		this.content = content;
+		this.author = author;
+		this.pinnedBy = pinnedBy;
+		this.likes = likes;
+		this.dislikes = dislikes;
+		this.syncToken = syncToken;
+		this.createAt = createAt;
+		this.updateAt = updateAt;
+		this.categories = categories;
+		this.comments = comments;
+		this.likingUsers = likingUsers;
+		this.dislikingUsers = dislikingUsers;
 	}
 	
 	

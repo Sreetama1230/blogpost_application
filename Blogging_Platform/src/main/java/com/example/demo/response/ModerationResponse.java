@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.response;
 
 public class ModerationResponse {
 

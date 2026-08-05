@@ -22,6 +22,7 @@ public class UserResponse {
 	private List<BlogPostResponse> blogPosts = new ArrayList<>();
 
 	private List<CommentResponse> comments = new ArrayList<>();
+	private String syncToken;
 
 	public Long getFollowers() {
 		return followers;
@@ -55,19 +56,6 @@ public class UserResponse {
 		this.totalPosts = totalPosts;
 	}
 
-	public UserResponse(long id, String username, Long followers, Long following, String bio, Long totalPosts,
-			String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments) {
-		super();
-		this.id = id;
-		this.username = username;
-		this.followers = followers;
-		this.following = following;
-		this.bio = bio;
-		this.totalPosts = totalPosts;
-		this.email = email;
-		this.blogPosts = blogPosts;
-		this.comments = comments;
-	}
 
 	public String getBio() {
 		return bio;
@@ -117,11 +105,32 @@ public class UserResponse {
 		this.email = email;
 	}
 
+	public String getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(String syncToken) {
+		this.syncToken = syncToken;
+	}
+
 	public UserResponse() {
 		super();
 
 	}
 
+    public UserResponse(long id, String username, Long followers, Long following, String bio, Long totalPosts,
+                        String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.followers = followers;
+        this.following = following;
+        this.bio = bio;
+        this.totalPosts = totalPosts;
+        this.email = email;
+        this.blogPosts = blogPosts;
+        this.comments = comments;
+    }
 	public UserResponse(long id, String username, String email) {
 		super();
 		this.id = id;
@@ -149,18 +158,34 @@ public class UserResponse {
 			resp.setTotalPosts((long) u.getBlogPosts().size());
 			resp.setRoles(u.getRoles());
 			resp.setId(u.getId());
+			resp.setSyncToken( String.valueOf(u.getSyncToken()));
 			return resp;
 		}
 
 		return null;
 
 	}
-	
+
+	public UserResponse(String username, Long followers, Long following, String bio, Long totalPosts, Set<String> roles,
+			String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments, String syncToken) {
+		super();
+		this.username = username;
+		this.followers = followers;
+		this.following = following;
+		this.bio = bio;
+		this.totalPosts = totalPosts;
+		this.roles = roles;
+		this.email = email;
+		this.blogPosts = blogPosts;
+		this.comments = comments;
+		this.syncToken = syncToken;
+	}
+
 	@Override
 	public String toString() {
 		return "UserResponse [id=" + id + ", username=" + username + ", followers=" + followers + ", following="
 				+ following + ", bio=" + bio + ", totalPosts=" + totalPosts + ", roles=" + roles + ", email=" + email
-				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
+				+ ", blogPosts=" + blogPosts + ", comments=" + comments + ", syncToken=" + syncToken + "]";
 	}
 
 }

@@ -112,14 +112,14 @@ public class CommentControllerUnitTest {
 
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
 
-		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L))).thenReturn(blogPostResponse);
+		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L), any())).thenReturn(blogPostResponse);
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isCreated()).andDo(print())
 				.andExpect(jsonPath("$.comments[0].content").value("fake-comment"));
-		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L));
+		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L) , any());
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class CommentControllerUnitTest {
 		CommentDTO commentDto = new CommentDTO();
 		commentDto.setMessage("fake-comment");
 
-		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L)))
+		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L) , any()))
 				.thenThrow(new ResourceNotFoundException("no blog post found with this id"));
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
@@ -136,7 +136,7 @@ public class CommentControllerUnitTest {
 				.andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("no blog post found with this id"));
 
-		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L));
+		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L) , any());
 	}
 
 	@Test
@@ -147,14 +147,14 @@ public class CommentControllerUnitTest {
 
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
 
-		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L))).thenReturn(blogPostResponse);
+		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L) , any())).thenReturn(blogPostResponse);
 
 		mockMvc.perform(MockMvcRequestBuilders.put("/comment").param("blogPostId", "1")
 				.content(objectMapper.writeValueAsString(commentDto)).contentType(MediaType.APPLICATION_JSON))
 
 				.andExpect(status().isOk()).andDo(print())
 				.andExpect(jsonPath("$.comments[0].content").value("fake-comment"));
-		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L));
+		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L) , any());
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class CommentControllerUnitTest {
 
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
 
-		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L)))
+		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L) , any()))
 				.thenThrow(new ResourceNotFoundException("No comment is present with the provided id..."));
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/comment").param("blogPostId", "1")
@@ -174,7 +174,7 @@ public class CommentControllerUnitTest {
 				.andExpect(status().isNotFound()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("No comment is present with the provided id..."));
 
-		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L));
+		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L),any());
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class CommentControllerUnitTest {
 		commentDto.setMessage("fake-comment");
 		commentDto.setCommentId(1L);
 
-		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L)))
+		when(commentService.createOrUpdateComment(any(CommentDTO.class), eq(1L) , any()))
 
 				.thenThrow(new DoNotHavePermissionError("You can not make changes on this comment!"));
 
@@ -193,7 +193,7 @@ public class CommentControllerUnitTest {
 				.andExpect(status().isForbidden()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You can not make changes on this comment!"));
 
-		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L));
+		verify(commentService).createOrUpdateComment(any(CommentDTO.class), eq(1L) , any());
 	}
 
 	@Test

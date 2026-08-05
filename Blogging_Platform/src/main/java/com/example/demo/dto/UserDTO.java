@@ -9,26 +9,21 @@ import jakarta.validation.constraints.NotBlank;
 public class UserDTO {
 
 	private Long id;
-	@NotBlank(message = "Username is required and must be unique")
 	private String username;
-    @NotBlank(message = "Password is required")
 	private String password;
-    @Email(message = "Invalid email format")
 	private String email;
 	private String bio;
-	@NotBlank(message = "Please provide a role")
 	private Set<String> roles = new HashSet<>();
 
-
-	public UserDTO(@NotBlank(message = "Username is required") String username,
-			@NotBlank(message = "Password is required") String password,
-			@Email(message = "Invalid email format") String email, String bio) {
+	public UserDTO(String username, String password, String email, String bio) {
 		super();
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.bio = bio;
 	}
+
+	private Long syncToken;
 
 	public String getBio() {
 		return bio;
@@ -62,6 +57,14 @@ public class UserDTO {
 		this.email = email;
 	}
 
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
+	}
+
 	public UserDTO(String username, String password, String email) {
 		super();
 		this.username = username;
@@ -89,4 +92,16 @@ public class UserDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public UserDTO(String username, String password, String email, String bio, Set<String> roles, Long syncToken) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.bio = bio;
+		this.roles = roles;
+		this.syncToken = syncToken;
+	}
+	
+	
 }

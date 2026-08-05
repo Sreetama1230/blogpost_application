@@ -24,6 +24,7 @@ import com.example.demo.exception.BlockUnBlockException;
 import com.example.demo.exception.FollowUnFollowException;
 import com.example.demo.exception.InvalidIdException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.StaleObjectError;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Event;
 import com.example.demo.model.User;
@@ -147,6 +148,11 @@ public class GraphQlService {
 		try {
 			Event event = new Event();
 			BlogPost bp = blogPostService.getById(request.getBpId());
+			
+			if (request.getSyncToken() == null || request.getSyncToken() != bp.getSyncToken()) {
+				throw new StaleObjectError("Please provide a valid syncToken!");
+			}
+			
 			User u = userService.getbyId((request.getuId()));
 			// for like
 			List<BlogPost> likedPosts = u.getLikedBlogPosts();

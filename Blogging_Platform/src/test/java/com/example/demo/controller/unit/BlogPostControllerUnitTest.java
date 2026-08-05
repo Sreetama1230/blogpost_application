@@ -106,7 +106,7 @@ public class BlogPostControllerUnitTest {
 		blogPostDTO.setContent(blogPost.getContent());
 
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
-		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenReturn(blogPostResponse);
+		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class) , any())).thenReturn(blogPostResponse);
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
@@ -117,7 +117,7 @@ public class BlogPostControllerUnitTest {
 
 		;
 
-		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class));
+		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class) , any());
 
 	}
 
@@ -128,7 +128,7 @@ public class BlogPostControllerUnitTest {
 		blogPostDTO.setTitle(blogPost.getTitle());
 		blogPostDTO.setContent(blogPost.getContent());
 
-		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenThrow(
+		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class) , any())).thenThrow(
 
 				new CategoryException("You have to specify a category to proceed"));
 
@@ -138,7 +138,7 @@ public class BlogPostControllerUnitTest {
 				.andExpect(status().isBadRequest()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You have to specify a category to proceed"));
 
-		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class));
+		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class) , any());
 
 	}
 
@@ -157,7 +157,7 @@ public class BlogPostControllerUnitTest {
 		blogPostDTO.setId(blogPost.getId());
 
 		BlogPostResponse blogPostResponse = BlogPostResponse.convertBlogPostRespons(blogPost);
-		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenReturn(blogPostResponse);
+		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class) , any())).thenReturn(blogPostResponse);
 
 		mockMvc.perform(MockMvcRequestBuilders.put("/blog").content(objectMapper.writeValueAsString(blogPostDTO))
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON))
@@ -167,7 +167,7 @@ public class BlogPostControllerUnitTest {
 				.andExpect(jsonPath("$.title").value("blog title"))
 				.andExpect(jsonPath("$.author.username").value("fake-username"));
 
-		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class));
+		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class) , any());
 
 	}
 
@@ -178,7 +178,7 @@ public class BlogPostControllerUnitTest {
 		blogPostDTO.setTitle(blogPost.getTitle());
 		blogPostDTO.setContent(blogPost.getContent());
 
-		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class))).thenThrow(
+		when(blogPostService.createOrUpdateBlogPost(any(BlogPostDTO.class) , any())).thenThrow(
 
 				new DoNotHavePermissionError("You can not do the update!"));
 
@@ -188,7 +188,7 @@ public class BlogPostControllerUnitTest {
 				.andExpect(status().isForbidden()).andDo(print())
 				.andExpect(jsonPath("$.msg").value("You can not do the update!"));
 
-		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class));
+		verify(blogPostService).createOrUpdateBlogPost(any(BlogPostDTO.class) , any());
 
 	}
 

@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Version;
 
 @Entity
 public class Category {
@@ -23,6 +24,11 @@ public class Category {
 	@ManyToMany(mappedBy = "categories")
 	private Set<BlogPost> blogPosts = new HashSet<>();
 
+
+	@Version
+	private Long syncToken;
+	
+	
 	public Set<BlogPost> getBlogPosts() {
 		return blogPosts;
 	}
@@ -65,6 +71,14 @@ public class Category {
 	public Category(String name) {
 		super();
 		this.name = name;
+	}
+
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
 	}
 
 	@Override

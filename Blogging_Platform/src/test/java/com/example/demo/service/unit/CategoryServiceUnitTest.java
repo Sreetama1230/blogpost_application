@@ -185,7 +185,7 @@ public class CategoryServiceUnitTest {
 		Category newCategory = new Category("#test", new HashSet<>());
 		when(categoryDao.save(newCategory)).thenReturn(newCategory);
 
-		Category savedCategory = categoryService.createCategory(newCategory);
+		Category savedCategory = categoryService.createCategory(newCategory,"");
 
 		assertEquals(newCategory.getId(), savedCategory.getId());
 		assertEquals(newCategory.getName(), savedCategory.getName());

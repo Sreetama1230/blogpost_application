@@ -3,16 +3,20 @@ package com.example.demo.controller.integration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -41,9 +45,11 @@ import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
+import com.example.demo.response.ModerationResponse;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
+import com.example.demo.service.ModerationService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,11 +95,21 @@ public class GraphQlControllerIntegrationTest {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
+	@MockBean
+	private ModerationService moderationClient;
+	
 
-	@BeforeAll
-	public static void init() {
+	@BeforeEach
+	public void init() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		 ModerationResponse response = new ModerationResponse();
+	        response.setApproved(true);
+	        response.setResponse("Approved");
+
+	        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+	                .thenReturn(response);
 	}
 
 	@Test
@@ -106,7 +122,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		userService.createUser(userDto);
+		userService.createUser(userDto , "");
 		authService.login(new AuthRequest("test", "pass123"));
 		CategoryDTO categoryDTO = new CategoryDTO();
 		categoryDTO.setName("test-category");
@@ -116,7 +132,7 @@ public class GraphQlControllerIntegrationTest {
 		post.setContent("post-content");
 		post.setCategories(Set.of(categoryDTO));
 
-		blogPostService.createOrUpdateBlogPost(post);
+		blogPostService.createOrUpdateBlogPost(post , "");
 
 		graphQlTester.document("""
 				        query Search{
@@ -142,9 +158,9 @@ public class GraphQlControllerIntegrationTest {
 		UserDTO userDto = new UserDTO();
 		userDto.setUsername("test");
 		userDto.setPassword("pass123");
-		userDto.setEmail("test@gmail.com");
+		userDto.setEmail("test"+UUID.randomUUID()+"@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		userService.createUser(userDto);
+		userService.createUser(userDto , "");
 		authService.login(new AuthRequest("test", "pass123"));
 		CategoryDTO categoryDTO = new CategoryDTO();
 		categoryDTO.setName("test-category");
@@ -154,14 +170,14 @@ public class GraphQlControllerIntegrationTest {
 		post.setContent("post-content");
 		post.setCategories(Set.of(categoryDTO));
 
-		BlogPostResponse response1 = blogPostService.createOrUpdateBlogPost(post);
+		BlogPostResponse response1 = blogPostService.createOrUpdateBlogPost(post , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		userService.createUser(userDto1);
+		userService.createUser(userDto1 , "");
 		authService.login(new AuthRequest("test1", "pass123"));
 		CategoryDTO categoryDTO1 = new CategoryDTO();
 		categoryDTO1.setName("test-category");
@@ -171,7 +187,7 @@ public class GraphQlControllerIntegrationTest {
 		post1.setContent("post-content");
 		post1.setCategories(Set.of(categoryDTO));
 
-		BlogPostResponse response2 = blogPostService.createOrUpdateBlogPost(post1);
+		BlogPostResponse response2 = blogPostService.createOrUpdateBlogPost(post1 , "");
 
 		graphQlTester.document("""
 
@@ -199,7 +215,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user = userService.createUser(userDto);
+		User user = userService.createUser(userDto , "");
 		AuthResponse authResp = authService.login(new AuthRequest("test", "pass123"));
 		CategoryDTO categoryDTO = new CategoryDTO();
 		categoryDTO.setName("test-category");
@@ -209,7 +225,7 @@ public class GraphQlControllerIntegrationTest {
 		post.setContent("post-content");
 		post.setCategories(Set.of(categoryDTO));
 
-		BlogPostResponse response = blogPostService.createOrUpdateBlogPost(post);
+		BlogPostResponse response = blogPostService.createOrUpdateBlogPost(post , "");
 
 		graphQlService.postPinnedUnpinned(user.getId(), response.getId());
 
@@ -244,14 +260,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		// set up data
 		user1.setListfollowing(Set.of(user2));
@@ -293,14 +309,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		// set up data
 		user1.setListfollowing(Set.of(user2));
@@ -343,14 +359,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1" + UUID.randomUUID());
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		BlogPost blogpost1 = new BlogPost();
 		blogpost1.setContent("fake-content-1");
@@ -393,14 +409,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		BlogPost blogpost1 = new BlogPost();
 		blogpost1.setContent("fake-content-1");
@@ -429,7 +445,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto3.setEmail("test3@gmail.com");
 		userDto3.setRoles(Set.of("ROLE_EDITOR"));
 
-		User user3 = userService.createUser(userDto3);
+		User user3 = userService.createUser(userDto3 , "");
 		user3.setLikedBlogPosts(List.of(blogpost1, blogpost2));
 		userDao.save(user3);
 		AuthResponse authResponse = authService.login(new AuthRequest(user3.getUsername(), "pass123"));
@@ -462,14 +478,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test1");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		BlogPost blogpost1 = new BlogPost();
 		blogpost1.setContent("fake-content-1");
@@ -498,7 +514,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto3.setEmail("test3@gmail.com");
 		userDto3.setRoles(Set.of("ROLE_EDITOR"));
 
-		User user3 = userService.createUser(userDto3);
+		User user3 = userService.createUser(userDto3 , "");
 		user3.setBlockedUsers(Set.of(user1, user2));
 		user1.setBlockedByUsers(Set.of(user3));
 		user2.setBlockedByUsers(Set.of(user3));
@@ -539,14 +555,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test5");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		BlogPost blogpost1 = new BlogPost();
 		blogpost1.setContent("fake-content-1");
@@ -564,7 +580,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto3.setEmail("test3@gmail.com");
 		userDto3.setRoles(Set.of("ROLE_EDITOR"));
 
-		User user3 = userService.createUser(userDto3);
+		User user3 = userService.createUser(userDto3 , "");
 
 		AuthResponse authResponse = authService.login(new AuthRequest(user3.getUsername(), "pass123"));
 
@@ -579,7 +595,8 @@ public class GraphQlControllerIntegrationTest {
 				     request : {
 				      bpId: %d,
 				      uId: %d,
-				      reaction: true
+				      reaction: true,
+				      syncToken:%d
 				    }
 				  ) {
 				  	id
@@ -589,7 +606,7 @@ public class GraphQlControllerIntegrationTest {
 				  }
 				}
 
-				""".formatted(blogpost1.getId(), user3.getId());
+				""".formatted(blogpost1.getId(), user3.getId() , user3.getSyncToken());
 
 		BlogPostResponse blogPost = authTester.document(query).execute().path("setReaction")
 				.entity(BlogPostResponse.class).get();
@@ -612,7 +629,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test11@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		BlogPost blogpost1 = new BlogPost();
 		blogpost1.setContent("fake-content-1");
@@ -630,7 +647,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto3.setEmail("test3@gmail.com");
 		userDto3.setRoles(Set.of("ROLE_EDITOR"));
 
-		User user3 = userService.createUser(userDto3);
+		User user3 = userService.createUser(userDto3 , "");
 
 		AuthResponse authResponse = authService.login(new AuthRequest(user3.getUsername(), "pass123"));
 
@@ -675,14 +692,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test5");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		// user2 will follow user1
 		AuthResponse authResponse = authService.login(new AuthRequest(user2.getUsername(), "pass123"));
@@ -730,7 +747,7 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		String query = """
 
@@ -764,14 +781,14 @@ public class GraphQlControllerIntegrationTest {
 		userDto.setPassword("pass123");
 		userDto.setEmail("test@gmail.com");
 		userDto.setRoles(Set.of("ROLE_EDITOR"));
-		User user1 = userService.createUser(userDto);
+		User user1 = userService.createUser(userDto , "");
 
 		UserDTO userDto1 = new UserDTO();
 		userDto1.setUsername("test5");
 		userDto1.setPassword("pass123");
 		userDto1.setEmail("test1@gmail.com");
 		userDto1.setRoles(Set.of("ROLE_EDITOR"));
-		User user2 = userService.createUser(userDto1);
+		User user2 = userService.createUser(userDto1 , "");
 
 		// user1 wants to block user2
 

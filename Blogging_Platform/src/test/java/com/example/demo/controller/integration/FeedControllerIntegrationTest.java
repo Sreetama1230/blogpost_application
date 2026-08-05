@@ -2,6 +2,8 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,10 +11,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,11 +37,12 @@ import com.example.demo.dto.UserDTO;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
+import com.example.demo.response.ModerationResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
+import com.example.demo.service.ModerationService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -60,10 +65,19 @@ public class FeedControllerIntegrationTest {
 	@Autowired
 	private AuthService authService;
 
-	@BeforeAll
-	public static void init() {
+	@MockBean
+	private ModerationService moderationClient;
+
+	@BeforeEach
+	public void init() {
 		httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+		ModerationResponse response = new ModerationResponse();
+		response.setApproved(true);
+		response.setResponse("Approved");
+
+		when(moderationClient.checkContent(any(BlogPostDTO.class))).thenReturn(response);
 	}
 
 	private String createURLWithPort() {
@@ -83,7 +97,7 @@ public class FeedControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -100,7 +114,7 @@ public class FeedControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO, "");
 
 		ResponseEntity<List<FeedItem>> resp = testRestTemplate.exchange(createURLWithPort() + "?start=0&size=10",
 				HttpMethod.GET, null, new ParameterizedTypeReference<List<FeedItem>>() {
@@ -125,7 +139,7 @@ public class FeedControllerIntegrationTest {
 		newUser1.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser1.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser1 = userService.createUser(newUser1);
+		User savedUser1 = userService.createUser(newUser1, "");
 
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -134,7 +148,7 @@ public class FeedControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID().toString());
 		newUser.setRoles(new HashSet<>(List.of("ROLE_ADMIN")));
 
-		User savedUser = userService.createUser(newUser);
+		User savedUser = userService.createUser(newUser, "");
 
 		savedUser1.setListfollowers(Set.of(savedUser));
 		savedUser1.setFollowers(1L);
@@ -157,7 +171,7 @@ public class FeedControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO);
+		BlogPostResponse blogPostResponse = blogpostService.createOrUpdateBlogPost(blogPostDTO, "");
 
 		AuthRequest authRequest1 = new AuthRequest(newUser1.getUsername(), "password123");
 
