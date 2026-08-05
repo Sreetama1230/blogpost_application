@@ -293,6 +293,7 @@ Core Entities:
 * Blocked Users
 * Post Reactions
 * Events
+* ServiceRequestId
 
 ---
 
