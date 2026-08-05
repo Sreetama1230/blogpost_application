@@ -42,8 +42,10 @@ import com.example.demo.model.Category;
 import com.example.demo.model.Event;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
+import com.example.demo.response.ModerationResponse;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.CategoryService;
+import com.example.demo.service.ModerationService;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +58,8 @@ public class BlogPostServiceTest {
 	@Mock
 	private UserDao userDao;
 
+	@Mock
+	private ModerationService moderationService;
 	@Mock
 	private CommentDao commentDao;
 	@Mock
@@ -103,7 +107,7 @@ public class BlogPostServiceTest {
 		blogPost.setComments(new ArrayList<>());
 		blogPost.setAuthor(user);
 		blogPost.setCategories(Set.of(category));
-
+		blogPost.setSyncToken(0L);
 		HashSet<BlogPost> set = new HashSet<>();
 		set.add(blogPost);
 		category.setBlogPosts(set);
@@ -163,7 +167,11 @@ public class BlogPostServiceTest {
 
 			
 			when(blogPostDao.save(any(BlogPost.class))).thenReturn(blogPost);
-			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO);
+			ModerationResponse moderationResponse = new ModerationResponse();
+			moderationResponse.setApproved(true);
+			moderationResponse.setResponse("approved");
+			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			assertEquals(blogPost.getContent(), blogPostResponse.getContent());
 			assertEquals(blogPost.getTitle(), blogPostResponse.getTitle());
 			assertEquals(blogPost.getAuthor().getUsername(), blogPostResponse.getAuthor().getUsername());
@@ -200,9 +208,13 @@ public class BlogPostServiceTest {
 			mockedStatic.when(SecurityUtils::getCurrentUserId).thenReturn(1L);
 
 			when(userService.getbyId(1L)).thenReturn(user);
-
+			ModerationResponse moderationResponse = new ModerationResponse();
+			moderationResponse.setApproved(true);
+			moderationResponse.setResponse("approved");
+			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			
 			CategoryException categoryException = assertThrows(CategoryException.class, () -> {
-				blogPostService.createOrUpdateBlogPost(blogPostDTO);
+				blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			});
 
 			assertNotNull(categoryException);
@@ -229,8 +241,13 @@ public class BlogPostServiceTest {
 			when(userService.getbyId(1L)).thenReturn(user);
 			when(blogPostDao.save(any(BlogPost.class))).thenReturn(blogPost);
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
+			ModerationResponse moderationResponse = new ModerationResponse();
+			moderationResponse.setApproved(true);
+			moderationResponse.setResponse("approved");
+			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
 			when(userDao.findById(blogPost.getId())).thenReturn(Optional.of(user));
-			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO);
+			blogPostDTO.setSyncToken(blogPost.getSyncToken());
+			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			
 		
 			String payload = objectMapper.writeValueAsString(blogPostDTO);
@@ -274,9 +291,12 @@ public class BlogPostServiceTest {
 			utilities.when(SecurityUtils::getCurrentUserId).thenReturn(1L);
 
 			when(userService.getbyId(1L)).thenThrow(ResourceNotFoundException.class);
-
+			ModerationResponse moderationResponse = new ModerationResponse();
+			moderationResponse.setApproved(true);
+			moderationResponse.setResponse("approved");
+			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
 			ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
-				blogPostService.createOrUpdateBlogPost(blogPostDTO);
+				blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			});
 
 			assertNotNull(resourceNotFoundException);
@@ -309,11 +329,15 @@ public class BlogPostServiceTest {
 			when(userService.getbyId(3L)).thenReturn(authenticatedUser);
 			when(userDao.findById(3L)).thenReturn(Optional.of(authenticatedUser));
 			when(blogPostDao.findById(1L)).thenReturn(Optional.of(blogPost));
-
+			ModerationResponse moderationResponse = new ModerationResponse();
+			moderationResponse.setApproved(true);
+			moderationResponse.setResponse("approved");
+			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			blogPostDTO.setSyncToken(blogPost.getSyncToken());
 			DoNotHavePermissionError doNotHavePermissionError =
 
 					assertThrows(DoNotHavePermissionError.class, () -> {
-						blogPostService.createOrUpdateBlogPost(blogPostDTO);
+						blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 					});
 
 			assertNotNull(doNotHavePermissionError);

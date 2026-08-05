@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.ModerationRequest;
-import com.example.demo.dto.ModerationResponse;
+import com.example.demo.response.ModerationResponse;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;

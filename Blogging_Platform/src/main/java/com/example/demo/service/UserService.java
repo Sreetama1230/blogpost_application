@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
@@ -24,9 +25,12 @@ import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvaildRoleException;
 import com.example.demo.exception.InvalidEmailIdError;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.StaleObjectError;
 import com.example.demo.exception.UnexpectedCustomException;
+import com.example.demo.exception.UsernameDoesNotAvailableException;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Event;
+import com.example.demo.model.ServiceRequestId;
 import com.example.demo.model.User;
 import com.example.demo.response.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,51 +53,105 @@ public class UserService {
 	@Autowired
 	ObjectMapper objectMapper;
 
+	@Autowired
+	private ServiceRequestIdDao serviceRequestIdDao;
+
 	Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	@Transactional
-	public User createUser(UserDTO u) throws JsonProcessingException {
-		if (!u.getEmail().contains("@")) {
-			throw new InvalidEmailIdError("Please enter a valid email id");
+	public User createUser(UserDTO u, String requestId) throws JsonProcessingException {
+
+		if ((u.getId() == null || u.getId() <= 0) && requestId != null && !requestId.equals("")) {
+
+			try {
+				if (!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId, TransactionType.USER)
+						.isEmpty()) {
+					logger.info("returning the existing transaction");
+					if (userDao
+							.findById(serviceRequestIdDao
+									.findByServiceRequestIdAndTransactionType(requestId, TransactionType.USER).get())
+							.isEmpty()) {
+						throw new ResourceNotFoundException("No user present with the provided id...");
+					}
+					return userDao
+							.findById(serviceRequestIdDao
+									.findByServiceRequestIdAndTransactionType(requestId, TransactionType.USER).get())
+							.get();
+
+				}
+			} catch (ResourceNotFoundException e) {
+				// suppose the transaction gets deleted
+				throw new ResourceNotFoundException(e.getMessage());
+			} catch (Exception e) {
+				throw e;
+			}
+
 		}
 
-		if (u.getRoles().size() > 1) {
-			throw new InvaildRoleException(
-					"Sorry! you can not provide more than one role for now.. we are working on this feature..than you!");
+		try {
+
+			if (!u.getEmail().contains("@")) {
+				throw new InvalidEmailIdError("Please enter a valid email id");
+			}
+
+			if (userDao.existsByEmail(u.getEmail())) {
+				throw new InvalidEmailIdError("Duplicate email id error");
+			}
+			
+			if(userDao.existsByUsername(u.getUsername())) {
+				throw new UsernameDoesNotAvailableException("This username is not available");
+			}
+
+			if (u.getRoles().size() > 1) {
+				throw new InvaildRoleException(
+						"Sorry! you can not provide more than one role for now.. we are working on this feature..thank you!");
+			}
+
+			User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
+
+			reqUser.setBio(u.getBio());
+			reqUser.setTotalPosts(0L);
+			reqUser.setFollowers(0L);
+			reqUser.setFollowing(0L);
+			reqUser.setBlogPosts(new ArrayList<>());
+			reqUser.setRoles(UserService.convertRoles(u.getRoles()));
+
+			User newUser = userDao.save(reqUser);
+			// adding record to the service request DB
+			if (requestId != null && !requestId.equals("") ) {
+				serviceRequestIdDao.save(new ServiceRequestId(newUser.getId(), requestId, TransactionType.USER));
+			}
+
+			Event event = new Event();
+
+			event.setEventType(EventType.CREATE);
+			event.setCreatedAt(LocalDateTime.now());
+			event.setPayload(objectMapper.writeValueAsString(u));
+			event.setPublishedAt(LocalDateTime.now());
+			event.setStatus(EventStatus.PENDING);
+			event.setTransactionId(String.valueOf(newUser.getId()));
+			event.setTransactionType(TransactionType.USER);
+			event.setRetryCount(0);
+			eventDao.save(event);
+
+			return newUser;
+
+		} catch (Exception e) {
+			throw  e;
 		}
 
-		User reqUser = new User(u.getUsername(), passwordEncoder.encode(u.getPassword()), u.getEmail());
-
-		reqUser.setBio(u.getBio());
-		reqUser.setTotalPosts(0L);
-		reqUser.setFollowers(0L);
-		reqUser.setFollowing(0L);
-		reqUser.setBlogPosts(new ArrayList<>());
-		reqUser.setRoles(UserService.convertRoles(u.getRoles()));
-
-		User newUser = userDao.save(reqUser);
-
-		Event event = new Event();
-
-		event.setEventType(EventType.CREATE);
-		event.setCreatedAt(LocalDateTime.now());
-		event.setPayload(objectMapper.writeValueAsString(u));
-		event.setPublishedAt(LocalDateTime.now());
-		event.setStatus(EventStatus.PENDING);
-		event.setTransactionId(String.valueOf(newUser.getId()));
-		event.setTransactionType(TransactionType.USER);
-		event.setRetryCount(0);
-		eventDao.save(event);
-
-		return newUser;
 	}
 
 	@Transactional
 	public User updateUser(UserDTO userDTO) throws JsonProcessingException {
+
 		long id = userDTO.getId();
 		if (id > 0 && userDao.findById(id).isPresent()) {
 
 			User targetUser = userDao.findById(id).get();
+			if (userDTO.getSyncToken() == null || userDTO.getSyncToken() != targetUser.getSyncToken()) {
+				throw new StaleObjectError("StaleObjectError : Please provide valid syncToken");
+			}
 			User currentUser = userDao.findById(SecurityUtils.getCurrentUserId()).get();
 
 			if (canUpdateOrDelete(currentUser, targetUser)) {
@@ -114,6 +172,11 @@ public class UserService {
 				}
 
 				if (userDTO.getUsername() != null) {
+					
+					if(userDao.existsByUsername(userDTO.getUsername())) {
+						throw new UsernameDoesNotAvailableException("This username is not available");
+					}
+					
 					targetUser.setUsername(userDTO.getUsername());
 				}
 

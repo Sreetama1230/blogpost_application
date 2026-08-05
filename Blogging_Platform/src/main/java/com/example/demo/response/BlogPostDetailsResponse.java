@@ -11,7 +11,8 @@ public class BlogPostDetailsResponse {
 	private String username;
     private Long id;
 	private String email;
-
+	private String syncToken;
+	
 	private List<BlogPostResponse> blogPosts= new ArrayList<>(); ;
 
 	private List<CommentResponse> comments= new ArrayList<>(); ;
@@ -23,11 +24,12 @@ public class BlogPostDetailsResponse {
 	}
 
 
-	public BlogPostDetailsResponse(String username, String email, List<BlogPostResponse> blogPosts,
+	public BlogPostDetailsResponse(String username, String email, String syncToken, List<BlogPostResponse> blogPosts,
 			List<CommentResponse> comments) {
 		super();
 		this.username = username;
 		this.email = email;
+		this.syncToken = syncToken;
 		this.blogPosts = blogPosts;
 		this.comments = comments;
 	}
@@ -79,6 +81,18 @@ public class BlogPostDetailsResponse {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	
+
+	public String getSyncToken() {
+		return syncToken;
+	}
+
+
+	public void setSyncToken(String syncToken) {
+		this.syncToken = syncToken;
+	}
+
 
 	public static BlogPostDetailsResponse convertBlogPostDetailsResponse(User b) {
 		List<BlogPost> dbblogs = b.getBlogPosts();
@@ -92,7 +106,7 @@ public class BlogPostDetailsResponse {
 		  comments.add(CommentResponse.convertCommentResponse(c));
 		}
 		BlogPostDetailsResponse blogPostDetailsResponse=
-				new BlogPostDetailsResponse(b.getUsername(),b.getEmail(),  blogs, comments);
+				new BlogPostDetailsResponse(b.getUsername(),b.getEmail(), String.valueOf( b.getSyncToken()), blogs, comments);
 		blogPostDetailsResponse.setId(b.getId());
 		return blogPostDetailsResponse;
 	}

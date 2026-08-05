@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.UserDTO;
@@ -37,8 +38,8 @@ public class UserController {
 
 	
 	@PostMapping("/register")
-	public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserDTO u) throws JsonProcessingException {
-		User newUser = s.createUser(u);
+	public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserDTO u , @RequestParam (required = false) String requestId) throws JsonProcessingException {
+		User newUser = s.createUser(u , requestId);
 		return new ResponseEntity<UserResponse>(UserResponse.convertUserResponse(newUser), HttpStatus.CREATED);
 	}
 

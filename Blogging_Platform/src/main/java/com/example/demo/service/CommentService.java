@@ -13,6 +13,7 @@ import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CommentDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
@@ -22,9 +23,11 @@ import com.example.demo.enums.TransactionType;
 import com.example.demo.exception.DoNotHavePermissionError;
 import com.example.demo.exception.InvalidReactException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.StaleObjectError;
 import com.example.demo.model.BlogPost;
 import com.example.demo.model.Comment;
 import com.example.demo.model.Event;
+import com.example.demo.model.ServiceRequestId;
 import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.CommentResponse;
@@ -43,6 +46,9 @@ public class CommentService {
 	private BlogPostDao blogPostDao;
 
 	@Autowired
+	private ServiceRequestIdDao serviceRequestIdDao;
+
+	@Autowired
 	private UserDao userdao;
 
 	@Autowired
@@ -53,7 +59,35 @@ public class CommentService {
 	Logger logger = LoggerFactory.getLogger(Comment.class);
 
 	@Transactional
-	public BlogPostResponse createOrUpdateComment(CommentDTO c, long blogPostId) throws JsonProcessingException {
+	public BlogPostResponse createOrUpdateComment(CommentDTO c, long blogPostId, String requestId)
+			throws JsonProcessingException {
+
+		// check if there any service request is provided (only for create)
+
+		if ((c.getCommentId() == null || c.getCommentId() <= 0) && requestId != null && !requestId.equals("")) {
+
+			try {
+				if (!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId, TransactionType.COMMENT)
+						.isEmpty()) {
+					logger.info("returning the existing transaction");
+
+					if (commentDao
+							.findById(serviceRequestIdDao
+									.findByServiceRequestIdAndTransactionType(requestId, TransactionType.COMMENT).get())
+							.isEmpty() || blogPostDao.findById(blogPostId).isEmpty()) {
+						throw new ResourceNotFoundException("Resource is not found!");
+					}
+					return BlogPostResponse.convertBlogPostRespons(blogPostDao.findById(blogPostId).get());
+
+				}
+			} catch (ResourceNotFoundException e) {
+				// suppose the transaction gets deleted
+				throw new ResourceNotFoundException(e.getMessage());
+			} catch (Exception e) {
+				throw e;
+			}
+
+		}
 
 		logger.info("request started processing for " + c.getMessage());
 		Comment upsertComment = null;
@@ -84,8 +118,12 @@ public class CommentService {
 			if (commentDao.findById(c.getCommentId()).isEmpty()) {
 				throw new ResourceNotFoundException("No comment is present with the provided id...");
 			} else {
+				Comment dbComemnt = commentDao.findById(c.getCommentId()).get();
+				User commentAuthor = dbComemnt.getUser();
+				if (c.getSyncToken() == null || c.getSyncToken() != dbComemnt.getSyncToken()) {
+					throw new StaleObjectError("Please provide a valid syncToken!");
+				}
 
-				User commentAuthor = commentDao.findById(c.getCommentId()).get().getUser();
 				if (canUpdateOrDelete(authDbUser, commentAuthor)) {
 					// update
 
@@ -109,6 +147,11 @@ public class CommentService {
 
 		} else {
 			upsertComment = commentDao.save(newComment);
+			if (requestId != null && !requestId.equals("")) {
+				serviceRequestIdDao
+						.save(new ServiceRequestId(upsertComment.getId(), requestId, TransactionType.COMMENT));
+			}
+
 			exitsingComments.add(newComment);
 			authDbUser.getComments().add(upsertComment);
 			event.setEventType(EventType.CREATE);
@@ -181,12 +224,17 @@ public class CommentService {
 
 	@Transactional
 	public CommentResponse reactComment(CommentReact commentReact) throws JsonProcessingException {
+
 		long id = SecurityUtils.getCurrentUserId();
 		User dbUser = userdao.findById(id).get();
 
 		if (commentDao.findById(commentReact.getId()).isPresent()) {
 
 			Comment dbComment = commentDao.findById(commentReact.getId()).get();
+
+			if (commentReact.getSyncToken() == null || commentReact.getSyncToken() != dbComment.getSyncToken()) {
+				throw new StaleObjectError("Please provide a valid syncToken!");
+			}
 
 			if (dbComment.getReactedUsers().contains(dbUser)) {
 

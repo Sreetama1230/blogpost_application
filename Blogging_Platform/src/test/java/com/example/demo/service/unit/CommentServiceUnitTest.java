@@ -27,6 +27,7 @@ import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CommentDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.CommentDTO;
 import com.example.demo.dto.CommentReact;
@@ -56,7 +57,8 @@ public class CommentServiceUnitTest {
 
 	@Mock
 	CommentDao commentDao;
-
+	@Mock
+	ServiceRequestIdDao serviceRequestIdDao;
 	@Mock
 	private BlogPostDao blogPostDao;
 
@@ -109,6 +111,7 @@ public class CommentServiceUnitTest {
 		comment.setFunnyCount(1L);
 		comment.setLoveCount(1L);
 		comment.setUser(user);
+		comment.setSyncToken(0L);
 		blogPost.setComments(new ArrayList<>(List.of(comment)));
 		comment.setBlogPost(blogPost);
 
@@ -138,7 +141,7 @@ public class CommentServiceUnitTest {
 			when(blogPostDao.save(blogPost)).thenReturn(blogPost);
 
 
-			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L);
+			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L, "");
 
 			assertEquals(comment.getId(), blogPostResponse.getComments().get(0).getId());
 			assertEquals(comment.getContent(), blogPostResponse.getComments().get(0).getContent());
@@ -179,8 +182,8 @@ public class CommentServiceUnitTest {
 			when(userDao.findById(1L)).thenReturn(Optional.of(user));
 			when(commentDao.save(any(Comment.class))).thenReturn(comment);
 			when(blogPostDao.save(blogPost)).thenReturn(blogPost);
-
-			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L);
+			newComment.setSyncToken(comment.getSyncToken());
+			BlogPostResponse blogPostResponse = commentService.createOrUpdateComment(newComment, 1L,"");
 
 			assertEquals(comment.getId(), blogPostResponse.getComments().get(0).getId());
 			assertEquals(newComment.getMessage() + "(edited)", blogPostResponse.getComments().get(0).getContent());
@@ -229,7 +232,7 @@ public class CommentServiceUnitTest {
 
 
 			ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
-				commentService.createOrUpdateComment(newComment, 1L);
+				commentService.createOrUpdateComment(newComment, 1L,"");
 			});
 
 			assertNotNull(resourceNotFoundException);
@@ -265,7 +268,8 @@ public class CommentServiceUnitTest {
 			when(commentDao.findById(1L)).thenReturn(Optional.of(comment));
 
 			DoNotHavePermissionError doNotHavePermissionError = assertThrows(DoNotHavePermissionError.class, () -> {
-				commentService.createOrUpdateComment(newComment, 1L);
+				newComment.setSyncToken(comment.getSyncToken());
+				commentService.createOrUpdateComment(newComment, 1L,"");
 			});
 
 			assertNotNull(doNotHavePermissionError);
@@ -405,6 +409,7 @@ public class CommentServiceUnitTest {
 			
 			when(commentDao.save(comment)).thenReturn(comment);
 			CommentReact commentReact = new CommentReact(1L, Reaction.LOVE);
+			commentReact.setSyncToken(comment.getSyncToken());
 			CommentResponse commentResponse = commentService.reactComment(commentReact);
 			String payload = objectMapper.writeValueAsString(commentReact);
 			
@@ -441,6 +446,7 @@ public class CommentServiceUnitTest {
 			when(commentDao.save(comment)).thenReturn(comment);
 
 			CommentReact commentReact = new CommentReact(1L, Reaction.LOVE);
+			commentReact.setSyncToken(comment.getSyncToken());
 			InvalidReactException invalidReactException = assertThrows(InvalidReactException.class, () -> {
 				commentService.reactComment(commentReact);
 			});

@@ -2,6 +2,8 @@ package com.example.demo.controller.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,11 +12,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.example.demo.response.ModerationResponse;
+import com.example.demo.service.ModerationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -92,11 +97,20 @@ public class CommentControllerIntegrationTest {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @MockBean
+    private ModerationService moderationClient;
 
-	@BeforeAll
-	public static void init() {
+	@BeforeEach
+	public  void init() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ModerationResponse response = new ModerationResponse();
+        response.setApproved(true);
+        response.setResponse("Approved");
+
+        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+                .thenReturn(response);
 	}
 
 	private String createURLWithPort() {
@@ -127,7 +141,7 @@ public class CommentControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		user1 = userService.createUser(newUser);
+		user1 = userService.createUser(newUser,"");
 
 		authRequest1 = new AuthRequest(newUser.getUsername(), "password123");
 		authResp1 = authService.login(authRequest1);
@@ -140,7 +154,7 @@ public class CommentControllerIntegrationTest {
 		blogPostDTO.setTitle("Fake Title");
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO);
+		blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 
 		commentDTO = new CommentDTO();
 		commentDTO.setMessage("test-comment");
@@ -153,7 +167,7 @@ public class CommentControllerIntegrationTest {
 		authUser.setUsername("test-username" + UUID.randomUUID());
 		authUser.setRoles(Set.of("ROLE_USER"));
 		authRequest = new AuthRequest(authUser.getUsername(), "password123");
-		user2 = userService.createUser(authUser);
+		user2 = userService.createUser(authUser,"");
 		authResp = authService.login(authRequest);
 
 	}
@@ -202,7 +216,7 @@ public class CommentControllerIntegrationTest {
 
 		commentDTO.setCommentId(commet.getId());
 		commentDTO.setMessage("updated-comment");
-
+        commentDTO.setSyncToken(commet.getSyncToken());
 		// authenticated with authUser
 		headers.setBearerAuth(authResp.getToken());
 		HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(commentDTO), headers);
@@ -291,6 +305,7 @@ public class CommentControllerIntegrationTest {
 		CommentReact react = new CommentReact();
 		react.setId(commet.getId());
 		react.setReaction(Reaction.LOVE);
+        react.setSyncToken(commet.getSyncToken());
 		HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(react), headers);
 
 		ResponseEntity<CommentResponse> response = template.exchange(createURLWithPort() + "/react", HttpMethod.POST,

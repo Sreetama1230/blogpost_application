@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 
 
 
@@ -41,6 +42,9 @@ public class Comment {
 	private Long loveCount;
 	@Column
 	private Long funnyCount;
+
+	@Version
+	private Long syncToken;
 
     @ManyToMany
     @JoinTable(
@@ -161,6 +165,14 @@ public class Comment {
 	@Override
 	public int hashCode() {
 		return Objects.hash(content);
+	}
+	
+	public Long getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(Long syncToken) {
+		this.syncToken = syncToken;
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.BlogPostDTO;
@@ -33,8 +34,8 @@ public class BlogPostController {
 
 
 	@PostMapping
-	public ResponseEntity<BlogPostResponse> createBlogPost( @RequestBody BlogPostDTO bp) throws JsonProcessingException {
-  	return new ResponseEntity<>(service.createOrUpdateBlogPost(bp),HttpStatus.CREATED);
+	public ResponseEntity<BlogPostResponse> createBlogPost( @RequestBody BlogPostDTO bp , @RequestParam (required = false) String requestId) throws JsonProcessingException {
+  	return new ResponseEntity<>(service.createOrUpdateBlogPost(bp , requestId),HttpStatus.CREATED);
 	}
 	
 	@GetMapping("title/{title}/user/{userId}")
@@ -45,7 +46,7 @@ public class BlogPostController {
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateBlogPost(@RequestBody BlogPostDTO bp) throws JsonProcessingException {
 			logger.info("Updating blog post...");
-		return new ResponseEntity<BlogPostResponse>(service.createOrUpdateBlogPost( bp),HttpStatus.OK);
+		return new ResponseEntity<BlogPostResponse>(service.createOrUpdateBlogPost( bp ,  ""),HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/{id}")

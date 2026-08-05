@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -17,6 +18,7 @@ import com.example.demo.exception.CategoryLinkedToBlogs;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Category;
 import com.example.demo.model.Event;
+import com.example.demo.model.ServiceRequestId;
 import com.example.demo.response.BlogPostResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +32,9 @@ public class CategoryService {
 	private CategoryDao categoryDao;
 
 	@Autowired
+	private ServiceRequestIdDao serviceRequestIdDao;
+
+	@Autowired
 	private EventDao eventDao;
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -37,7 +42,31 @@ public class CategoryService {
 	Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
 	@Transactional
-	public Category createCategory(Category cg) throws JsonProcessingException {
+	public Category createCategory(Category cg, String requestId) throws JsonProcessingException {
+
+		// check if there any service request is provided (only for create)
+
+		if ( (cg.getId() == null || cg.getId() <= 0) &&   requestId != null &&  !requestId.isEmpty()   ) {
+			
+			try {
+				if (!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId , TransactionType.CATEGORY).isEmpty()) {
+					logger.info("returning the existing transaction");
+
+					if (!categoryDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId , TransactionType.CATEGORY).get()).isPresent()) {
+						throw new ResourceNotFoundException("Resource is not found!");
+					}
+					return categoryDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId ,TransactionType.CATEGORY ).get()).get();
+
+				}
+			} catch (ResourceNotFoundException e) {
+				// suppose the transaction gets deleted
+				throw new ResourceNotFoundException(e.getMessage());
+			} catch (Exception e) {
+				throw e;
+			}
+
+		}
+
 		String s = cg.getName();
 		String str = null;
 		if (!(s.startsWith("#"))) {
@@ -46,7 +75,11 @@ public class CategoryService {
 
 		}
 		Category newCategory = categoryDao.save(cg);
-	
+		   // adding record to the service request DB
+		if(requestId != null && !requestId.equals("")) {
+	    	serviceRequestIdDao.save(new ServiceRequestId(newCategory.getId(), requestId, TransactionType.CATEGORY));
+		}
+     
 		Event event = new Event();
 
 		event.setEventType(EventType.CREATE);
@@ -95,7 +128,6 @@ public class CategoryService {
 			if (c.getBlogPosts().isEmpty()) {
 				categoryDao.deleteById(id);
 
-				
 				Event event = new Event();
 
 				event.setEventType(EventType.DELETE);

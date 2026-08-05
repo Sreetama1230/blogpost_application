@@ -33,16 +33,16 @@ public class CommentController {
 
 	@PostMapping
 	public ResponseEntity<BlogPostResponse> addComments(@RequestBody CommentDTO c,
-			@RequestParam long blogPostId) throws JsonProcessingException {
+			@RequestParam long blogPostId , @RequestParam (required = false) String requestId) throws JsonProcessingException {
 
-		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment( c, blogPostId),
+		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment( c, blogPostId,requestId),
 				HttpStatus.CREATED);
 	}
 
 	@PutMapping
 	public ResponseEntity<BlogPostResponse> updateComments(@RequestBody CommentDTO c, @RequestParam long blogPostId) throws JsonProcessingException {
 		logger.info("started request for editing comment {}", c.getMessage());
-		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId), HttpStatus.OK);
+		return new ResponseEntity<BlogPostResponse>(commentService.createOrUpdateComment(c, blogPostId,""), HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")

@@ -37,7 +37,7 @@ public class CategoryController {
 	Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
 	@PostMapping
-	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto) throws JsonProcessingException {
+	public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryDTO cdto , @RequestParam(required = false) String requestId) throws JsonProcessingException {
 		Category c = new Category();
 		String name = cdto.getName();
 		String normalizedName = name.startsWith("#") ? name : "#" + name;
@@ -49,7 +49,7 @@ public class CategoryController {
 			}
 		} catch (ResourceNotFoundException e) {
 			c = new Category(cdto.getName(), new HashSet<>());
-			Category newCategory = service.createCategory(c);
+			Category newCategory = service.createCategory(c ,requestId );
 			logger.info("created category : {} ", c.getName());
 			return new ResponseEntity<CategoryResponse>(CategoryResponse.convertCategoryResponse(newCategory),
 					HttpStatus.CREATED);

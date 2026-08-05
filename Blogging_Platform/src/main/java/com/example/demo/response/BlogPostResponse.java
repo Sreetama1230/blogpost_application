@@ -31,6 +31,7 @@ public class BlogPostResponse {
 	private Long likes;
 
 	private Long dislikes;
+	private String syncToken;
 
 	public BlogPostResponse() {
 		super();
@@ -117,6 +118,14 @@ public class BlogPostResponse {
 		this.updateAt = updateAt;
 	}
 
+	public String getSyncToken() {
+		return syncToken;
+	}
+
+	public void setSyncToken(String syncToken) {
+		this.syncToken = syncToken;
+	}
+
 	public BlogPostResponse(String title, String content, LocalDateTime createAt, BlogPostUserResponse author) {
 
 		this.title = title;
@@ -154,6 +163,22 @@ public class BlogPostResponse {
 
 	}
 
+	public BlogPostResponse(String title, String content, BlogPostUserResponse author, Set<CategoryResponse> categories,
+			List<CommentResponse> comments, LocalDateTime createAt, LocalDateTime updateAt, Long likes, Long dislikes,
+			String syncToken) {
+		super();
+		this.title = title;
+		this.content = content;
+		this.author = author;
+		this.categories = categories;
+		this.comments = comments;
+		this.createAt = createAt;
+		this.updateAt = updateAt;
+		this.likes = likes;
+		this.dislikes = dislikes;
+		this.syncToken = syncToken;
+	}
+
 	public static BlogPostResponse convertBlogPostRespons(BlogPost b) {
 
 		Set<Category> dBCategory = b.getCategories();
@@ -174,6 +199,7 @@ public class BlogPostResponse {
 		resp.setLikes(b.getLikes());
 		resp.setDislikes(b.getDislikes());
 		resp.setId(b.getId());
+		resp.setSyncToken(String.valueOf(b.getSyncToken()));
 		return resp;
 
 	}
@@ -182,7 +208,9 @@ public class BlogPostResponse {
 	public String toString() {
 		return "BlogPostResponse [id=" + id + ", title=" + title + ", content=" + content + ", author=" + author
 				+ ", categories=" + categories + ", comments=" + comments + ", createAt=" + createAt + ", updateAt="
-				+ updateAt + ", likes=" + likes + ", dislikes=" + dislikes + "]";
+				+ updateAt + ", likes=" + likes + ", dislikes=" + dislikes + ", syncToken=" + syncToken + "]";
 	}
+
+	
 
 }
