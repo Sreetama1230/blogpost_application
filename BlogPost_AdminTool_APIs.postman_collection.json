@@ -21,7 +21,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU"
+                "value": ""
               }
             ],
             "url": {
@@ -56,7 +56,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"strin22g\",\n  \"password\": \"string\",\n  \"email\": \"string@string.dfg\",\n  \"bio\": \"string\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
+              "raw": "{\n  \"username\": \"sree34\",\n  \"password\": \"string\",\n  \"email\": \"sree34@string\",\n  \"bio\": \"string\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -64,7 +64,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/user/register",
+              "raw": "http://localhost:8080/user/register?requestId=78",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -73,6 +73,58 @@
               "path": [
                 "user",
                 "register"
+              ],
+              "query": [
+                {
+                  "key": "requestId",
+                  "value": "78"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU'"
+          },
+          "response": []
+        },
+        {
+          "name": "/user/register with requestId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test-username-4953\",\n  \"password\": \"passwrod@1234\",\n  \"email\": \"testusername2934@gmail.com\",\n  \"bio\": \"my-bio\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/user/register?requestId=78",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "register"
+              ],
+              "query": [
+                {
+                  "key": "requestId",
+                  "value": "78"
+                }
               ]
             },
             "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU'"
@@ -90,7 +142,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU"
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg1OTU1MDE4LCJleHAiOjE3ODU5NTg2MTh9.fkw20s7js64QAKbqaomPO3Unblq296hxkg8Bl0SGw24"
               },
               {
                 "key": "Content-Type",
@@ -99,7 +151,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 22,\n  \"username\": \"sreetama124\",\n  \"password\": \"sree1234\"\n}",
+              "raw": "{\n  \"id\": 3,\n  \"username\": \"myusername\",\n  \"password\": \"mypassword\",\n  \"syncToken\":\"0\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -132,11 +184,12 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmZmZmZmdnZ2ciLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3ODQ0ODAzNDgsImV4cCI6MTc4NDQ4Mzk0OH0.xpretDUlj7Yo3UA4SzbBwMIMCXwD4gUydyQu_L-gSu4"
+                "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVlMzU0NWdnZ2dnZ2c1Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg1NTAzMTkzLCJleHAiOjE3ODU1MDY3OTN9.cuK28C6K0zGhwZ3F23yQSVGG8ORfYQWU_WnH9ch1Xyo",
+                "disabled": true
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/user/25/post",
+              "raw": "http://localhost:8080/user/23/post",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -144,7 +197,7 @@
               "port": "8080",
               "path": [
                 "user",
-                "25",
+                "23",
                 "post"
               ]
             }
@@ -192,7 +245,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NDAzOSwiZXhwIjoxNzg0NDg3NjM5fQ.3rSpKAFrsndoG_tzpuVM61Atni7OGcFeWWwxyrPFmHM"
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTg4MSwiZXhwIjoxNzg1OTU5NDgxfQ.jFlPW2nzwm5kFOXx8V0rNnTyo388z9ZMLcWY5oCGWlo"
               }
             ],
             "url": {
@@ -232,7 +285,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n \"username\": \"strin22g\",\n  \"password\": \"string\"\n}",
+              "raw": "{\n  \"username\": \"test-username-456\",\n  \"password\": \"passwrod@1234\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -265,13 +318,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reaction\": \"LIKE\",\n  \"id\": 1\n}",
+              "raw": "{\n  \"reaction\": \"LIKE\",\n  \"id\": 1,\n  \"syncToken\":\"3\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -294,13 +347,13 @@
           "response": []
         },
         {
-          "name": "comment",
+          "name": "comment_with_requestid",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
@@ -314,7 +367,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=15",
+              "raw": "http://localhost:8080/comment?blogPostId=1&requestId=67847",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -326,7 +379,51 @@
               "query": [
                 {
                   "key": "blogPostId",
-                  "value": "15"
+                  "value": "1"
+                },
+                {
+                  "key": "requestId",
+                  "value": "67847"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"comment-test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/comment?blogPostId=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "comment"
+              ],
+              "query": [
+                {
+                  "key": "blogPostId",
+                  "value": "1"
                 }
               ]
             }
@@ -340,13 +437,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"commentId\":1,\n    \"message\": \"comment-test-1\"\n}",
+              "raw": "{\n    \"commentId\":6,\n    \"message\": \"comment-test-1\",\n    \"syncToken\":\"0\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -354,7 +451,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=15",
+              "raw": "http://localhost:8080/comment?blogPostId=1",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -366,7 +463,7 @@
               "query": [
                 {
                   "key": "blogPostId",
-                  "value": "15"
+                  "value": "1"
                 }
               ]
             }
@@ -400,12 +497,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/comment/1/blogpost/15",
+              "raw": "http://localhost:8080/comment/6/blogpost/1",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -413,9 +510,9 @@
               "port": "8080",
               "path": [
                 "comment",
-                "1",
+                "6",
                 "blogpost",
-                "15"
+                "1"
               ]
             }
           },
@@ -433,13 +530,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"id\": 15,\n    \"title\": \"today's blog\",\n    \"content\": \"started my day with a cup of tea...\",\n    \"categories\": [\n        {\n            \"name\": \"lifestyle\"\n        }\n    ]\n}",
+              "raw": "{\n \"id\":9,\n  \"title\": \"today's blog..\",\n  \"content\": \"started my day with a cup of tea\",\n  \"syncToken\":\"1\",\n  \"categories\": [\n    {\n      \"name\": \"lifestyle\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -467,13 +564,53 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n \n  \"title\": \"today's blog\",\n  \"content\": \"started my day with a cup of tea\",\n  \"categories\": [\n    {\n      \"name\": \"lifestyle\"\n    }\n  ]\n}",
+              "raw": "{\n \n  \"title\": \"cupoftea\",\n  \"content\": \"started my day with a cup of tea\",\n  \"categories\": [\n    {\n      \"name\": \"lifestyle\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/blog?requestId=45663",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog"
+              ],
+              "query": [
+                {
+                  "key": "requestId",
+                  "value": "45663"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/blog",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n \n  \"title\": \"cupoftea\",\n  \"content\": \"started my day with a cup of tea\",\n  \"categories\": [\n    {\n      \"name\": \"lifestyle\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -500,7 +637,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/blog/title/today's blog/user/26",
+              "raw": "http://localhost:8080/blog/title/cupoftea/user/25",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -509,9 +646,9 @@
               "path": [
                 "blog",
                 "title",
-                "today's blog",
+                "cupoftea",
                 "user",
-                "26"
+                "25"
               ]
             }
           },
@@ -524,12 +661,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/blog/12",
+              "raw": "http://localhost:8080/blog/10",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -537,7 +674,7 @@
               "port": "8080",
               "path": [
                 "blog",
-                "12"
+                "10"
               ]
             }
           },
@@ -555,13 +692,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"category-test\"\n}",
+              "raw": "{\n  \"name\": \"category-test2\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -569,7 +706,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/category",
+              "raw": "http://localhost:8080/category?requestId=1234",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -577,6 +714,12 @@
               "port": "8080",
               "path": [
                 "category"
+              ],
+              "query": [
+                {
+                  "key": "requestId",
+                  "value": "1234"
+                }
               ]
             }
           },
@@ -592,7 +735,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
@@ -663,7 +806,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
                 "type": "text"
               }
             ],
@@ -752,13 +895,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 15,\n\t\t\t\t      uId: 27,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
+                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 9,\n\t\t\t\t      uId: 25,\n                      syncToken:4,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
                     "variables": ""
                   }
                 },
@@ -787,13 +930,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation PinUnpinPost {\n\t\t\t\t pinUnpinPost(uId:27 , bpId: 15 ){\n\t\t\t\t\n\t\t\t\t      content\n\t\t\t\t      id\n\t\t\t\t      author{\n\t\t\t\t      username\n\t\t\t\t     }\n\t\t\t\t  \n\t\t\t\t}\n\t\t\t\t}",
+                    "query": "mutation PinUnpinPost {\n\t\t\t\t pinUnpinPost(uId:25 , bpId: 9 ){\n\t\t\t\t\n\t\t\t\t      content\n\t\t\t\t      id\n\t\t\t\t      author{\n\t\t\t\t      username\n\t\t\t\t     }\n\t\t\t\t  \n\t\t\t\t}\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
@@ -822,13 +965,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation FollowOrUnFollowAuthor{\n\t\t\t\t    followOrUnFollowAuthor(follower: 27, followee:26){\n\t\t\t\t        username\n\t\t\t\t        id\n\t\t\t\t    }\n\t\t\t\t}\n",
+                    "query": "mutation FollowOrUnFollowAuthor{\n\t\t\t\t    followOrUnFollowAuthor(follower: 25, followee:23){\n\t\t\t\t        username\n\t\t\t\t        id\n\t\t\t\t    }\n\t\t\t\t}\n",
                     "variables": ""
                   }
                 },
@@ -857,13 +1000,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": " mutation BlockUser{\n\t\t\t\t           blockUser (blockerId: 27, blockedUserId:26){\n\t\t\t\t                username\n\t\t\t\t                id\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "query": " mutation BlockUser{\n\t\t\t\t           blockUser (blockerId: 25, blockedUserId:23){\n\t\t\t\t                username\n\t\t\t\t                id\n\t\t\t\t            }\n\t\t\t\t        }",
                     "variables": ""
                   }
                 },
@@ -897,7 +1040,7 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
@@ -932,7 +1075,7 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
@@ -959,16 +1102,6 @@
             {
               "name": "getPinnedPostsOfTheUser",
               "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "POST",
                 "header": [
                   {
@@ -977,14 +1110,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4",
-                    "disabled": true
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": " query GetPinnedPostsOfTheUser {\n  getPinnedPostsOfTheUser(uId:27){\n\n\n    content\n    author{\n        username\n    }\n   \n  }\n}\n\n",
+                    "query": " query GetPinnedPostsOfTheUser {\n  getPinnedPostsOfTheUser(uId:25){\n\n\n    content\n    author{\n        username\n    }\n   \n  }\n}\n\n",
                     "variables": ""
                   }
                 },
@@ -1013,7 +1145,7 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
@@ -1048,13 +1180,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query getFollowers{\n\t\t\t\t    getFollowers(uId:27){\n\t\t\t\t            username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "query": "query getFollowers{\n\t\t\t\t    getFollowers(uId:25){\n\t\t\t\t            username\n\t\t\t\t    }\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
@@ -1083,13 +1215,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query GetFollowings{\n\t\t\t\t         getFollowings(uId:27){\n\t\t\t\t                username\n\t\t\t\t                }\n\t\t\t\t            }\n",
+                    "query": "query GetFollowings{\n\t\t\t\t         getFollowings(uId:25){\n\t\t\t\t                username\n\t\t\t\t                }\n\t\t\t\t            }\n",
                     "variables": ""
                   }
                 },
@@ -1118,13 +1250,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query   UserLikedPost{\n\t\t\t\t           userLikedPost(uId:27){\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "query": "query   UserLikedPost{\n\t\t\t\t           userLikedPost(uId:25){\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
                     "variables": ""
                   }
                 },
@@ -1153,13 +1285,13 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query BlockedUsers{\n\t\t\t\t  blockedUsers (uId:27){\n\t\t\t\t    id\n\t\t\t\t    username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "query": "query BlockedUsers{\n\t\t\t\t  blockedUsers (uId:25){\n\t\t\t\t    id\n\t\t\t\t    username\n\t\t\t\t    }\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
@@ -1198,7 +1330,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbjIyZyIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4ODIxOCwiZXhwIjoxNzg0NDkxODE4fQ.sWUoTQYH8rY-_JI__nnlWnxwm0t7AkayUqXFXShjyd4"
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
               }
             ],
             "body": {
@@ -1219,6 +1351,86 @@
               "port": "8080",
               "path": [
                 "admintool"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Actuator",
+      "item": [
+        {
+          "name": "health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8089/actuator/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8089",
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8089/actuator/info",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8089",
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8089/actuator/metrics",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8089",
+              "path": [
+                "actuator",
+                "metrics"
               ]
             }
           },
