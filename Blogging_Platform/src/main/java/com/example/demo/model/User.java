@@ -30,7 +30,7 @@ public class User implements Comparable<User> {
 	private Long id;
 	@Column(unique = true, nullable = false)
 	private String username;
-	@Column(unique = true, nullable = false)
+	@Column(nullable = false)
 	private String password;
 
 	@ElementCollection(fetch = FetchType.EAGER)

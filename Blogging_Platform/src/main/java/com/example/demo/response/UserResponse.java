@@ -56,19 +56,6 @@ public class UserResponse {
 		this.totalPosts = totalPosts;
 	}
 
-	public UserResponse(long id, String username, Long followers, Long following, String bio, Long totalPosts,
-			String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments) {
-		super();
-		this.id = id;
-		this.username = username;
-		this.followers = followers;
-		this.following = following;
-		this.bio = bio;
-		this.totalPosts = totalPosts;
-		this.email = email;
-		this.blogPosts = blogPosts;
-		this.comments = comments;
-	}
 
 	public String getBio() {
 		return bio;
@@ -131,6 +118,19 @@ public class UserResponse {
 
 	}
 
+    public UserResponse(long id, String username, Long followers, Long following, String bio, Long totalPosts,
+                        String email, List<BlogPostResponse> blogPosts, List<CommentResponse> comments) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.followers = followers;
+        this.following = following;
+        this.bio = bio;
+        this.totalPosts = totalPosts;
+        this.email = email;
+        this.blogPosts = blogPosts;
+        this.comments = comments;
+    }
 	public UserResponse(long id, String username, String email) {
 		super();
 		this.id = id;
