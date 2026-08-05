@@ -94,6 +94,7 @@ A user can have only one valid role, and the email must contain `@`.
 * Create User
 * Update User (sparse update is allowed)
   * You cannot change the registered email ID or the role.
+  * username and email should be unique.
 * Delete User
 * Get Blog Posts
 * Get posts of a user
@@ -201,6 +202,33 @@ Examples of events:
   "Event [id=32, transactionType=USER, transactionId=26, eventType=UPDATE, payload=\"Updated User while creating the blogpost: 26\", status=PROCESSING, createdAt=2026-07-19T23:58:47.565348, publishedAt=2026-07-19T23:58:47.565394, lastAttemptAt=2026-07-19T23:58:47.596897418, retryCount=0]",
   "Event [id=33, transactionType=BLOGPOST, transactionId=14, eventType=CREATE, payload={\"id\":0,\"title\":\"today's blog\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\"}]}, status=PROCESSING, createdAt=2026-07-19T23:58:47.566730, publishedAt=2026-07-19T23:58:47.566785, lastAttemptAt=2026-07-19T23:58:47.597109750, retryCount=0]"
 ]
+```
+## Toggling Feature
+GraphQl mutation operation has toggling feature
+setReaction,pinUnpinPost,followOrUnFollowAuthor and blockUser
+<br>
+For example,
+For example, when you hit the endpoint for the first time, the reaction is added. If you hit the same endpoint again with the same request body, the reaction is removed.
+
+Try to mimic the behavior of popular social media platforms like Instagram or Facebook. When you click the Like button once, the post is liked. Clicking the Like button again removes the like.
+
+```
+mutation SetReaction {
+				  setReaction(
+				     request : {
+				      bpId: 9,
+				      uId: 25,
+                      syncToken:4,
+				      reaction: true
+				    }
+				  ) {
+				  	id
+				    content
+				    createAt
+				    likes
+				  }
+				}
+
 ```
 
 ---
@@ -372,6 +400,7 @@ The project includes:
 
 ---
 ## New Feature
+
 ## Content Moderation
 
 The AI Content Moderation Service analyzes blog posts before they are published to help prevent harmful or inappropriate content from entering the platform.
@@ -386,6 +415,19 @@ The AI Content Moderation Service analyzes blog posts before they are published 
    * **Rejects** the content if it contains harmful, violent, abusive, or illegal material.
 4. To improve reliability, the service is protected with **Resilience4j Retry** and **Circuit Breaker**. Temporary failures such as network issues or API outages are handled gracefully.
 5. If the Gemini API is unavailable due to **rate limiting (HTTP 429)**, the service automatically falls back to a local keyword-based moderation check to detect obvious harmful content, ensuring moderation continues even during temporary API quota exhaustion.
+
+## Optimistic Locking
+Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided, a `StaleObjectError` will be thrown.
+
+
+## Idempotency 
+If you want to enable idempotency, include the `requestId` as a request parameter, as shown below.
+`http://localhost:8080/comment?blogPostId=1&requestId=67847`
+So, if you send the same `POST` request multiple times with the same `requestId`, the API will return the existing object/transaction, **regardless of the request body**.
+If, for any reason, the object associated with that `requestId` has been deleted, the API will throw a `Resource is not found!` exception.
+
+
+
 
 ### Technologies Used
 
