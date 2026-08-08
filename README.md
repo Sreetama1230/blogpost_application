@@ -1,4 +1,4 @@
-# BlogPost Application - Event Driven Blogging Platform
+# Scalable Content Publishing & Moderation Platform - Event Driven Blogging Platform
 
 ## Overview
 
