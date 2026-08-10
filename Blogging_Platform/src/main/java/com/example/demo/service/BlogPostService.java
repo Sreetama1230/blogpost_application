@@ -164,6 +164,8 @@ public class BlogPostService {
                 subEvent.setTransactionId(String.valueOf(newCat.getId()));
                 subEvent.setTransactionType(TransactionType.CATEGORY);
                 subEvent.setRetryCount(0);
+                subEvent.setRecipientUserId(userId); 
+                subEvent.setActorUserId(userId);
                 eventDao.save(subEvent);
 
                 catSet.add(newCat);
@@ -263,12 +265,14 @@ public class BlogPostService {
 
         subEvent1.setEventType(EventType.UPDATE);
         subEvent1.setCreatedAt(LocalDateTime.now());
-        subEvent1.setPayload(objectMapper.writeValueAsString("Updated User while creating the blogpost: " + u.getId()));
+        subEvent1.setPayload(objectMapper.writeValueAsString("Updated user while creating the blogpost: " + u.getId()));
         subEvent1.setPublishedAt(LocalDateTime.now());
         subEvent1.setStatus(EventStatus.PENDING);
         subEvent1.setTransactionId(String.valueOf(u.getId()));
         subEvent1.setTransactionType(TransactionType.USER);
         subEvent1.setRetryCount(0);
+        subEvent1.setRecipientUserId(u.getId()); 
+        subEvent1.setActorUserId(userId);
         eventDao.save(subEvent1);
 
 
@@ -280,6 +284,8 @@ public class BlogPostService {
         event.setTransactionId(String.valueOf(newBlogPost.getId()));
         event.setTransactionType(TransactionType.BLOGPOST);
         event.setRetryCount(0);
+        event.setRecipientUserId(u.getId()); 
+        event.setActorUserId(userId);
         eventDao.save(event);
 
         return BlogPostResponse.convertBlogPostRespons(bpdata);
@@ -322,6 +328,8 @@ public class BlogPostService {
 					event.setTransactionId(String.valueOf(bp.getId()));
 					event.setTransactionType(TransactionType.BLOGPOST);
 					event.setRetryCount(0);
+					event.setRecipientUserId(blogpostAuthor.getId()); 
+			        event.setActorUserId(userId);
 					eventDao.save(event);
 					
 					return deletedBlogPost;

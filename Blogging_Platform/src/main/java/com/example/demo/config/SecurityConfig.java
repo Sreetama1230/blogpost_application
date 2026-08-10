@@ -44,6 +44,7 @@ public class SecurityConfig {
                 			    "/swagger-ui.html",
                 			    "/webjars/**",
                 			    "/login/**",
+                			    "/actuator/**",
                 			    "/admintool/**"
                 			).permitAll()
 

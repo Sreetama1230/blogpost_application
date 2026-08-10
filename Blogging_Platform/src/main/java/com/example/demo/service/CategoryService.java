@@ -3,14 +3,18 @@ package com.example.demo.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.catalina.security.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.EventDao;
 import com.example.demo.dao.ServiceRequestIdDao;
+import com.example.demo.dao.UserDao;
+import com.example.demo.dto.CategoryDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -19,6 +23,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Category;
 import com.example.demo.model.Event;
 import com.example.demo.model.ServiceRequestId;
+import com.example.demo.model.User;
 import com.example.demo.response.BlogPostResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +40,9 @@ public class CategoryService {
 	private ServiceRequestIdDao serviceRequestIdDao;
 
 	@Autowired
+	private UserDao userDao;
+
+	@Autowired
 	private EventDao eventDao;
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -46,16 +54,20 @@ public class CategoryService {
 
 		// check if there any service request is provided (only for create)
 
-		if ( (cg.getId() == null || cg.getId() <= 0) &&   requestId != null &&  !requestId.isEmpty()   ) {
-			
+		if ((cg.getId() == null || cg.getId() <= 0) && requestId != null && !requestId.isEmpty()) {
+
 			try {
-				if (!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId , TransactionType.CATEGORY).isEmpty()) {
+				if (!serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId, TransactionType.CATEGORY)
+						.isEmpty()) {
 					logger.info("returning the existing transaction");
 
-					if (!categoryDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId , TransactionType.CATEGORY).get()).isPresent()) {
+					if (!categoryDao.findById(serviceRequestIdDao
+							.findByServiceRequestIdAndTransactionType(requestId, TransactionType.CATEGORY).get())
+							.isPresent()) {
 						throw new ResourceNotFoundException("Resource is not found!");
 					}
-					return categoryDao.findById(serviceRequestIdDao.findByServiceRequestIdAndTransactionType(requestId ,TransactionType.CATEGORY ).get()).get();
+					return categoryDao.findById(serviceRequestIdDao
+							.findByServiceRequestIdAndTransactionType(requestId, TransactionType.CATEGORY).get()).get();
 
 				}
 			} catch (ResourceNotFoundException e) {
@@ -74,22 +86,49 @@ public class CategoryService {
 			cg.setName(str);
 
 		}
-		Category newCategory = categoryDao.save(cg);
-		   // adding record to the service request DB
-		if(requestId != null && !requestId.equals("")) {
-	    	serviceRequestIdDao.save(new ServiceRequestId(newCategory.getId(), requestId, TransactionType.CATEGORY));
+		Long categoryAuthorId = SecurityUtils.getCurrentUserId();
+		if (!userDao.findById(categoryAuthorId).isPresent()) {
+			throw new ResourceNotFoundException("user id is not valid");
 		}
-     
-		Event event = new Event();
+		User categoryAuthor = userDao.findById(categoryAuthorId).get();
 
+		cg.setUser(categoryAuthor);
+		Category newCategory = categoryDao.save(cg);
+		categoryAuthor.getCategories().add(newCategory);
+		userDao.save(categoryAuthor);
+
+		// need to publish the user update event
+		Event subEvent1 = new Event();
+
+		subEvent1.setEventType(EventType.UPDATE);
+		subEvent1.setCreatedAt(LocalDateTime.now());
+		subEvent1.setPayload(
+				objectMapper.writeValueAsString("Updated user while creating the category: " + newCategory.getId()));
+		subEvent1.setPublishedAt(LocalDateTime.now());
+		subEvent1.setStatus(EventStatus.PENDING);
+		subEvent1.setTransactionId(String.valueOf(categoryAuthorId));
+		subEvent1.setTransactionType(TransactionType.USER);
+		subEvent1.setRetryCount(0);
+		subEvent1.setRecipientUserId(categoryAuthorId);
+		subEvent1.setActorUserId(categoryAuthorId);
+		eventDao.save(subEvent1);
+
+		// adding record to the service request DB
+		if (requestId != null && !requestId.equals("")) {
+			serviceRequestIdDao.save(new ServiceRequestId(newCategory.getId(), requestId, TransactionType.CATEGORY));
+		}
+
+		Event event = new Event();
 		event.setEventType(EventType.CREATE);
 		event.setCreatedAt(LocalDateTime.now());
-		event.setPayload(objectMapper.writeValueAsString(cg));
+		event.setPayload(objectMapper.writeValueAsString(CategoryDTO.convertToCategoryDTO(cg)));
 		event.setPublishedAt(LocalDateTime.now());
 		event.setStatus(EventStatus.PENDING);
 		event.setTransactionId(String.valueOf(newCategory.getId()));
 		event.setTransactionType(TransactionType.CATEGORY);
 		event.setRetryCount(0);
+		event.setRecipientUserId(categoryAuthorId);
+		event.setActorUserId(categoryAuthorId);
 		eventDao.save(event);
 
 		return newCategory;
@@ -138,6 +177,9 @@ public class CategoryService {
 				event.setTransactionId(String.valueOf(c.getId()));
 				event.setTransactionType(TransactionType.CATEGORY);
 				event.setRetryCount(0);
+				Long userId = SecurityUtils.getCurrentUserId();
+				event.setRecipientUserId(c.getUser().getId());
+				event.setActorUserId(userId);
 				eventDao.save(event);
 
 				return c;

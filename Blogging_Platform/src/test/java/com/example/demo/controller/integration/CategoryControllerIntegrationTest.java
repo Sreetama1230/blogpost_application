@@ -82,26 +82,25 @@ public class CategoryControllerIntegrationTest {
 	@Autowired
 	private CategoryService categoryService;
 
-    @Autowired
-    private EventDao eventDao;
+	@Autowired
+	private EventDao eventDao;
 	private static HttpHeaders headers;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-    @MockBean
-    private ModerationService moderationClient;
+	@MockBean
+	private ModerationService moderationClient;
 
-    @BeforeEach
-    public  void init() {
-        headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+	@BeforeEach
+	public void init() {
+		headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ModerationResponse response = new ModerationResponse();
-        response.setApproved(true);
-        response.setResponse("Approved");
+		ModerationResponse response = new ModerationResponse();
+		response.setApproved(true);
+		response.setResponse("Approved");
 
-        when(moderationClient.checkContent(any(BlogPostDTO.class)))
-                .thenReturn(response);
-    }
+		when(moderationClient.checkContent(any(BlogPostDTO.class))).thenReturn(response);
+	}
 
 	private String createURLWithPort() {
 		return "http://localhost:" + port + "/category";
@@ -109,9 +108,10 @@ public class CategoryControllerIntegrationTest {
 	}
 
 
-    @Test
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	
+	@Test
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreateCategory() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -120,7 +120,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser,"");
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -142,14 +142,14 @@ public class CategoryControllerIntegrationTest {
 		assertNotNull(categoryResponse);
 		assertEquals("#fake-category", categoryResponse.getName());
 
-       Event event =  eventDao.findByTransactionIdAndEventType(categoryResponse.getId()+"" , EventType.CREATE).get();
-        assertEquals(EventStatus.PENDING, event.getStatus());
-        assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+		Event event = eventDao.findByTransactionIdAndEventType(categoryResponse.getId() + "", EventType.CREATE).get();
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
 	}
 
-    @Test
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Test
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testGetAll() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
@@ -158,7 +158,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser,"");
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -181,10 +181,9 @@ public class CategoryControllerIntegrationTest {
 		assertEquals("#fake-category", categoryResponse.getName());
 	}
 
-
-    @Test
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Test
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(scripts = "/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void testListBlogsByCategory() throws JsonProcessingException {
 
 		UserDTO newUser = new UserDTO();
@@ -194,7 +193,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-9" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		User createdUser = userService.createUser(newUser,"");
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -208,7 +207,7 @@ public class CategoryControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
+		blogPostService.createOrUpdateBlogPost(blogPostDTO, "");
 
 		ResponseEntity<List<BlogPostResponse>> response = template.exchange(
 				createURLWithPort() + "/name?name=" + categoryDTO.getName(), HttpMethod.GET, null,
@@ -226,12 +225,12 @@ public class CategoryControllerIntegrationTest {
 	public void testDeleteById() throws JsonProcessingException {
 		UserDTO newUser = new UserDTO();
 		newUser.setBio("test-bio");
-		newUser.setEmail("test@12345gmail.com");
+		newUser.setEmail("test" + UUID.randomUUID() + "@12345gmail.com");
 		newUser.setPassword("password123");
 		newUser.setUsername("test-username" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser,"");
+		User createdUser = userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -239,24 +238,26 @@ public class CategoryControllerIntegrationTest {
 
 		headers.setBearerAuth(authResp.getToken());
 
-		Category category = categoryDao.save(new Category("#fake-category", new HashSet<>()));
+		Category category = categoryDao
+				.save(new Category("#fake-category", new HashSet<>(), createdUser));
 
-		HttpEntity<String> entity = 	new HttpEntity<>(null, headers);
+		HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
-		ResponseEntity<Category> resp = template.exchange(createURLWithPort() + "/" + category.getId(),
-				HttpMethod.DELETE, entity, Category.class);
+		ResponseEntity<CategoryResponse> resp = template.exchange(createURLWithPort() + "/" + category.getId(),
+				HttpMethod.DELETE, entity, CategoryResponse.class);
+		
 
-		Category deletedResponse = resp.getBody();
+		CategoryResponse deletedResponse = resp.getBody();
 
 		assertEquals(HttpStatus.OK, resp.getStatusCode());
 		assertEquals("#fake-category", deletedResponse.getName());
 		assertNotNull(deletedResponse);
 
-        Event event = eventDao.findByTransactionIdAndEventType(category.getId()+"" , EventType.DELETE).get();
+		Event event = eventDao.findByTransactionIdAndEventType(category.getId() + "", EventType.DELETE).get();
 
-        assertEquals(EventStatus.PENDING, event.getStatus());
-        assertEquals(TransactionType.CATEGORY, event.getTransactionType());
-        assertEquals(0, event.getRetryCount());
+		assertEquals(EventStatus.PENDING, event.getStatus());
+		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+		assertEquals(0, event.getRetryCount());
 	}
 
 	@Test
@@ -269,7 +270,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-9" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser,"");
+		userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -285,7 +286,7 @@ public class CategoryControllerIntegrationTest {
 
 		blogPostDTO.setCategories(new HashSet<>(Set.of(categoryDTO)));
 
-		blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
+		blogPostService.createOrUpdateBlogPost(blogPostDTO, "");
 
 		Category category = categoryService.getByName("#" + categoryDTO.getName());
 
@@ -310,7 +311,7 @@ public class CategoryControllerIntegrationTest {
 		newUser.setUsername("test-username-10-" + UUID.randomUUID());
 		newUser.setRoles(Set.of("ROLE_ADMIN"));
 
-		userService.createUser(newUser,"");
+		userService.createUser(newUser, "");
 
 		AuthRequest authRequest = new AuthRequest(newUser.getUsername(), "password123");
 
@@ -322,8 +323,8 @@ public class CategoryControllerIntegrationTest {
 
 				new HttpEntity<>(null, headers);
 
-		ResponseEntity<ErrorDetails> response = template.exchange(createURLWithPort() + "/1" ,
-				HttpMethod.DELETE, entity, ErrorDetails.class);
+		ResponseEntity<ErrorDetails> response = template.exchange(createURLWithPort() + "/1", HttpMethod.DELETE, entity,
+				ErrorDetails.class);
 
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		assertEquals("Category with provided id is not present.", response.getBody().getMsg());

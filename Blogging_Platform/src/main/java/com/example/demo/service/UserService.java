@@ -132,6 +132,8 @@ public class UserService {
 			event.setTransactionId(String.valueOf(newUser.getId()));
 			event.setTransactionType(TransactionType.USER);
 			event.setRetryCount(0);
+			event.setRecipientUserId(newUser.getId());
+			event.setActorUserId(newUser.getId());
 			eventDao.save(event);
 
 			return newUser;
@@ -207,6 +209,8 @@ public class UserService {
 				event.setTransactionId(String.valueOf(updatedUser.getId()));
 				event.setTransactionType(TransactionType.USER);
 				event.setRetryCount(0);
+				event.setRecipientUserId(updatedUser.getId());
+				event.setActorUserId(updatedUser.getId());
 				eventDao.save(event);
 
 				return updatedUser;
@@ -263,6 +267,8 @@ public class UserService {
 				event.setTransactionId(String.valueOf(dbUser.getId()));
 				event.setTransactionType(TransactionType.USER);
 				event.setRetryCount(0);
+				event.setRecipientUserId(dbUser.getId());
+				event.setActorUserId(dbUser.getId());
 				eventDao.save(event);
 
 				return resp;

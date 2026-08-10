@@ -20,10 +20,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.CategoryDao;
 import com.example.demo.dao.EventDao;
+import com.example.demo.dao.UserDao;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -46,6 +50,9 @@ public class CategoryServiceUnitTest {
 
 	@InjectMocks
 	private CategoryService categoryService;
+
+	@Mock
+	private UserDao userDao;
 
 	@Mock
 	private EventDao eventDao;
@@ -82,7 +89,13 @@ public class CategoryServiceUnitTest {
 		categories = new HashSet<>();
 		HashSet<BlogPost> blogPosts = new HashSet<>();
 		blogPosts.add(blogPost);
-		categories.add(new Category("fake-category", blogPosts));
+		Category newCategory = new Category();
+		newCategory.setBlogPosts(blogPosts);
+		newCategory.setName("fake-category");
+		newCategory.setUser(user);
+
+		categories.add(newCategory);
+
 		blogPost.setCategories(categories);
 
 		comment = new Comment();
@@ -94,6 +107,8 @@ public class CategoryServiceUnitTest {
 
 		blogPost.setComments(new ArrayList<>(List.of(comment)));
 		comment.setBlogPost(blogPost);
+		listCategory.add(newCategory);
+		user.setCategories(listCategory);
 
 		List<BlogPost> listofUserBlogPosts = new ArrayList<>();
 		listofUserBlogPosts.add(blogPost);
@@ -182,60 +197,74 @@ public class CategoryServiceUnitTest {
 	@Test
 	public void testCreateCategory() throws JsonProcessingException {
 
-		Category newCategory = new Category("#test", new HashSet<>());
-		when(categoryDao.save(newCategory)).thenReturn(newCategory);
+		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
+				Mockito.CALLS_REAL_METHODS)) {
 
-		Category savedCategory = categoryService.createCategory(newCategory,"");
+			mockedStatic.when(SecurityUtils::getCurrentUserId).thenReturn(1L);
 
-		assertEquals(newCategory.getId(), savedCategory.getId());
-		assertEquals(newCategory.getName(), savedCategory.getName());
+			when(userDao.findById(1L)).thenReturn(Optional.of(user));
 
-		String payload = objectMapper.writeValueAsString(newCategory);
+			Category newCategory = new Category("#test", new HashSet<>());
+			when(categoryDao.save(newCategory)).thenReturn(newCategory);
 
-		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+			Category savedCategory = categoryService.createCategory(newCategory, "");
 
-		verify(eventDao).save(captor.capture());
+			assertEquals(newCategory.getId(), savedCategory.getId());
+			assertEquals(newCategory.getName(), savedCategory.getName());
 
-		Event event = captor.getValue();
+			String payload = objectMapper.writeValueAsString(newCategory);
 
-		assertEquals(EventType.CREATE, event.getEventType());
-		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
-		assertEquals(EventStatus.PENDING, event.getStatus());
-		assertEquals(savedCategory.getId() + "", event.getTransactionId());
-		assertEquals(0, event.getRetryCount());
-		assertEquals(payload, event.getPayload());
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
+			verify(eventDao,times(2)).save(captor.capture());
+
+			Event event = captor.getValue();
+
+			assertEquals(EventType.CREATE, event.getEventType());
+			assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(savedCategory.getId() + "", event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
+
+		}
 
 	}
 
 	@Test
 	public void testDeleteById() throws JsonProcessingException {
 
-		Category newCategory = new Category("#test", new HashSet<>());
-		newCategory.setId(5L);
+		try (MockedStatic<SecurityUtils> mockedStatic = Mockito.mockStatic(SecurityUtils.class,
+				Mockito.CALLS_REAL_METHODS)) {
 
-		when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
+			mockedStatic.when(SecurityUtils::getCurrentUserId).thenReturn(1L);
+			Category newCategory = new Category("#test", new HashSet<>());
+			newCategory.setId(5L);
+			newCategory.setUser(user);
+			when(categoryDao.findById(5L)).thenReturn(Optional.of(newCategory));
 
-		Category deletedCategory = categoryService.deleteById(5L);
+			Category deletedCategory = categoryService.deleteById(5L);
 
-		assertEquals(newCategory.getId(), deletedCategory.getId());
-		assertEquals(newCategory.getName(), deletedCategory.getName());
+			assertEquals(newCategory.getId(), deletedCategory.getId());
+			assertEquals(newCategory.getName(), deletedCategory.getName());
 
-		verify(categoryDao).deleteById(5L);
-		
-		String payload = objectMapper.writeValueAsString(deletedCategory.getId());
+			verify(categoryDao).deleteById(5L);
 
-		ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+			String payload = objectMapper.writeValueAsString(deletedCategory.getId());
 
-		verify(eventDao).save(captor.capture());
+			ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
 
-		Event event = captor.getValue();
+			verify(eventDao).save(captor.capture());
 
-		assertEquals(EventType.DELETE, event.getEventType());
-		assertEquals(TransactionType.CATEGORY, event.getTransactionType());
-		assertEquals(EventStatus.PENDING, event.getStatus());
-		assertEquals(deletedCategory.getId() + "", event.getTransactionId());
-		assertEquals(0, event.getRetryCount());
-		assertEquals(payload, event.getPayload());
+			Event event = captor.getValue();
+
+			assertEquals(EventType.DELETE, event.getEventType());
+			assertEquals(TransactionType.CATEGORY, event.getTransactionType());
+			assertEquals(EventStatus.PENDING, event.getStatus());
+			assertEquals(deletedCategory.getId() + "", event.getTransactionId());
+			assertEquals(0, event.getRetryCount());
+			assertEquals(payload, event.getPayload());
+		}
 
 	}
 

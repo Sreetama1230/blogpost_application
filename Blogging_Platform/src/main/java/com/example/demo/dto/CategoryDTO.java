@@ -43,6 +43,7 @@ public class CategoryDTO {
 	public static CategoryDTO convertToCategoryDTO(Category category) {
 		CategoryDTO dto = new CategoryDTO();
 		dto.setName(category.getName());
+		dto.setSyncToken(category.getSyncToken());
 		return dto;
 	}
 

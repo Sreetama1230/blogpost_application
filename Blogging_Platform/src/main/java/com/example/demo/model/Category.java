@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Version;
 
 @Entity
@@ -24,7 +25,9 @@ public class Category {
 	@ManyToMany(mappedBy = "categories")
 	private Set<BlogPost> blogPosts = new HashSet<>();
 
-
+	@ManyToOne
+	private User user;
+	
 	@Version
 	private Long syncToken;
 	
@@ -53,12 +56,6 @@ public class Category {
 		super();
 	}
 
-	public Category(String name, Set<BlogPost> blogPosts) {
-		super();
-		this.name = name;
-		this.blogPosts = blogPosts;
-	}
-
 	public void setBlogPosts(HashSet<BlogPost> blogPosts) {
 		this.blogPosts = blogPosts;
 	}
@@ -81,6 +78,21 @@ public class Category {
 		this.syncToken = syncToken;
 	}
 
+	
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public void setBlogPosts(Set<BlogPost> blogPosts) {
+		this.blogPosts = blogPosts;
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -92,5 +104,38 @@ public class Category {
 		Category other = (Category) obj;
 		return Objects.equals(name, other.name);
 	}
+	
+
+	public Category(String name, Set<BlogPost> blogPosts) {
+		super();
+		this.name = name;
+		this.blogPosts = blogPosts;
+	}
+
+	public Category(String name, Set<BlogPost> blogPosts, User user) {
+		super();
+		this.name = name;
+		this.blogPosts = blogPosts;
+		this.user = user;
+	}
+
+	public Category(Long id, String name, Set<BlogPost> blogPosts, User user, Long syncToken) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.blogPosts = blogPosts;
+		this.user = user;
+		this.syncToken = syncToken;
+	}
+
+	public Category(String name, Set<BlogPost> blogPosts, User user, Long syncToken) {
+		super();
+		this.name = name;
+		this.blogPosts = blogPosts;
+		this.user = user;
+		this.syncToken = syncToken;
+	}
+
+	
 
 }
