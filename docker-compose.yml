@@ -31,9 +31,8 @@ services:
       test:
         [
           "CMD",
-          "wget",
-          "--spider",
-          "-q",
+          "curl",
+          "-f",
           "http://localhost:8089/actuator/health"
         ]
       interval: 10s
