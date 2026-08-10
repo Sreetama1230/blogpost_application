@@ -40,6 +40,49 @@ services:
       retries: 10
       start_period: 30s
 
+  admintool-service:
+    build: ./AdminTool
+    ports:
+      - "8081:8081"
+    networks:
+      - service-network
+    depends_on:
+      kafka:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8081/actuator/health"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  notification-service:
+    build: ./NotificationService
+    ports:
+      - "8088:8088"
+    networks:
+      - service-network
+    depends_on:
+      kafka:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8088/actuator/health"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
   mysql:
     image: mysql:8
     ports:
