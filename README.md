@@ -198,9 +198,8 @@ Examples of events:
 
 ```text
 [
-"Event [id=31, transactionType=CATEGORY, transactionId=8, eventType=CREATE, payload={\"name\":\"lifestyle\"}, status=PROCESSING, createdAt=2026-07-19T23:58:47.558106, publishedAt=2026-07-19T23:58:47.558196, lastAttemptAt=2026-07-19T23:58:47.596545236, retryCount=0]",
-  "Event [id=32, transactionType=USER, transactionId=26, eventType=UPDATE, payload=\"Updated User while creating the blogpost: 26\", status=PROCESSING, createdAt=2026-07-19T23:58:47.565348, publishedAt=2026-07-19T23:58:47.565394, lastAttemptAt=2026-07-19T23:58:47.596897418, retryCount=0]",
-  "Event [id=33, transactionType=BLOGPOST, transactionId=14, eventType=CREATE, payload={\"id\":0,\"title\":\"today's blog\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\"}]}, status=PROCESSING, createdAt=2026-07-19T23:58:47.566730, publishedAt=2026-07-19T23:58:47.566785, lastAttemptAt=2026-07-19T23:58:47.597109750, retryCount=0]"
+    "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
+    "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
 ]
 ```
 ### Toggling Feature
@@ -461,7 +460,17 @@ So, if you send the same `POST` request multiple times with the same `requestId`
 If, for any reason, the object associated with that `requestId` has been deleted, the API will throw a `Resource is not found!` exception.
 
 
-
+## 4) Notification
+User will get notified 
+Access URL - `http://localhost:8088/notification`
+```
+[
+    "Profile Updated!",
+    "Your blog post has been added successfully!",
+    "Someone has liked your post!",
+    "Someone has started following you!"
+]
+```
 
 ### Technologies Used
 
