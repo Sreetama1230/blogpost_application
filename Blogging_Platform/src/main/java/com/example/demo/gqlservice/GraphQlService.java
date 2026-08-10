@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
@@ -234,6 +235,8 @@ public class GraphQlService {
 			event.setTransactionId(String.valueOf(updatedBlogPostResponse.getId()));
 			event.setTransactionType(TransactionType.BLOGPOST);
 			event.setRetryCount(0);
+			event.setRecipientUserId(updatedBlogPostResponse.getAuthor().getId());
+			event.setActorUserId(SecurityUtils.getCurrentUserId());
 			eventDao.save(event);
 
 			return updatedBlogPostResponse;
@@ -302,6 +305,8 @@ public class GraphQlService {
 			event.setTransactionId(String.valueOf(pinnedBlogPost.getId()));
 			event.setTransactionType(TransactionType.BLOGPOST);
 			event.setRetryCount(0);
+			event.setRecipientUserId(pinnedBlogPost.getAuthor().getId());
+			event.setActorUserId(SecurityUtils.getCurrentUserId());
 			eventDao.save(event);
 
 			return pinnedBlogPost;
@@ -367,6 +372,8 @@ public class GraphQlService {
 			event.setTransactionId(String.valueOf(follower));
 			event.setTransactionType(TransactionType.USER);
 			event.setRetryCount(0);
+			event.setRecipientUserId(followee);
+			event.setActorUserId(follower);
 			eventDao.save(event);
 			return resp;
 
@@ -440,6 +447,8 @@ public class GraphQlService {
 			event.setTransactionId(String.valueOf(blocker));
 			event.setTransactionType(TransactionType.USER);
 			event.setRetryCount(0);
+			event.setRecipientUserId(blockedUser);
+			event.setActorUserId(blocker);
 			eventDao.save(event);
 
 			return resp;

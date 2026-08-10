@@ -43,6 +43,11 @@ public class Event {
 	@Column
 	private int retryCount;
 	
+	@Column
+	private  Long recipientUserId; //The ID of the user who should receive the notification.
+	
+	@Column
+	private Long actorUserId;
 	
 	public Long getId() {
 		return id;
@@ -144,15 +149,34 @@ public class Event {
 	}
 	public Event() {
 		super();
-		// TODO Auto-generated constructor stub
+	}
+	
+	
+	public Long getRecipientUserId() {
+		return recipientUserId;
+	}
+	public void setRecipientUserId(Long recipientUserId) {
+		this.recipientUserId = recipientUserId;
+	}
+	public Long getActorUserId() {
+		return actorUserId;
+	}
+	public void setActorUserId(Long actorUserId) {
+		this.actorUserId = actorUserId;
 	}
 	@Override
 	public String toString() {
-		return "Event [id=" + id + ", transactionType=" + transactionType + ", transactionId=" + transactionId
-				+ ", eventType=" + eventType + ", payload=" + payload + ", status=" + status + ", createdAt="
-				+ createdAt + ", publishedAt=" + publishedAt + ", lastAttemptAt=" + lastAttemptAt + ", retryCount="
-				+ retryCount + "]";
+		return "transactionType=" + transactionType + ", transactionId=" + transactionId + ", eventType="
+				+ eventType + ", payload=" + payload + ", status=" + status + ", createdAt=" + createdAt
+				+ ", publishedAt=" + publishedAt + ", lastAttemptAt=" + lastAttemptAt + ", retryCount=" + retryCount
+				+ ", recipientUserId=" + recipientUserId + ", actorUserId=" + actorUserId;
 	}
+	
+	
+
+	
+	
+	
 	
 	
 	

@@ -79,7 +79,7 @@ public class CategoryController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Category> deleteById(@PathVariable Long id) throws JsonProcessingException {
-		return new ResponseEntity<>(service.deleteById(id), HttpStatus.OK);
+	public ResponseEntity<CategoryResponse> deleteById(@PathVariable Long id) throws JsonProcessingException {
+		return new ResponseEntity<>( CategoryResponse.convertCategoryResponse(service.deleteById(id)), HttpStatus.OK);
 	}
 }

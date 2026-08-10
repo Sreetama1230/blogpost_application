@@ -168,7 +168,9 @@ public class CommentService {
 		event.setTransactionId(String.valueOf(upsertComment.getId()));
 		event.setTransactionType(TransactionType.COMMENT);
 		event.setRetryCount(0);
-		eventDao.save(event);
+		event.setRecipientUserId(upsertComment.getUser().getId()); //Creator  of the comment
+		event.setActorUserId(userId); //current logged in user
+		eventDao.save(event); 
 
 		logger.info("returning response... " + newBlogPostWithComment.getContent());
 		return BlogPostResponse.convertBlogPostRespons(newBlogPostWithComment);
@@ -201,6 +203,8 @@ public class CommentService {
 				event.setTransactionId(String.valueOf(c.getId()));
 				event.setTransactionType(TransactionType.COMMENT);
 				event.setRetryCount(0);
+				event.setRecipientUserId(commentAuthor.getId()); //Creator  of the comment
+				event.setActorUserId(userId);
 				eventDao.save(event);
 
 				return cr;
@@ -268,6 +272,8 @@ public class CommentService {
 			event.setTransactionId(String.valueOf(reactedComment.getId()));
 			event.setTransactionType(TransactionType.COMMENT);
 			event.setRetryCount(0);
+			event.setRecipientUserId(dbComment.getUser().getId()); //Creator  of the comment
+			event.setActorUserId(id);
 			eventDao.save(event);
 
 			return CommentResponse.convertCommentResponse(reactedComment);

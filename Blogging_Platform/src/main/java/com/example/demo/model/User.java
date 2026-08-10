@@ -58,6 +58,8 @@ public class User implements Comparable<User> {
 	@OneToMany(mappedBy = "user")
 	private List<Comment> comments = new ArrayList<>();;
 
+	@OneToMany(mappedBy = "user")
+	private List<Category> categories = new ArrayList<>();
 	// any particular user has pinned some posts
 	@ManyToMany
 	@JoinTable(
@@ -65,32 +67,6 @@ public class User implements Comparable<User> {
 			name = "pinned_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
 
 	private Set<BlogPost> pinnedBlogPosts = new HashSet<>();
-
-	public User(String username, String password, Set<String> roles, Long followers, Long following, String bio,
-			@Email String email, Long totalPosts, List<BlogPost> blogPosts, List<Comment> comments,
-			Set<BlogPost> pinnedBlogPosts, List<BlogPost> likedBlogPosts, List<BlogPost> dislikedBlogPosts,
-			Set<User> listfollowing, Set<User> listfollowers, Set<User> blockedUsers, Set<User> blockedByUsers,
-			Long syncToken) {
-		super();
-		this.username = username;
-		this.password = password;
-		this.roles = roles;
-		this.followers = followers;
-		this.following = following;
-		this.bio = bio;
-		this.email = email;
-		this.totalPosts = totalPosts;
-		this.blogPosts = blogPosts;
-		this.comments = comments;
-		this.pinnedBlogPosts = pinnedBlogPosts;
-		this.likedBlogPosts = likedBlogPosts;
-		this.dislikedBlogPosts = dislikedBlogPosts;
-		this.listfollowing = listfollowing;
-		this.listfollowers = listfollowers;
-		this.blockedUsers = blockedUsers;
-		this.blockedByUsers = blockedByUsers;
-		this.syncToken = syncToken;
-	}
 
 	@ManyToMany
 
@@ -329,6 +305,41 @@ public class User implements Comparable<User> {
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email
 				+ ", blogPosts=" + blogPosts + ", comments=" + comments + "]";
+	}
+
+
+	public List<Category> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<Category> categories) {
+		this.categories = categories;
+	}
+
+	public User(String username, String password, Set<String> roles, Long followers, Long following, String bio,
+			@Email String email, Long totalPosts, List<BlogPost> blogPosts, List<Comment> comments,
+			Set<BlogPost> pinnedBlogPosts, List<BlogPost> likedBlogPosts, List<BlogPost> dislikedBlogPosts,
+			Set<User> listfollowing, Set<User> listfollowers, Set<User> blockedUsers, Set<User> blockedByUsers,
+			Long syncToken) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.roles = roles;
+		this.followers = followers;
+		this.following = following;
+		this.bio = bio;
+		this.email = email;
+		this.totalPosts = totalPosts;
+		this.blogPosts = blogPosts;
+		this.comments = comments;
+		this.pinnedBlogPosts = pinnedBlogPosts;
+		this.likedBlogPosts = likedBlogPosts;
+		this.dislikedBlogPosts = dislikedBlogPosts;
+		this.listfollowing = listfollowing;
+		this.listfollowers = listfollowers;
+		this.blockedUsers = blockedUsers;
+		this.blockedByUsers = blockedByUsers;
+		this.syncToken = syncToken;
 	}
 
 }
