@@ -162,7 +162,8 @@ Each entity contains a `syncToken` field. If an incorrect `syncToken` value is p
 ###  Idempotency
 
 If Client wants to enable idempotency, include the `requestId` as a request parameter, as shown below.
-`http://localhost:8080/comment?blogPostId=1&requestId=67847`
+```http://localhost:8080/comment?blogPostId=1&requestId=67847```
+<br>
 So, if we send the same `POST` request multiple times with the same `requestId`, the API will return the existing object/transaction, **regardless of the request body**.
 For any reason, the object associated with that `requestId` has been deleted, the API will throw a `Resource is not found!` exception.
 
