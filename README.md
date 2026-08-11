@@ -426,7 +426,7 @@ http://localhost:<...>/graphql
 ```
 ### Postman Collection 
 ```
-https://github.com/Sreetama1230/blogpost_application/blob/main/BlogPost_AdminTool_APIs.postman_collection.json
+https://github.com/Sreetama1230/blogpost_application/blob/main/blogpost_application_APIs.postman_collection.json
 ```
 ---
 
