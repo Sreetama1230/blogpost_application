@@ -1,30 +1,75 @@
-# Scalable Content Publishing & Moderation Platform - Event Driven Blogging Platform
+# BlogPost Application — Event-Driven Blogging Platform
 
 ## Overview
 
 BlogPost Application is a Spring Boot based blogging platform that enables users to create and manage blog posts, comments, categories, followers, reactions, and user relationships.
 
-The project follows an **event-driven architecture** using **Apache Kafka**. Whenever important actions occur inside the **Blogging Platform**, events are published to Kafka and consumed by a separate **AdminTool** service for monitoring and auditing purposes. This project uses the **outbox** design pattern for publishing events.
+The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **four independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST and Kafka:
 
-Logging is implemented using **AOP and SLF4J.**
+* **Blogging_Platform** (`:8080`) — the core platform: auth, posts, comments, categories, social graph, feed/timeline, GraphQL. The only Kafka producer in the system.
+* **AIContentModerationService** (`:8089`) — stateless moderation gate, called synchronously by Blogging_Platform before a post is persisted.
+* **AdminTool** (`:8081`) — Kafka consumer, audit/monitoring endpoint.
+* **NotificationService** (`:8088`) — Kafka consumer, translates events into human-readable notification strings.
 
-Spring Boot **Actuator** is used to monitor, manage, and audit running applications.
+This project uses the **outbox pattern** for publishing events: writes are persisted to an `Event` table first, and a scheduled poller drains them onto Kafka — so an event is never lost even if Kafka is briefly unavailable.
 
-This project consists of two Spring Boot applications:
-
-* **Blogging_Platform** (Kafka Producer)
-* **AdminTool** (Kafka Consumer)
+Logging is implemented using **AOP and SLF4J**. Spring Boot **Actuator** is used to monitor, manage, and audit running applications, and its `/actuator/health` endpoint gates service startup ordering in Docker Compose.
 
 ---
 
+
+
 ## Architecture
-<img width="4400" height="3600" alt="blogpost_architecture_expanded (1)" src="https://github.com/user-attachments/assets/ef371a5a-6a5e-41cc-965b-124e4f423507" />
 
 
 
-### Blogging Platform (Producer)
+```
+                       ┌────────────┐
+                       │   Client   │
+                       └─────┬──────┘
+                             │ POST /blog (JWT)
+                             ▼
+                   ┌───────────────────────┐        POST /moderate        ┌──────────────────────────────┐
+                   │   Blogging_Platform   │ ───────────────────────────▶ │  AIContentModerationService  │
+                   │        :8080          │   retry ×3 / circuit-breaker │            :8089             │
+                   └──────────┬────────────┘ ◀─────────────────────────── └───────────────┬──────────────┘
+                              │                                                           │
+                   writes row +                                                  generateContent
+                   Event(PENDING)                                                         ▼
+                             ▼                                                 ┌─────────────────────┐
+                   ┌──────────────────────┐                                    │  Google Gemini API  │
+                   │  MySQL: blogposts_db │                                    │      (external)     │
+                   └──────────┬───────────┘                                    └───────────┬─────────┘
+                              │                                                            │
+                   polls PENDING every 5s                                    on 429 → local keyword
+                              ▼                                                blacklist fallback
+                   ┌───────────────────┐
+                   │   EventPublisher  │
+                   │    (@Scheduled)   │
+                   └──────────┬────────┘
+                              │ publish to both topics
+                              ▼
+                   ┌───────────────────────────────────────┐
+                   │               Kafka                   │
+                   │  admin-topic  ·  notification-topic   │
+                   └───────┬─────────────────────┬─────────┘
+                           │ group-1             │ group-2
+                           ▼                     ▼
+                   ┌───────────────┐     ┌──────────────────────────┐
+                   │   AdminTool   │     │   NotificationService    │
+                   │     :8081     │     │         :8088            │
+                   │  GET /events  │     │  GET /notification       │
+                   │ (in-memory)   │     │    (in-memory)           │
+                   └───────────────┘     └──────────────────────────┘
+```
 
-Responsible for:
+
+
+A second, separate producer path exists: `GET /admintool` on Blogging_Platform sends the logged-in username directly to `admin-topic`, bypassing the outbox/`Event` table entirely.
+
+### Blogging Platform (core service, Kafka producer)
+**REST** and **GraphQl** APIs are 
+responsible for:
 
 * User Management
 * Authentication & Authorization
@@ -37,29 +82,39 @@ Responsible for:
 * Reactions
 * Timeline/Feed
 
+Publishes events to Kafka (via the outbox) when:
 
-Publishes events to Kafka when:
-
-* User Created
-* Blog Post Created
-* Blog Post Updated
-* Blog Post Deleted
+* User Created/Updated/Deleted
+* Blog Post Created/Updated/Deleted/Reacted 
+* Category Created/Deleted
+* Comment Created/Updated/Deleted/Reacted
 * Follow/Unfollow related
 * Block/Unblock related
-* Reacting on posts/comments
+* Reacting on posts/comments, Pin/Unpin
 
-### Admin Tool (Consumer)
+### AI Content Moderation Service (stateless, synchronous)
 
-Consumes Kafka events generated by the Blogging Platform and provides a **monitoring** endpoint.
+Called by Blogging_Platform on every blog post create/update, **before** the post is persisted. Has no database and no Kafka involvement — a pure REST wrapper around the Gemini API.
+
+Github Link - https://github.com/Sreetama1230/AIContentModeration
+
+### Admin Tool (Kafka consumer)
+
+Consumes events from `admin-topic` and the separate `/admintool` login-broadcast path) and exposes them via a **monitoring** endpoint.
+
+State is held **in an in-memory list only** — nothing is persisted to a database, so the event list resets on service restart.
 
 Example Response:
-It may contain the request body or some custom messages to understand what operation someone has done.
 ```json
 [
-  "Event [id=21, transactionType=USER, transactionId=25, eventType=DELETE, payload=25, status=PROCESSING, createdAt=2026-07-19T23:28:35.029139, publishedAt=2026-07-19T23:28:35.029202, lastAttemptAt=2026-07-19T23:28:37.583146210, retryCount=0]",
-  "Event [id=22, transactionType=USER, transactionId=24, eventType=DELETE, payload=24, status=PROCESSING, createdAt=2026-07-19T23:32:36.748003, publishedAt=2026-07-19T23:32:36.748039, lastAttemptAt=2026-07-19T23:32:37.790795975, retryCount=0]"
+    "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
+    "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
 ]
 ```
+
+### Notification Service (Kafka consumer)
+
+Consumes events from `notification-topic` (compact event strings) and maps them to human-readable notification messages. State is also held in memory only — messages are not persisted to a database, so `GET /notification` reflects only what's been consumed since the service last started.
 
 ---
 
@@ -82,7 +137,6 @@ Permission Hierarchy:
 ```text
 ADMIN > EDITOR > USER
 ```
-
 ---
 
 ### User Management
@@ -100,7 +154,7 @@ A user can have only one valid role, and the email must contain `@`.
 * Get posts of a user
 * Get all users
 
-If you don't have the required permission, the request will fail with a 403 error.
+If you don't have the required permission, the request will fail with a **403** error.
 
 **GraphQL APIs**
 
@@ -113,6 +167,7 @@ If you don't have the required permission, the request will fail with a 403 erro
 * Follow or unfollow a user
 * Block a user
 * Get all the blocked users
+
 ---
 
 ### Blog Management
@@ -123,7 +178,7 @@ If you don't have the required permission, the request will fail with a 403 erro
 * Delete Blog Posts
 * Category-Based Organization
 * Get by title and user ID
-  
+
 **GraphQL APIs**
 * Trending Posts
 * Search Blog Posts by a keyword
@@ -142,7 +197,6 @@ If you don't have the required permission, the request will fail with a 403 erro
 
 ---
 
-
 ### Comment System
 
 * Add Comments
@@ -159,49 +213,54 @@ Supported Reactions:
 * FUNNY
 
 ---
+
 ## Feed / Timeline API
 
 Returns a paginated feed of posts. Logged-in users get posts from people they follow (plus some outside posts), ranked by net reactions (likes − dislikes) then recency; guests (or users with no follows) get a popularity feed ranked by reaction count and recency instead.
 
 ---
+
 ### Social Features
 
+**GraphQL APIs**
 * Follow Users
 * Unfollow Users
 * Block/Unblock Users
 * View Followers
 * View Following
 
----
 
-### GraphQL Support
-
-Implemented GraphQL APIs for:
-
-* Pagination
-* Search Blog Posts
-* Trending Posts
-* Pinned Unpinned Posts
-* Followers
-* Following
-* User Reactions on a Blog Post
-* Blocked Users
-* Unblocked Users
-
----
 
 ### Kafka Integration
 
-Kafka is used for asynchronous communication between services.
+Kafka is used for **one-way, asynchronous fan-out** from Blogging_Platform. Blogging_Platform is the only producer in the system; AdminTool and NotificationService only ever consume — no topic flows back toward Blogging_Platform.
 
-Examples of events:
+Two topics are published to on every outbox event:
 
-```text
+* `admin-topic` — full event dump, consumed by AdminTool (`groupId=group-1`)
+* `notification-topic` — compact `"<TransactionType> <EventType> <recipientUserId> <actorUserId>"` string, consumed by NotificationService (`groupId=group-2`)
+
+A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. 
+
+Example events (from the outbox):
+
+Endpoint : `\events`
+```
 [
     "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
     "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
 ]
 ```
+Endpoint : ```\notification```
+```
+[
+    "Profile Updated!",
+    "Your blog post has been added successfully!",
+    "Someone has liked your post!",
+    "Someone has started following you!"
+]
+```
+
 ### Toggling Feature
 The following GraphQL mutation operations support toggling behavior:
 
@@ -242,21 +301,22 @@ mutation SetReaction {
 
 ### Backend
 
-* Java 17
+* Java 17 (Blogging_Platform, AIContentModerationService, AdminTool, NotificationService)
 * Spring Boot
 * Spring Security
 * Spring Data JPA
 * Hibernate
 * Spring Kafka
 * GraphQL
+* Resilience4j (Retry & Circuit Breaker)
 
 ### Database
 
-* MySQL
+* MySQL — used by **Blogging_Platform**. AIContentModerationService, AdminTool, and NotificationService are stateless/in-memory and have no database dependency.
 
 ### Messaging
 
-* Apache Kafka
+* Apache Kafka (KRaft mode, no Zookeeper)
 
 ### Documentation
 
@@ -280,7 +340,7 @@ mutation SetReaction {
 
 ## Database Design
 
-Core Entities:
+Core Entities (Blogging_Platform, `blogposts_db`):
 
 * User
 * BlogPost
@@ -291,8 +351,10 @@ Core Entities:
 * Following
 * Blocked Users
 * Post Reactions
-* Events
-* ServiceRequestId
+* Events (outbox table)
+* ServiceRequestId (idempotency key store)
+
+AdminTool and NotificationService hold no persistent entities — both keep consumed messages in an in-memory list that resets on restart.
 
 ---
 
@@ -304,6 +366,7 @@ Core Entities:
 * Maven
 * Docker
 * Docker Compose
+* A `GEMINI_API_KEY` environment variable (required by AIContentModerationService — no default/fallback key is bundled)
 
 ### Clone Repository
 
@@ -320,10 +383,14 @@ docker compose up --build
 
 This starts:
 
-* Blogging Platform
-* Admin Tool
+* Blogging_Platform
+* AIContentModerationService
+* AdminTool
+* NotificationService
 * MySQL
 * Apache Kafka
+
+Note: Blogging_Platform's container waits for AIContentModerationService's `/actuator/health` check to pass before starting (declared in `docker-compose.yml`).
 
 ---
 
@@ -354,23 +421,8 @@ http://localhost:8081/swagger-ui/index.html
 ```text
 http://localhost:8081/events
 ```
----
 
-## Example Workflow
 
-1. Register User
-2. Login
-3. Create Category
-4. Create Blog Post
-5. Add Comments
-6. React to Posts/Comments
-7. Pin a Post
-8. Follow Other Users
-9. Block a user
-10. Kafka Event Generated
-11. Admin Tool Consumes Event
-
----
 
 ## Sample Execution Flow
 
@@ -381,15 +433,19 @@ Login
       ↓
 Create Blog Post
       ↓
+AIContentModerationService checks content (Gemini)
+      ↓
 Assign Categories
       ↓
 Add Comments
       ↓
 React / Follow
       ↓
-Kafka Event Published
+Event row written (outbox, PENDING)
       ↓
-Admin Tool Consumes Event
+EventPublisher polls every 5s → Kafka
+      ↓
+AdminTool consumes admin-topic  ·  NotificationService consumes notification-topic
 ```
 
 ---
@@ -404,79 +460,3 @@ The project includes:
 * Security Tests
 
 ---
-## New Feature
-
-## 1)Content Moderation
-GitHub : https://github.com/Sreetama1230/AIContentModeration
-
-### Clone Repository
-
-```bash
-git clone <repository-url>
-cd AIContentModeration
-```
-
-### Start All Services
-
-```bash
-docker compose up --build
-```
-
-This starts:
-
-* AIContentModeration
-
-Access URL:
-`http://localhost:8089/moderate`
-
-
-The AI Content Moderation Service analyzes blog posts before they are published to help prevent harmful or inappropriate content from entering the platform.
-
-### How it Works
-
-1. The BlogPost service sends the blog title, content, and categories to the AI Content Moderation Service.
-2. The moderation service uses the **Google Gemini API** to evaluate the content against predefined safety guidelines.
-3. Based on the AI response, the service either:
-
-   * **Approves** the content for publishing, or
-   * **Rejects** the content if it contains harmful, violent, abusive, or illegal material.
-4. To improve reliability, the service is protected with **Resilience4j Retry** and **Circuit Breaker**. Temporary failures such as network issues or API outages are handled gracefully.
-5. If the Gemini API is unavailable due to **rate limiting (HTTP 429)**, the service automatically falls back to a local keyword-based moderation check to detect obvious harmful content, ensuring moderation continues even during temporary API quota exhaustion.
-
-## 2)Optimistic Locking
-Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided in the update operation, a `StaleObjectError` will be thrown.
-```{
-    "id": 23,
-    "username": "test-username-457",
-    "password": "passwrod@1234",
-    "syncToken": "0"
-}
-```
-
-## 3)Idempotency 
-If you want to enable idempotency, include the `requestId` as a request parameter, as shown below.
-`http://localhost:8080/comment?blogPostId=1&requestId=67847`
-So, if you send the same `POST` request multiple times with the same `requestId`, the API will return the existing object/transaction, **regardless of the request body**.
-If, for any reason, the object associated with that `requestId` has been deleted, the API will throw a `Resource is not found!` exception.
-
-
-## 4) Notification
-User will get notified 
-Access URL - `http://localhost:8088/notification`
-```
-[
-    "Profile Updated!",
-    "Your blog post has been added successfully!",
-    "Someone has liked your post!",
-    "Someone has started following you!"
-]
-```
-
-### Technologies Used
-
-* Java 21
-* Spring Boot
-* Google Gemini API
-* Resilience4j (Retry & Circuit Breaker)
-* REST APIs
-
