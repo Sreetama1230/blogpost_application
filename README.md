@@ -115,6 +115,7 @@ GitHub Link : https://github.com/Sreetama1230/AdminTool
 
 Consumes events from `notification-topic` (compact event strings) and maps them to human-readable notification messages. <br>
 Endpoint : `GET /notification` 
+<br>
 Example Response:
 ```
 [
@@ -322,7 +323,8 @@ mutation SetReaction {
 * Spring Data JPA
 * Hibernate
 * Spring Kafka
-* GraphQL
+* REST 
+* GraphQL 
 * Resilience4j (Retry & Circuit Breaker)
 
 ### Database
@@ -458,7 +460,7 @@ AdminTool consumes admin-topic  ·  NotificationService consumes notification-to
 
 The project includes:
 
-* Unit Tests
+* Unit Tests and Integration Tests
 * Service Layer Tests
 * Controller Layer Tests
 * Security Tests
