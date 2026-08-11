@@ -397,7 +397,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NjMyODcwMCwiZXhwIjoxNzg2MzMyMzAwfQ.zmbTqcwpN-KOzwS8REg7Y5juAEFBY11IM_1mhFtuEUU",
                 "type": "text"
               }
             ],
@@ -411,7 +411,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=1",
+              "raw": "http://localhost:8080/comment?blogPostId=23",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -423,7 +423,7 @@
               "query": [
                 {
                   "key": "blogPostId",
-                  "value": "1"
+                  "value": "23"
                 }
               ]
             }
@@ -604,7 +604,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2MzUwMTk3LCJleHAiOjE3ODYzNTM3OTd9.zbqyWG8A1cu3CljQrp-BW4fti4tr5MdcaAAAEVNNQDk",
                 "type": "text"
               }
             ],
@@ -860,6 +860,12 @@
               {
                 "key": "accept",
                 "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NjI4NDM1OCwiZXhwIjoxNzg2Mjg3OTU4fQ.UQQdeNEdwEcnNjw6nUGyU1Gx4LtdoGk0yLFzrWAkOAo",
+                "type": "text",
+                "disabled": true
               }
             ],
             "url": {
@@ -1362,75 +1368,361 @@
       "name": "Actuator",
       "item": [
         {
-          "name": "health",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "*/*"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8089/actuator/health",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8089",
-              "path": [
-                "actuator",
-                "health"
-              ]
+          "name": "BlogPost",
+          "item": [
+            {
+              "name": "blog post service health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/actuator/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "actuator",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "blog post service metrices",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/actuator/metrics",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "actuator",
+                    "metrics"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "blog post service info",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/actuator/info",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "actuator",
+                    "info"
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "info",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "*/*"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8089/actuator/info",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8089",
-              "path": [
-                "actuator",
-                "info"
-              ]
+          "name": "Admin Tool",
+          "item": [
+            {
+              "name": "admin tool service health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8081/actuator/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "actuator",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "admin tool service info",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8081/actuator/info",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "actuator",
+                    "info"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "admin tool service metrices",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8081/actuator/metrics",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "actuator",
+                    "metrics"
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "metrics",
+          "name": "Notification Service",
+          "item": [
+            {
+              "name": "notification service health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8088/actuator/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8088",
+                  "path": [
+                    "actuator",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "notification service info",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8088/actuator/info",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8088",
+                  "path": [
+                    "actuator",
+                    "info"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "notification service metrices",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8088/actuator/metrics",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8088",
+                  "path": [
+                    "actuator",
+                    "metrics"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "AI Content Moderation",
+          "item": [
+            {
+              "name": "ai content moderation service info",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8089/actuator/info",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8089",
+                  "path": [
+                    "actuator",
+                    "info"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ai content moderation service metrics",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8089/actuator/metrics",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8089",
+                  "path": [
+                    "actuator",
+                    "metrics"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ai content moderation service health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8089/actuator/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8089",
+                  "path": [
+                    "actuator",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notification",
+      "item": [
+        {
+          "name": "notification",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "accept",
                 "value": "*/*"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU",
+                "disabled": true
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test-username-456\",\n  \"password\": \"passwrod@1234\"\n}"
+            },
             "url": {
-              "raw": "http://localhost:8089/actuator/metrics",
+              "raw": "http://localhost:8088/notification",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8089",
+              "port": "8088",
               "path": [
-                "actuator",
-                "metrics"
+                "notification"
               ]
             }
           },
