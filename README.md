@@ -63,10 +63,6 @@ Logging is implemented using **AOP and SLF4J**. Spring Boot **Actuator** is used
                    └───────────────┘     └──────────────────────────┘
 ```
 
-
-
-A second, separate producer path exists: `GET /admintool` on Blogging_Platform sends the logged-in username directly to `admin-topic`, bypassing the outbox/`Event` table entirely.
-
 ### Blogging Platform (core service, Kafka producer)
 **REST** and **GraphQl** APIs are 
 responsible for:
@@ -91,30 +87,44 @@ Publishes events to Kafka (via the outbox) when:
 * Follow/Unfollow related
 * Block/Unblock related
 * Reacting on posts/comments, Pin/Unpin
+  
+Github Link - https://github.com/Sreetama1230/BloggingPlatform
 
 ### AI Content Moderation Service (stateless, synchronous)
 
-Called by Blogging_Platform on every blog post create/update, **before** the post is persisted. Has no database and no Kafka involvement — a pure REST wrapper around the Gemini API.
+Called by Blogging_Platform on every blog post create/update, **before** the post is persisted.A pure REST wrapper around the Gemini API.
 
 Github Link - https://github.com/Sreetama1230/AIContentModeration
 
 ### Admin Tool (Kafka consumer)
 
-Consumes events from `admin-topic` and the separate `/admintool` login-broadcast path) and exposes them via a **monitoring** endpoint.
+Consumes events from the `admin-topic` Kafka topic and provides access to the logged-in user’s information through the GET `/admintool` endpoint. User activity and event details can be retrieved through the GET `/events` endpoint.
 
-State is held **in an in-memory list only** — nothing is persisted to a database, so the event list resets on service restart.
 
 Example Response:
+events details from GET `\events` endpoint 
 ```json
 [
     "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
     "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
 ]
 ```
+GitHub Link : https://github.com/Sreetama1230/AdminTool
 
 ### Notification Service (Kafka consumer)
 
-Consumes events from `notification-topic` (compact event strings) and maps them to human-readable notification messages. State is also held in memory only — messages are not persisted to a database, so `GET /notification` reflects only what's been consumed since the service last started.
+Consumes events from `notification-topic` (compact event strings) and maps them to human-readable notification messages. <br>
+Endpoint : `GET /notification` 
+Example Response:
+```
+[
+    "Profile Updated!",
+    "Your blog post has been added successfully!",
+    "Someone has liked your post!",
+    "Someone has started following you!"
+]
+```
+GitHub Link :  https://github.com/Sreetama1230/NotificationService
 
 ---
 
@@ -137,8 +147,27 @@ Permission Hierarchy:
 ```text
 ADMIN > EDITOR > USER
 ```
----
 
+### Optimistic Locking
+
+Each entity contains a `syncToken` field. If an incorrect `syncToken` value is provided in the update operation, a `StaleObjectError` will be thrown.
+```json
+{
+    "id": 23,
+    "username": "test-username-457",
+    "password": "passwrod@1234",
+    "syncToken": "0"
+}
+```
+###  Idempotency
+
+If Client wants to enable idempotency, include the `requestId` as a request parameter, as shown below.
+`http://localhost:8080/comment?blogPostId=1&requestId=67847`
+So, if we send the same `POST` request multiple times with the same `requestId`, the API will return the existing object/transaction, **regardless of the request body**.
+For any reason, the object associated with that `requestId` has been deleted, the API will throw a `Resource is not found!` exception.
+
+
+---
 ### User Management
 
 **REST APIs**
@@ -180,7 +209,7 @@ If you don't have the required permission, the request will fail with a **403** 
 * Get by title and user ID
 
 **GraphQL APIs**
-* Trending Posts
+* Trending Posts (top 10 most liked posts)
 * Search Blog Posts by a keyword
 * Pin and unpin Posts
 * Like/dislike a post
@@ -215,8 +244,10 @@ Supported Reactions:
 ---
 
 ## Feed / Timeline API
+Endpoint - `/timeline?start=<...>&size=<...>`
+<br>
+Returns a paginated feed of posts. Logged-in users get posts from people they follow (plus some outside posts), ranked by net reactions (likes − dislikes) then recency; guests (or users with no follows) get a popularity feed ranked by reaction count and recency instead. 
 
-Returns a paginated feed of posts. Logged-in users get posts from people they follow (plus some outside posts), ranked by net reactions (likes − dislikes) then recency; guests (or users with no follows) get a popularity feed ranked by reaction count and recency instead.
 
 ---
 
@@ -228,6 +259,8 @@ Returns a paginated feed of posts. Logged-in users get posts from people they fo
 * Block/Unblock Users
 * View Followers
 * View Following
+* Pin/UnPin posts
+* View pinned posts
 
 
 
@@ -241,25 +274,6 @@ Two topics are published to on every outbox event:
 * `notification-topic` — compact `"<TransactionType> <EventType> <recipientUserId> <actorUserId>"` string, consumed by NotificationService (`groupId=group-2`)
 
 A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. 
-
-Example events (from the outbox):
-
-Endpoint : `\events`
-```
-[
-    "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
-    "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
-]
-```
-Endpoint : ```\notification```
-```
-[
-    "Profile Updated!",
-    "Your blog post has been added successfully!",
-    "Someone has liked your post!",
-    "Someone has started following you!"
-]
-```
 
 ### Toggling Feature
 The following GraphQL mutation operations support toggling behavior:
@@ -312,11 +326,11 @@ mutation SetReaction {
 
 ### Database
 
-* MySQL — used by **Blogging_Platform**. AIContentModerationService, AdminTool, and NotificationService are stateless/in-memory and have no database dependency.
+* MySQL 
 
 ### Messaging
 
-* Apache Kafka (KRaft mode, no Zookeeper)
+* Apache Kafka (KRaft mode)
 
 ### Documentation
 
@@ -390,7 +404,7 @@ This starts:
 * MySQL
 * Apache Kafka
 
-Note: Blogging_Platform's container waits for AIContentModerationService's `/actuator/health` check to pass before starting (declared in `docker-compose.yml`).
+Note: Blogging_Platform's container waits for AIContentModerationService's `/actuator/health` check to pass before starting 
 
 ---
 
@@ -399,30 +413,19 @@ Note: Blogging_Platform's container waits for AIContentModerationService's `/act
 ### Swagger UI
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:<...>/swagger-ui/index.html
 ```
 
 ### GraphQL Endpoint
 
 ```text
-http://localhost:8080/graphql
+http://localhost:<...>/graphql
 ```
-
-### Admin Tool Events Endpoint
-
-**Swagger UI**
-
-```text
-http://localhost:8081/swagger-ui/index.html
+### Postman Collection 
 ```
-
-**Events Endpoint**
-
-```text
-http://localhost:8081/events
+https://github.com/Sreetama1230/blogpost_application/blob/main/BlogPost_AdminTool_APIs.postman_collection.json
 ```
-
-
+---
 
 ## Sample Execution Flow
 
@@ -441,7 +444,7 @@ Add Comments
       ↓
 React / Follow
       ↓
-Event row written (outbox, PENDING)
+Event data written (outbox, PENDING)
       ↓
 EventPublisher polls every 5s → Kafka
       ↓
