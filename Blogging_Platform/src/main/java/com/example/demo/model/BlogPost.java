@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -27,6 +28,11 @@ public class BlogPost {
 	private String title;
 	@Column
 	private String content;
+	
+	@Lob
+	@Column(columnDefinition = "LONGTEXT")
+	private String image;
+	
 
 	@ManyToOne
 	private User author;
@@ -217,6 +223,14 @@ public class BlogPost {
 	
 	
 	
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
 
 	public Long getSyncToken() {
 		return syncToken;

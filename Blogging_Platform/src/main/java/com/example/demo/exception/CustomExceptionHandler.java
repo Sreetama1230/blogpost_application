@@ -1,5 +1,6 @@
 package com.example.demo.exception;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -84,4 +85,10 @@ public class CustomExceptionHandler {
 		ErrorDetails ed = new ErrorDetails(e.getMessage(), HttpStatus.BAD_REQUEST.value());
 		return new ResponseEntity<>(ed, HttpStatus.BAD_REQUEST);
 	}
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<ErrorDetails> handlerRateLimiter(RequestNotPermitted requestNotPermitted){
+        ErrorDetails ed = new ErrorDetails("Too many requests. Please try again later.", HttpStatus.TOO_MANY_REQUESTS.value());
+        return new ResponseEntity<>(ed, HttpStatus.BAD_REQUEST);
+    }
 }

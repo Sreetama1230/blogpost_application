@@ -117,18 +117,20 @@ public class ModerationService {
 
 		logger.error("Error calling moderation service " + e.getMessage());
 
-		if(e.getMessage().contains("TooManyRequests")) {
-			logger.info("429 error has came so checking manually");
-			if(checkContentManually(blogPostDTO))
-			{
-				return new ModerationResponse("rejected", false);
-				
-			}else {
-				return new ModerationResponse("approved", true);
-			}
+		if(e.getMessage().contains("Connection refused")) { // the service is no running
+		
+			return new ModerationResponse("Moderation service is temporarily unavailable: "+e.getMessage(), false);
 		}
 
-		return new ModerationResponse("Moderation service is temporarily unavailable", false);
+		if(checkContentManually(blogPostDTO))
+		{
+			return new ModerationResponse("rejected", false);
+			
+		}else {
+			return new ModerationResponse("approved", true);
+		}
+		
+	
 
 	}
 	
