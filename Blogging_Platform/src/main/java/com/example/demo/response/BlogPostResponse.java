@@ -32,6 +32,7 @@ public class BlogPostResponse {
 
 	private Long dislikes;
 	private String syncToken;
+	private String image;
 
 	public BlogPostResponse() {
 		super();
@@ -126,6 +127,14 @@ public class BlogPostResponse {
 		this.syncToken = syncToken;
 	}
 
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
 	public BlogPostResponse(String title, String content, LocalDateTime createAt, BlogPostUserResponse author) {
 
 		this.title = title;
@@ -200,6 +209,7 @@ public class BlogPostResponse {
 		resp.setDislikes(b.getDislikes());
 		resp.setId(b.getId());
 		resp.setSyncToken(String.valueOf(b.getSyncToken()));
+		resp.setImage(b.getImage());
 		return resp;
 
 	}
@@ -210,7 +220,5 @@ public class BlogPostResponse {
 				+ ", categories=" + categories + ", comments=" + comments + ", createAt=" + createAt + ", updateAt="
 				+ updateAt + ", likes=" + likes + ", dislikes=" + dislikes + ", syncToken=" + syncToken + "]";
 	}
-
-	
 
 }
