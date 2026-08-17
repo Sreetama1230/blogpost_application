@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "2d2539d3-90c2-4b45-81d4-783d0b02dac9",
-    "name": "BlogPost_AdminTool_APIs",
+    "name": "blogpost_application_APIs",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "49200566",
     "_collection_link": "https://go.postman.co/collection/49200566-2d2539d3-90c2-4b45-81d4-783d0b02dac9?source=collection_link"
@@ -285,7 +285,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"test-username-456\",\n  \"password\": \"passwrod@1234\"\n}",
+              "raw": "{\n   \"username\": \"test-username-45678\",\n  \"password\": \"passwrod@1234\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -635,9 +635,15 @@
           "name": "blog/title/{title}/user/{userId}",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2OTg3OTk3LCJleHAiOjE3ODY5OTE1OTd9.01OyCNtA5EXT8EgaMRw1pytRcSZDUEXYb7WOZRqC87g",
+                "type": "text"
+              }
+            ],
             "url": {
-              "raw": "http://localhost:8080/blog/title/cupoftea/user/25",
+              "raw": "http://localhost:8080/blog/title/string/user/3",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -646,9 +652,57 @@
               "path": [
                 "blog",
                 "title",
-                "cupoftea",
+                "string",
                 "user",
-                "25"
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "blog/upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2OTk1MjE4LCJleHAiOjE3ODY5OTg4MTh9.THr9QRyJ3JZt_cw-7Gc_KF6UrhW74yVTgyi3Mqyq7-4",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "uuid": "abe5607a-f686-4844-9623-54964255009a",
+                  "src": "/home/sreetama/Pictures/Screenshot from 2025-02-12 18-03-54.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/blog/upload?blogId=39",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "upload"
+              ],
+              "query": [
+                {
+                  "key": "blogId",
+                  "value": "39"
+                }
               ]
             }
           },
@@ -675,6 +729,32 @@
               "path": [
                 "blog",
                 "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "blog/{id}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "1"
               ]
             }
           },
@@ -860,12 +940,6 @@
               {
                 "key": "accept",
                 "value": "*/*"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NjI4NDM1OCwiZXhwIjoxNzg2Mjg3OTU4fQ.UQQdeNEdwEcnNjw6nUGyU1Gx4LtdoGk0yLFzrWAkOAo",
-                "type": "text",
-                "disabled": true
               }
             ],
             "url": {
@@ -1415,6 +1489,32 @@
                   "path": [
                     "actuator",
                     "metrics"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "blog post service metrices resilience4j",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/actuator/metrics/resilience4j.ratelimiter.available.permissions",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "actuator",
+                    "metrics",
+                    "resilience4j.ratelimiter.available.permissions"
                   ]
                 }
               },
