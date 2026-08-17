@@ -311,6 +311,18 @@ mutation SetReaction {
 
 ```
 
+
+## New Feature 
+### 1)Rate Limiting
+
+For the BlogPost API, up to 10 create or update operations per second are allowed.
+
+### 2)Image Upload Feature
+
+A separate API, `blog/upload`, has been created to attach an image to a blog post.<br>
+<img width="1313" height="405" alt="image" src="https://github.com/user-attachments/assets/e53fe684-a45e-41b0-b991-b621188e213e" />
+
+
 ---
 
 ## Tech Stack
@@ -325,7 +337,7 @@ mutation SetReaction {
 * Spring Kafka
 * REST 
 * GraphQL 
-* Resilience4j (Retry & Circuit Breaker)
+* Resilience4j (Retry, Circuit Breaker & RateLimiter)
 
 ### Database
 
@@ -417,12 +429,16 @@ Note: Blogging_Platform's container waits for AIContentModerationService's `/act
 
 ```text
 http://localhost:<...>/swagger-ui/index.html
+8080 - blogpost application
+8081 - admin tool application
+8088 - notification application
+8089 - ai content moderation endpoint (used internally)
 ```
 
 ### GraphQL Endpoint
 
 ```text
-http://localhost:<...>/graphql
+http://localhost:8080/graphql
 ```
 ### Postman Collection 
 ```
