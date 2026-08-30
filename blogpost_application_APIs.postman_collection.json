@@ -25,12 +25,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/user",
-              "protocol": "http",
+              "raw": "{{blogpost}}/user",
               "host": [
-                "localhost"
+                "{{blogpost}}"
               ],
-              "port": "8080",
               "path": [
                 "user"
               ]
@@ -56,7 +54,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"sree34\",\n  \"password\": \"string\",\n  \"email\": \"sree34@string\",\n  \"bio\": \"string\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
+              "raw": "{\n  \"username\": \"sree36499\",\n  \"password\": \"passwrod\",\n  \"email\": \"sree34699@string\",\n  \"bio\": \"string\",\n  \"roles\": [\n    \"admin\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -64,21 +62,13 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/user/register?requestId=78",
-              "protocol": "http",
+              "raw": "{{url}}/user/register",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "user",
                 "register"
-              ],
-              "query": [
-                {
-                  "key": "requestId",
-                  "value": "78"
-                }
               ]
             },
             "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/user' \\\n  -H 'accept: */*' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzcmVldGFtYSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4Mzk2MjIwNiwiZXhwIjoxNzgzOTY1ODA2fQ.yWzL85ikMV3AXYZzNtgdkTZwxkRGu7FD2iaX1HrfqGU'"
@@ -110,12 +100,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/user/register?requestId=78",
-              "protocol": "http",
+              "raw": "{{url}}/user/register?requestId=78",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "user",
                 "register"
@@ -142,7 +130,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg1OTU1MDE4LCJleHAiOjE3ODU5NTg2MTh9.fkw20s7js64QAKbqaomPO3Unblq296hxkg8Bl0SGw24"
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "Content-Type",
@@ -151,7 +139,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 3,\n  \"username\": \"myusername\",\n  \"password\": \"mypassword\",\n  \"syncToken\":\"0\"\n}",
+              "raw": "{\n  \"id\": 1,\n  \"username\": \"myusername\",\n  \"password\": \"mypassword\",\n  \"syncToken\":\"0\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -159,12 +147,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/user",
-              "protocol": "http",
+              "raw": "{{url}}/user",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "user"
               ]
@@ -245,19 +231,17 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTg4MSwiZXhwIjoxNzg1OTU5NDgxfQ.jFlPW2nzwm5kFOXx8V0rNnTyo388z9ZMLcWY5oCGWlo"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/user/24",
-              "protocol": "http",
+              "raw": "{{url}}/user/3",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "user",
-                "24"
+                "3"
               ]
             }
           },
@@ -270,6 +254,17 @@
       "item": [
         {
           "name": "/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.environment.set(\"token\", response.token);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -293,12 +288,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/login",
-              "protocol": "http",
+              "raw": "{{url}}/login",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "login"
               ]
@@ -318,13 +311,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reaction\": \"LIKE\",\n  \"id\": 1,\n  \"syncToken\":\"3\"\n}",
+              "raw": "{\n  \"reaction\": \"LIKE\",\n  \"id\": 1,\n  \"syncToken\":\"0\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -332,12 +324,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment/react",
-              "protocol": "http",
+              "raw": "{{url}}/comment/react",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment",
                 "react"
@@ -353,8 +343,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -367,12 +356,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=1&requestId=67847",
-              "protocol": "http",
+              "raw": "{{url}}/comment?blogPostId=1&requestId=67847",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment"
               ],
@@ -397,8 +384,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NjMyODcwMCwiZXhwIjoxNzg2MzMyMzAwfQ.zmbTqcwpN-KOzwS8REg7Y5juAEFBY11IM_1mhFtuEUU",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -411,12 +397,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=23",
-              "protocol": "http",
+              "raw": "{{url}}/comment?blogPostId=23",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment"
               ],
@@ -437,8 +421,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -451,12 +434,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/comment?blogPostId=1",
-              "protocol": "http",
+              "raw": "{{url}}/comment?blogPostId=1",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment"
               ],
@@ -476,12 +457,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/comment/1",
-              "protocol": "http",
+              "raw": "{{url}}/comment/1",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment",
                 "1"
@@ -497,17 +476,14 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/comment/6/blogpost/1",
-              "protocol": "http",
+              "raw": "{{url}}/comment/6/blogpost/1",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "comment",
                 "6",
@@ -530,8 +506,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -544,12 +519,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/blog",
-              "protocol": "http",
+              "raw": "{{url}}/blog",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog"
               ]
@@ -558,14 +531,13 @@
           "response": []
         },
         {
-          "name": "/blog",
+          "name": "/blog with request id",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -578,12 +550,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/blog?requestId=45663",
-              "protocol": "http",
+              "raw": "{{url}}/blog?requestId=45663",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog"
               ],
@@ -638,17 +608,14 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2OTg3OTk3LCJleHAiOjE3ODY5OTE1OTd9.01OyCNtA5EXT8EgaMRw1pytRcSZDUEXYb7WOZRqC87g",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/blog/title/string/user/3",
-              "protocol": "http",
+              "raw": "{{url}}/blog/title/string/user/3",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog",
                 "title",
@@ -667,13 +634,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2OTk1MjE4LCJleHAiOjE3ODY5OTg4MTh9.THr9QRyJ3JZt_cw-7Gc_KF6UrhW74yVTgyi3Mqyq7-4",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -682,18 +643,17 @@
                 {
                   "key": "image",
                   "type": "file",
-                  "uuid": "abe5607a-f686-4844-9623-54964255009a",
-                  "src": "/home/sreetama/Pictures/Screenshot from 2025-02-12 18-03-54.png"
+                  "src": [
+                    "/home/sreetama/Pictures/Screenshot from 2026-01-11 13-20-20.png"
+                  ]
                 }
               ]
             },
             "url": {
-              "raw": "http://localhost:8080/blog/upload?blogId=39",
-              "protocol": "http",
+              "raw": "{{url}}/blog/upload?blogId=8",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog",
                 "upload"
@@ -701,7 +661,7 @@
               "query": [
                 {
                   "key": "blogId",
-                  "value": "39"
+                  "value": "8"
                 }
               ]
             }
@@ -741,17 +701,14 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/blog/1",
-              "protocol": "http",
+              "raw": "{{url}}/blog/1",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog",
                 "1"
@@ -772,8 +729,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -786,12 +742,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/category?requestId=1234",
-              "protocol": "http",
+              "raw": "{{url}}/category?requestId=1234",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "category"
               ],
@@ -815,8 +769,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -829,12 +782,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/category",
-              "protocol": "http",
+              "raw": "{{url}}/category",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "category"
               ]
@@ -844,36 +795,28 @@
         },
         {
           "name": "category/name?name=<name>",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaGhoaCIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NDQ4NTk3OCwiZXhwIjoxNzg0NDg5NTc4fQ.MVH9glNcvkgtfdDTSJK1pgxQOn00tihibwFPBcckebI",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"category-test\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
-              "raw": "http://localhost:8080/category",
-              "protocol": "http",
+              "raw": "{{url}}/category/name?name=lifestyle",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
-                "category"
+                "category",
+                "name"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "lifestyle"
+                }
               ]
             }
           },
@@ -886,8 +829,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -900,12 +842,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/category/9",
-              "protocol": "http",
+              "raw": "{{url}}/category/9",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "category",
                 "9"
@@ -923,7 +863,31 @@
           "name": "/timeline",
           "request": {
             "method": "GET",
-            "header": []
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/timeline?start=0&size=10",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "timeline"
+              ],
+              "query": [
+                {
+                  "key": "start",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
           },
           "response": []
         }
@@ -943,12 +907,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8081/events",
-              "protocol": "http",
+              "raw": "{{url}}/events",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8081",
               "path": [
                 "events"
               ]
@@ -975,23 +937,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 9,\n\t\t\t\t      uId: 25,\n                      syncToken:4,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
+                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 1,\n\t\t\t\t      uId: 1,\n                      syncToken:0,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1010,23 +970,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation PinUnpinPost {\n\t\t\t\t pinUnpinPost(uId:25 , bpId: 9 ){\n\t\t\t\t\n\t\t\t\t      content\n\t\t\t\t      id\n\t\t\t\t      author{\n\t\t\t\t      username\n\t\t\t\t     }\n\t\t\t\t  \n\t\t\t\t}\n\t\t\t\t}",
+                    "query": "mutation PinUnpinPost {\n\t\t\t\t pinUnpinPost(uId:1 , bpId: 1 ){\n\t\t\t\t\n\t\t\t\t      content\n\t\t\t\t      id\n\t\t\t\t      author{\n\t\t\t\t      username\n\t\t\t\t     }\n\t\t\t\t  \n\t\t\t\t}\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1045,23 +1003,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation FollowOrUnFollowAuthor{\n\t\t\t\t    followOrUnFollowAuthor(follower: 25, followee:23){\n\t\t\t\t        username\n\t\t\t\t        id\n\t\t\t\t    }\n\t\t\t\t}\n",
+                    "query": "mutation FollowOrUnFollowAuthor{\n\t\t\t\t    followOrUnFollowAuthor(follower: 1, followee:3){\n\t\t\t\t        username\n\t\t\t\t        id\n\t\t\t\t    }\n\t\t\t\t}\n",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1080,23 +1036,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": " mutation BlockUser{\n\t\t\t\t           blockUser (blockerId: 25, blockedUserId:23){\n\t\t\t\t                username\n\t\t\t\t                id\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "query": " mutation BlockUser{\n\t\t\t\t           blockUser (blockerId: 1, blockedUserId:3){\n\t\t\t\t                username\n\t\t\t\t                id\n\t\t\t\t            }\n\t\t\t\t        }",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1120,23 +1074,20 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query TrendingPosts{\n\t\t\t\t            trendingPosts{\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
-                    "variables": ""
+                    "query": "query TrendingPosts{\n\t\t\t\t            trendingPosts{\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }"
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1155,23 +1106,20 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query Pagination{\n   getPosts(page: 0,size:2){\n    content\n   }\n}\n",
-                    "variables": ""
+                    "query": "query Pagination{\n   getPosts(page: 0,size:2){\n    content\n   }\n}\n"
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1190,23 +1138,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": " query GetPinnedPostsOfTheUser {\n  getPinnedPostsOfTheUser(uId:25){\n\n\n    content\n    author{\n        username\n    }\n   \n  }\n}\n\n",
+                    "query": " query GetPinnedPostsOfTheUser {\n  getPinnedPostsOfTheUser(uId:1){\n\n\n    content\n    author{\n        username\n    }\n   \n  }\n}\n\n",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1225,23 +1171,20 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query Search{\n    searchPosts(keyword:\"today's\"){\n        title,\n        content\n        \n    }\n}\n",
-                    "variables": ""
+                    "query": "query Search{\n    searchPosts(keyword:\"today's\"){\n        title,\n        content\n        \n    }\n}\n"
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1260,23 +1203,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query getFollowers{\n\t\t\t\t    getFollowers(uId:25){\n\t\t\t\t            username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "query": "query getFollowers{\n\t\t\t\t    getFollowers(uId:1){\n\t\t\t\t            username\n\t\t\t\t    }\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1295,23 +1236,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query GetFollowings{\n\t\t\t\t         getFollowings(uId:25){\n\t\t\t\t                username\n\t\t\t\t                }\n\t\t\t\t            }\n",
+                    "query": "query GetFollowings{\n\t\t\t\t         getFollowings(uId:1){\n\t\t\t\t                username\n\t\t\t\t                }\n\t\t\t\t            }\n",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1330,23 +1269,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query   UserLikedPost{\n\t\t\t\t           userLikedPost(uId:25){\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
+                    "query": "query   UserLikedPost{\n\t\t\t\t           userLikedPost(uId:1){\n\t\t\t\t                   content,\n\t\t\t\t                   createAt\n\t\t\t\t            }\n\t\t\t\t        }",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1365,23 +1302,21 @@
                   },
                   {
                     "key": "Authorization",
-                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                    "value": "Bearer {{token}}"
                   }
                 ],
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "query BlockedUsers{\n\t\t\t\t  blockedUsers (uId:25){\n\t\t\t\t    id\n\t\t\t\t    username\n\t\t\t\t    }\n\t\t\t\t}",
+                    "query": "query BlockedUsers{\n\t\t\t\t  blockedUsers (uId:1){\n\t\t\t\t    id\n\t\t\t\t    username\n\t\t\t\t    }\n\t\t\t\t}",
                     "variables": ""
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:8080/graphql",
-                  "protocol": "http",
+                  "raw": "{{url}}/graphql",
                   "host": [
-                    "localhost"
+                    "{{url}}"
                   ],
-                  "port": "8080",
                   "path": [
                     "graphql"
                   ]
@@ -1410,7 +1345,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1NiIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc4NTk1NTk2MywiZXhwIjoxNzg1OTU5NTYzfQ.k-cJ7LFr637ATfv2N2kzSNVMDEJLUHOe9ngoT9G48aE"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -1423,12 +1358,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/admintool",
-              "protocol": "http",
+              "raw": "{{url}}/admintool",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "admintool"
               ]
@@ -1784,6 +1717,31 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "ai content moderation service health Copy",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8089/actuator/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8089",
+                  "path": [
+                    "actuator",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         }
@@ -1812,15 +1770,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"test-username-456\",\n  \"password\": \"passwrod@1234\"\n}"
+              "raw": "{\n  \"username\": \"test-username-456\",\n  \"password\": \"passwrod@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
-              "raw": "http://localhost:8088/notification",
-              "protocol": "http",
+              "raw": "{{url}}/notification",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8088",
               "path": [
                 "notification"
               ]
