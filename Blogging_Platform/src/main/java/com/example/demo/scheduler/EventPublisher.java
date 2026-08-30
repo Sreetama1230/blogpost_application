@@ -31,7 +31,7 @@ public class EventPublisher {
 
 	Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
-	@Scheduled(fixedDelay = 500000000)
+	@Scheduled(fixedDelay = 5000)
 	public void publishEvents() {
 
 		List<Event> events = eventDao.findByStatus(EventStatus.PENDING, PageRequest.of(0, 100));
