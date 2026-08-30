@@ -4,7 +4,7 @@
 
 BlogPost Application is a Spring Boot based blogging platform that enables users to create and manage blog posts, comments, categories, followers, reactions, and user relationships.
 
-The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **four independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST and Kafka:
+The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **six independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST and Kafka:
 
 * **Service Registry** (`:8761`) - A service registry service. This is a Eureka server.
 * **APIGatewayApplication**(`:9872`) - API Gateway service. This is a Eureka Client. 
