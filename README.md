@@ -425,6 +425,15 @@ Note: Blogging_Platform's container waits for AIContentModerationService's `/act
 
 ## API Documentation
 
+### Use API Gateway Service to access the endpoints 
+
+```text
+http://localhost:9872/api/<core service url>
+for example
+http://localhost:8080/login
+will be replaced by 
+http://localhost:9872/api/login
+```
 ### Swagger UI
 
 ```text
