@@ -316,7 +316,9 @@ Two topics are published to on every outbox event:
 * `notification-topic` — compact `"<TransactionType> <EventType> <recipientUserId> <actorUserId>"` string, consumed by NotificationService (`groupId=group-2`)
 
 A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. We can see that username in the BlogPost Application console or with the `/events` endpoint 
-
+```
+ [ "test-username-45678" ]
+```
 ### Toggling Feature
 The following GraphQL mutation operations support toggling behavior:
 
