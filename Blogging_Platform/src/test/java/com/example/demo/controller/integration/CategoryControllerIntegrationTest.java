@@ -37,6 +37,7 @@ import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
@@ -88,7 +89,7 @@ public class CategoryControllerIntegrationTest {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	@MockBean
-	private ModerationService moderationClient;
+	private ModerationServiceClient moderationClient;
 
 	@BeforeEach
 	public void init() {
@@ -99,7 +100,7 @@ public class CategoryControllerIntegrationTest {
 		response.setApproved(true);
 		response.setResponse("Approved");
 
-		when(moderationClient.checkContent(any(BlogPostDTO.class))).thenReturn(response);
+		when(moderationClient.checkContent(any(ModerationRequest.class))).thenReturn(response);
 	}
 
 	private String createURLWithPort() {

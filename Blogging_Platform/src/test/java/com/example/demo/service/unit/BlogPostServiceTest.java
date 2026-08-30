@@ -31,6 +31,7 @@ import com.example.demo.dao.EventDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -45,7 +46,7 @@ import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.ModerationResponse;
 import com.example.demo.service.BlogPostService;
 import com.example.demo.service.CategoryService;
-import com.example.demo.service.ModerationService;
+import com.example.demo.service.ModerationServiceClient;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +60,7 @@ public class BlogPostServiceTest {
 	private UserDao userDao;
 
 	@Mock
-	private ModerationService moderationService;
+	private ModerationServiceClient moderationService;
 	@Mock
 	private CommentDao commentDao;
 	@Mock
@@ -170,7 +171,13 @@ public class BlogPostServiceTest {
 			ModerationResponse moderationResponse = new ModerationResponse();
 			moderationResponse.setApproved(true);
 			moderationResponse.setResponse("approved");
-			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			ModerationRequest moderationRequest = new ModerationRequest(blogPostDTO.getTitle(), blogPostDTO.getContent(),
+					blogPostDTO.getCategories().stream().map(c -> c.getName()).toList());
+					
+//			when(moderationService.checkContent(moderationRequest)).thenReturn(moderationResponse);
+			
+			when(moderationService.checkContent(any(ModerationRequest.class)))
+	        .thenReturn(moderationResponse);
 			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			assertEquals(blogPost.getContent(), blogPostResponse.getContent());
 			assertEquals(blogPost.getTitle(), blogPostResponse.getTitle());
@@ -211,7 +218,15 @@ public class BlogPostServiceTest {
 			ModerationResponse moderationResponse = new ModerationResponse();
 			moderationResponse.setApproved(true);
 			moderationResponse.setResponse("approved");
-			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			ModerationRequest moderationRequest = new ModerationRequest(blogPostDTO.getTitle(), blogPostDTO.getContent(),
+					blogPostDTO.getCategories().stream().map(c -> c.getName()).toList());
+			
+			
+			when(moderationService.checkContent(any(ModerationRequest.class)))
+	        .thenReturn(moderationResponse);
+			
+			
+//			when(moderationService.checkContent(moderationRequest)).thenReturn(moderationResponse);
 			
 			CategoryException categoryException = assertThrows(CategoryException.class, () -> {
 				blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
@@ -244,7 +259,11 @@ public class BlogPostServiceTest {
 			ModerationResponse moderationResponse = new ModerationResponse();
 			moderationResponse.setApproved(true);
 			moderationResponse.setResponse("approved");
-			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+		
+		
+			when(moderationService.checkContent(any(ModerationRequest.class)))
+	        .thenReturn(moderationResponse);
+			
 			when(userDao.findById(blogPost.getId())).thenReturn(Optional.of(user));
 			blogPostDTO.setSyncToken(blogPost.getSyncToken());
 			BlogPostResponse blogPostResponse = blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
@@ -294,7 +313,10 @@ public class BlogPostServiceTest {
 			ModerationResponse moderationResponse = new ModerationResponse();
 			moderationResponse.setApproved(true);
 			moderationResponse.setResponse("approved");
-			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+			
+			
+			
+			when(moderationService.checkContent(any(ModerationRequest.class))).thenReturn(moderationResponse);
 			ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
 				blogPostService.createOrUpdateBlogPost(blogPostDTO,"");
 			});
@@ -332,7 +354,8 @@ public class BlogPostServiceTest {
 			ModerationResponse moderationResponse = new ModerationResponse();
 			moderationResponse.setApproved(true);
 			moderationResponse.setResponse("approved");
-			when(moderationService.checkContent(blogPostDTO)).thenReturn(moderationResponse);
+
+			when(moderationService.checkContent(any(ModerationRequest.class))).thenReturn(moderationResponse);
 			blogPostDTO.setSyncToken(blogPost.getSyncToken());
 			DoNotHavePermissionError doNotHavePermissionError =
 
