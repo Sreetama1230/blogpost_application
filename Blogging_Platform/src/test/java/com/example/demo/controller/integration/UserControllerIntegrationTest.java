@@ -31,6 +31,7 @@ import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
@@ -44,7 +45,7 @@ import com.example.demo.response.ModerationResponse;
 import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
-import com.example.demo.service.ModerationService;
+import com.example.demo.service.ModerationServiceClient;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,7 +83,7 @@ public class UserControllerIntegrationTest {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
 	@MockBean
-	private ModerationService moderationClient;
+	private ModerationServiceClient moderationClient;
 
 
 	@BeforeEach
@@ -93,7 +94,7 @@ public class UserControllerIntegrationTest {
 	        response.setApproved(true);
 	        response.setResponse("Approved");
 
-	        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+	        when(moderationClient.checkContent(any(ModerationRequest.class)))
 	                .thenReturn(response);
 	}
 

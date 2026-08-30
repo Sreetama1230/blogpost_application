@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.example.demo.response.ModerationResponse;
-import com.example.demo.service.ModerationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +37,7 @@ import com.example.demo.dao.UserDao;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
@@ -49,6 +49,7 @@ import com.example.demo.response.AuthResponse;
 import com.example.demo.response.BlogPostResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
+import com.example.demo.service.ModerationServiceClient;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -92,7 +93,7 @@ public class BlogPostControllerIntegrationTest {
 	private CategoryDao categoryDao;
 
     @MockBean
-    private ModerationService moderationClient;
+    private ModerationServiceClient moderationClient;
 
     @BeforeEach
     public  void init() {
@@ -103,7 +104,7 @@ public class BlogPostControllerIntegrationTest {
         response.setApproved(true);
         response.setResponse("Approved");
 
-        when(moderationClient.checkContent(any(BlogPostDTO.class)))
+        when(moderationClient.checkContent(any(ModerationRequest.class)))
                 .thenReturn(response);
     }
 

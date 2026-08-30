@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.client.ModerationClient;
 import com.example.demo.config.SecurityUtils;
 import com.example.demo.dao.BlogPostDao;
 import com.example.demo.dao.CategoryDao;
@@ -24,6 +25,7 @@ import com.example.demo.dao.ServiceRequestIdDao;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.enums.EventStatus;
 import com.example.demo.enums.EventType;
 import com.example.demo.enums.TransactionType;
@@ -56,8 +58,9 @@ public class BlogPostService {
 
 	@Autowired
 	private ServiceRequestIdDao serviceRequestIdDao;
+
 	@Autowired
-	private ModerationService moderationClient;
+	private ModerationServiceClient moderationServiceClient;
 
 	@Autowired
 	private CommentDao commentDao;
@@ -89,7 +92,7 @@ public class BlogPostService {
 	}
 
 	@Transactional
-	@RateLimiter(name = "blogService")
+	@RateLimiter(name = "BloggingPlatform")
 	public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp, String requestId) throws JsonProcessingException {
 
 		// check if there any service request is provided (only for create)
@@ -119,8 +122,15 @@ public class BlogPostService {
 			}
 
 		}
+		
+		// creating moderation request for downstream API
+		
+		List<String> categoriesName = bp.getCategories().stream().map(cdto -> cdto.getName()).toList();
 
-		ModerationResponse filteredContent = moderationClient.checkContent(bp);
+		ModerationRequest moderationRequest = new ModerationRequest(bp.getTitle(), bp.getContent(),
+				categoriesName);
+		
+		ModerationResponse filteredContent = moderationServiceClient.checkContent(moderationRequest);
 
 		if (!filteredContent.isApproved()) {
 			if (filteredContent.getResponse().toLowerCase().contains("rejected")) {

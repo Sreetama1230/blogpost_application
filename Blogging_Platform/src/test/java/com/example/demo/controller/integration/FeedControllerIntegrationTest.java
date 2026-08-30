@@ -33,6 +33,7 @@ import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.BlogPostDTO;
 import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.FeedItem;
+import com.example.demo.dto.ModerationRequest;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.model.User;
 import com.example.demo.response.AuthResponse;
@@ -40,7 +41,7 @@ import com.example.demo.response.BlogPostResponse;
 import com.example.demo.response.ModerationResponse;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.BlogPostService;
-import com.example.demo.service.ModerationService;
+import com.example.demo.service.ModerationServiceClient;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -66,7 +67,7 @@ public class FeedControllerIntegrationTest {
 	private AuthService authService;
 
 	@MockBean
-	private ModerationService moderationClient;
+	private ModerationServiceClient moderationClient;
 
 	@BeforeEach
 	public void init() {
@@ -77,7 +78,7 @@ public class FeedControllerIntegrationTest {
 		response.setApproved(true);
 		response.setResponse("Approved");
 
-		when(moderationClient.checkContent(any(BlogPostDTO.class))).thenReturn(response);
+		when(moderationClient.checkContent(any(ModerationRequest.class))).thenReturn(response);
 	}
 
 	private String createURLWithPort() {
