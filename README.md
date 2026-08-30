@@ -6,10 +6,50 @@ BlogPost Application is a Spring Boot based blogging platform that enables users
 
 The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **four independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST and Kafka:
 
-* **Blogging_Platform** (`:8080`) — the core platform: auth, posts, comments, categories, social graph, feed/timeline, GraphQL. The only Kafka producer in the system.
-* **AIContentModerationService** (`:8089`) — stateless moderation gate, called synchronously by Blogging_Platform before a post is persisted.
-* **AdminTool** (`:8081`) — Kafka consumer, audit/monitoring endpoint.
-* **NotificationService** (`:8088`) — Kafka consumer, translates events into human-readable notification strings.
+* **Service Registry** (`:8761`) - A service registry service. This is a Eureka server.
+* **APIGatewayApplication**(`:9872`) - API Gateway service. This is a Eureka Client. 
+* **Blogging_Platform** (`:8080`) — the core platform: auth, posts, comments, categories, social graph, feed/timeline, GraphQL. The only Kafka producer in the system. This is a Eureka Client. 
+* **AIContentModerationService** (`:8089`) — stateless moderation gate, called synchronously by Blogging_Platform before a post is persisted. This is a Eureka Client. 
+* **AdminTool** (`:8081`) — Kafka consumer, audit/monitoring endpoint.This is a Eureka Client. 
+* **NotificationService** (`:8088`) — Kafka consumer, translates events into human-readable notification strings. This is a Eureka Client. 
+
+  ```
+
+                         ┌───────────────────┐
+                         │       Client      │
+                         └─────────┬─────────┘
+                                   │
+                              :9872 (Common Entry Point) 
+                                   │
+                         ┌─────────▼─────────┐
+                         │    API Gateway    │
+                         │    LoadBalancer   │
+                         │   Eureak Client   │
+                         │                   │
+                         └─────────┬─────────┘
+                                   │
+                              Eureka lookup
+                                   │
+                         ┌─────────▼─────────┐
+                         │  Eureka Server    │
+                         │      :8761        │
+                         └─────────┬─────────┘
+                   Eureak Clients  │
+             ┌─────────────────────┼─────────────────────┐
+             │                     │                     │
+             ▼                     ▼                     ▼
+      BLOGGING_PLATFORM     NotificationService     AdminTool
+          :8080                  :8088                 :8081
+             │
+             │ Feign + Eureka
+             ▼
+      AIContentModeration
+          :8089
+             │
+             ▼
+          Gemini
+
+  ```
 
 This project uses the **outbox pattern** for publishing events: writes are persisted to an `Event` table first, and a scheduled poller drains them onto Kafka — so an event is never lost even if Kafka is briefly unavailable.
 
@@ -275,7 +315,7 @@ Two topics are published to on every outbox event:
 * `admin-topic` — full event dump, consumed by AdminTool (`groupId=group-1`)
 * `notification-topic` — compact `"<TransactionType> <EventType> <recipientUserId> <actorUserId>"` string, consumed by NotificationService (`groupId=group-2`)
 
-A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. 
+A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. We can see that username in the BlogPost Application console or with the `/events` endpoint 
 
 ### Toggling Feature
 The following GraphQL mutation operations support toggling behavior:
@@ -425,13 +465,19 @@ Note: Blogging_Platform's container waits for AIContentModerationService's `/act
 
 ## API Documentation
 
-### Use API Gateway Service to access the endpoints 
+### Use API Gateway service to access the endpoints 
 
 ```text
 http://localhost:9872/api/<core service url>
-for example
+```
+
+for example,
+port number for the blogpost application is 8080. For login, you need to use the /login endpoint.
+```text
 http://localhost:8080/login
-will be replaced by 
+```
+After integrating the API gateway, the above endpoint will be replaced with below endpoint.
+```text
 http://localhost:9872/api/login
 ```
 ### Swagger UI
@@ -449,9 +495,12 @@ http://localhost:<...>/swagger-ui/index.html
 ```text
 http://localhost:8080/graphql
 ```
-### Postman Collection 
+### Postman Collection & Set Up Environment
 ```
 https://github.com/Sreetama1230/blogpost_application/blob/main/blogpost_application_APIs.postman_collection.json
+
+https://github.com/Sreetama1230/blogpost_application/blob/main/SetUp.postman_environment.json
+
 ```
 ---
 
