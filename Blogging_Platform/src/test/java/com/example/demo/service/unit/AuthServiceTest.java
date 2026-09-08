@@ -1,5 +1,6 @@
 package com.example.demo.service.unit;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +24,9 @@ import com.example.demo.config.JwtUtils;
 import com.example.demo.customuserdetails.CustomUserDetails;
 import com.example.demo.customuserdetails.CustomUserDetailsService;
 import com.example.demo.dto.AuthRequest;
+import com.example.demo.kafkaservice.KafkaService;
 import com.example.demo.response.AuthResponse;
+import com.example.demo.response.UserResponse;
 import com.example.demo.service.AuthService;
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -36,6 +39,8 @@ public class AuthServiceTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private KafkaService kafkaService;
 
 
     @InjectMocks
@@ -45,7 +50,7 @@ public class AuthServiceTest {
     UserDetails userDetails;
     private AuthRequest authRequest;
     private Collection<? extends GrantedAuthority> authorities;
-   
+
     @BeforeEach
     void setUp(){
 
@@ -69,15 +74,13 @@ public class AuthServiceTest {
         when(((CustomUserDetails)authentication.getPrincipal())).thenReturn(ccustomUserDetails);
 
         when(jwtUtils.generateToken(ccustomUserDetails)).thenReturn("my-jwt-token");
+        when(kafkaService.getLoginUserData(any(UserResponse.class))).thenReturn(true);
 
-      AuthResponse authResponse= authService.login(authRequest);
-      assertEquals("my-jwt-token",authResponse.getToken());
+        AuthResponse authResponse= authService.login(authRequest);
+        assertEquals("my-jwt-token",authResponse.getToken());
         assertEquals(Optional.of(1L).get(),authResponse.getId());
 
 
-
     }
-
-
 
 }
