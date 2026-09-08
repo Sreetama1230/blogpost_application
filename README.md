@@ -4,7 +4,7 @@
 
 BlogPost Application is a Spring Boot based blogging platform that enables users to create and manage blog posts, comments, categories, followers, reactions, and user relationships.
 
-The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **six independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST, Eureka and Kafka:
+The project follows an **event-driven architecture** using **Apache Kafka**, with content moderation handled synchronously via **Google Gemini** before a post is ever saved. The system is composed of **six independently deployable Spring Boot services**, each with its own port and Docker build context, wired together over REST and Kafka. For simplicity **a uniform endpoint** has been introduced with the help of the APIGatewayApplication created with Eureka.
 
 * **Service Registry** (`:8761`) - A service registry service. This is a Eureka server.
 * **APIGatewayApplication**(`:9872`) - API Gateway service. This is a Eureka Client. 
@@ -51,7 +51,8 @@ The project follows an **event-driven architecture** using **Apache Kafka**, wit
 
   ```
 
-This project uses the **outbox pattern** for publishing events: writes are persisted to an `Event` table first, and a scheduled poller drains them onto Kafka — so an event is never lost even if Kafka is briefly unavailable.
+This project uses the **outbox pattern** for publishing events: writes are persisted to an `Event` table first, and a scheduled poller drains them onto Kafka — so an event is never lost even if Kafka is briefly unavailable. Also, whenever a user logs in, we can see the logged-in user's username and timestamp from our monitoring tool (i.e., AdminTool).
+
 
 Logging is implemented using **AOP and SLF4J**. Spring Boot **Actuator** is used to monitor, manage, and audit running applications, and its `/actuator/health` endpoint gates service startup ordering in Docker Compose.
 
@@ -91,7 +92,8 @@ Logging is implemented using **AOP and SLF4J**. Spring Boot **Actuator** is used
                               ▼
                    ┌───────────────────────────────────────┐
                    │               Kafka                   │
-                   │  admin-topic  ·  notification-topic   │
+                   │        admin-events-topic             │ 
+                   │        notification-topic             │
                    └───────┬─────────────────────┬─────────┘
                            │ group-1             │ group-2
                            ▼                     ▼
@@ -99,7 +101,7 @@ Logging is implemented using **AOP and SLF4J**. Spring Boot **Actuator** is used
                    │   AdminTool   │     │   NotificationService    │
                    │     :8081     │     │         :8088            │
                    │  GET /events  │     │  GET /notification       │
-                   │ (in-memory)   │     │    (in-memory)           │
+                   │               │     │                          │
                    └───────────────┘     └──────────────────────────┘
 ```
 
@@ -118,7 +120,7 @@ responsible for:
 * Reactions
 * Timeline/Feed
 
-Publishes events to Kafka (via the outbox) when:
+1)Publishes user action events to Kafka (via the outbox) in 2topics (`ADMINTOOL_EVENTS_TOPIC` & `NOTIFICATION_TOPIC`)when:
 
 * User Created/Updated/Deleted
 * Blog Post Created/Updated/Deleted/Reacted 
@@ -127,7 +129,9 @@ Publishes events to Kafka (via the outbox) when:
 * Follow/Unfollow related
 * Block/Unblock related
 * Reacting on posts/comments, Pin/Unpin
-  
+
+2)Publishes logged in user details to Kafka with the current timestamp.
+
 Github Link - https://github.com/Sreetama1230/BloggingPlatform
 
 ### AI Content Moderation Service (stateless, synchronous)
@@ -138,16 +142,23 @@ Github Link - https://github.com/Sreetama1230/AIContentModeration
 
 ### Admin Tool (Kafka consumer)
 
-Consumes events from the `admin-topic` Kafka topic and provides access to the logged-in user’s information through the GET `/admintool` endpoint. User activity and event details can be retrieved through the GET `/events` endpoint.
+Consumes events from the `ADMINTOOL_EVENTS_TOPIC` & `ADMINTOOL_USERNAME_TOPIC` Kafka topics and provides access to the logged-in user’s information via `/admintool/loggedin/username`. User activity, event details can be retrieved through the GET `/admintool/events` endpoint.
 
 
 Example Response:
-events details from GET `\events` endpoint 
+events details from GET `/admintool/events` endpoint 
 ```json
 [
     "transactionType=USER, transactionId=1, eventType=UPDATE, payload=\"Updated user while creating the blogpost: 1\", status=PROCESSING, createdAt=2026-08-10T12:14:06.504106, publishedAt=2026-08-10T12:14:06.505492, lastAttemptAt=2026-08-10T12:14:10.158964853, retryCount=0, recipientUserId=1, actorUserId=1",
     "transactionType=BLOGPOST, transactionId=4, eventType=CREATE, payload={\"id\":0,\"title\":\"cupoftea\",\"content\":\"started my day with a cup of tea\",\"categories\":[{\"name\":\"lifestyle\",\"syncToken\":null}],\"syncToken\":null}, status=PROCESSING, createdAt=2026-08-10T12:14:06.511552, publishedAt=2026-08-10T12:14:06.515968, lastAttemptAt=2026-08-10T12:14:10.435831164, retryCount=0, recipientUserId=1, actorUserId=1"
 ]
+```
+events details from GET `/admintool/loggedin/username` endpoint.
+```json
+[
+    "Currently logged in username: test-username-45678 TimeStamp : 2026-09-08T23:16:21.984992440"
+]
+
 ```
 GitHub Link : https://github.com/Sreetama1230/AdminTool
 
@@ -310,15 +321,6 @@ Returns a paginated feed of posts. Logged-in users get posts from people they fo
 
 Kafka is used for **one-way, asynchronous fan-out** from Blogging_Platform. Blogging_Platform is the only producer in the system; AdminTool and NotificationService only ever consume — no topic flows back toward Blogging_Platform.
 
-Two topics are published to on every outbox event:
-
-* `admin-topic` — full event dump, consumed by AdminTool (`groupId=group-1`)
-* `notification-topic` — compact `"<TransactionType> <EventType> <recipientUserId> <actorUserId>"` string, consumed by NotificationService (`groupId=group-2`)
-
-A separate, non-outbox path also publishes to `admin-topic`: `GET /admintool` sends the current **logged-in username** directly to Kafka, bypassing the `Event` table. We can see that username in the BlogPost Application console or with the `/events` endpoint 
-```
- [ "test-username-45678" ]
-```
 ### Toggling Feature
 The following GraphQL mutation operations support toggling behavior:
 
@@ -367,47 +369,6 @@ A separate API, `blog/upload`, has been created to attach an image to a blog pos
 
 ---
 
-## Tech Stack
-
-### Backend
-
-* Java 17 (Blogging_Platform, AIContentModerationService, AdminTool, NotificationService)
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* Hibernate
-* Spring Kafka
-* REST 
-* GraphQL 
-* Resilience4j (Retry, Circuit Breaker & RateLimiter)
-
-### Database
-
-* MySQL 
-
-### Messaging
-
-* Apache Kafka (KRaft mode)
-
-### Documentation
-
-* Swagger / OpenAPI
-
-### Testing
-
-* JUnit 5
-* Mockito
-
-### Build Tool
-
-* Maven
-
-### Containerization
-
-* Docker
-* Docker Compose
-
----
 
 ## Database Design
 
@@ -424,8 +385,7 @@ Core Entities (Blogging_Platform, `blogposts_db`):
 * Post Reactions
 * Events (outbox table)
 * ServiceRequestId (idempotency key store)
-
-AdminTool and NotificationService hold no persistent entities — both keep consumed messages in an in-memory list that resets on restart.
+.
 
 ---
 
@@ -475,7 +435,7 @@ http://localhost:9872/api/<core service url>
 
 for example,
 <br>
-port number for the blogpost application is 8080. For login, you need to use the /login endpoint.
+port number for the blogpost application is 8080. For login, you need to use the ```/login``` endpoint. So the final endpoint would be 
 ```text
 http://localhost:8080/login
 ```
@@ -483,22 +443,19 @@ After integrating the API gateway, the above endpoint will be replaced with belo
 ```text
 http://localhost:9872/api/login
 ```
-Kindly explore the attached postman collection.
+Kindly explore the attached postman collection. 
 
 ### Swagger UI
 
 ```text
 http://localhost:<...>/swagger-ui/index.html
-8080 - blogpost application
-8081 - admin tool application
-8088 - notification application
-8089 - ai content moderation endpoint (used internally)
+
 ```
 
 ### GraphQL Endpoint
 
 ```text
-http://localhost:8080/graphql
+http://localhost:<...>/graphql
 ```
 ### Postman Collection & Set Up Environment
 ```
@@ -530,7 +487,7 @@ Event data written (outbox, PENDING)
       ↓
 EventPublisher polls every 5s → Kafka
       ↓
-AdminTool consumes admin-topic  ·  NotificationService consumes notification-topic
+AdminTool consumes admin topics   ·  NotificationService consumes notification topic
 ```
 
 ---
@@ -543,5 +500,48 @@ The project includes:
 * Service Layer Tests
 * Controller Layer Tests
 * Security Tests
+
+---
+
+## Tech Stack
+
+### Backend
+
+* Java 17 (Blogging_Platform, AIContentModerationService, AdminTool, NotificationService)
+* Spring Boot
+* Spring Security
+* Spring Cloud
+* Spring Data JPA
+* Hibernate
+* Kafka
+* REST 
+* GraphQL 
+* Resilience4j (Retry, Circuit Breaker & RateLimiter)
+
+### Database
+
+* MySQL 
+
+### Messaging
+
+* Apache Kafka (KRaft mode)
+
+### Documentation
+
+* Swagger / OpenAPI
+
+### Testing
+
+* JUnit 5
+* Mockito
+
+### Build Tool
+
+* Maven
+
+### Containerization
+
+* Docker
+* Docker Compose
 
 ---
