@@ -1,4 +1,4 @@
-package com.example.demo.scheduler;
+package com.example.demo.kafkaservice;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +43,7 @@ public class EventPublisher {
 
 			try {
 
-				kafkaTemplate.send(AppConstants.ADMINTOOL_TOPIC_NAME, event.toString()).get();
+				kafkaTemplate.send(AppConstants.ADMINTOOL_EVENTS_TOPIC, event.toString()).get();
 				kafkaTemplate.send(AppConstants.NOTIFICATION_TOPIC, event.getTransactionType() + " "
 						+ event.getEventType() + " " + event.getRecipientUserId() + " " + event.getActorUserId()).get();
 

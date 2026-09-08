@@ -1,4 +1,4 @@
-package com.example.demo.component;
+package com.example.demo.service;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,16 +16,27 @@ public class KafkaConsumerService {
 	Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
 
 	private final List<String> messages = new CopyOnWriteArrayList<>();
+	private final List<String> usernames = new CopyOnWriteArrayList<>();
 
-	@KafkaListener(topics = AppConstants.ADMINTOOL_TOPIC_NAME, groupId = AppConstants.GROUP_ID)
+	@KafkaListener(topics = AppConstants.ADMINTOOL_EVENTS_TOPIC, groupId = AppConstants.GROUP_ID)
 	public void getConsumedMessages(String s) {
-		logger.info("username: " + s);
 		messages.add(s);
 
 	}
 
+	@KafkaListener(topics = AppConstants.ADMINTOOL_USERNAME_TOPIC, groupId = AppConstants.GROUP_ID)
+	public void getLoggedInUserName(String s) {
+		logger.info("Currently logged in username: " + s);
+		usernames.add(s);
+
+	}
+
+	
 	public List<String> getMessages() {
 		return messages;
 	}
 
+	public List<String> getLoggedInUsernames() {
+		return usernames;
+	}
 }
