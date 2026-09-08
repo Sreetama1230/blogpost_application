@@ -574,8 +574,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXJuYW1lLTQ1Njc4Iiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNzg2MzUwMTk3LCJleHAiOjE3ODYzNTM3OTd9.zbqyWG8A1cu3CljQrp-BW4fti4tr5MdcaAAAEVNNQDk",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -588,12 +587,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/blog",
-              "protocol": "http",
+              "raw": "{{url}}/blog",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
-              "port": "8080",
               "path": [
                 "blog"
               ]
@@ -894,33 +891,6 @@
       ]
     },
     {
-      "name": "Events",
-      "item": [
-        {
-          "name": "/events",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "*/*"
-              }
-            ],
-            "url": {
-              "raw": "{{url}}/events",
-              "host": [
-                "{{url}}"
-              ],
-              "path": [
-                "events"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
       "name": "GraphQl Controller",
       "item": [
         {
@@ -943,7 +913,7 @@
                 "body": {
                   "mode": "graphql",
                   "graphql": {
-                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 1,\n\t\t\t\t      uId: 1,\n                      syncToken:0,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
+                    "query": "mutation SetReaction {\n\t\t\t\t  setReaction(\n\t\t\t\t     request : {\n\t\t\t\t      bpId: 99,\n\t\t\t\t      uId: 1,\n                      syncToken:0,\n\t\t\t\t      reaction: true\n\t\t\t\t    }\n\t\t\t\t  ) {\n\t\t\t\t  \tid\n\t\t\t\t    content\n\t\t\t\t    createAt\n\t\t\t\t    likes\n\t\t\t\t  }\n\t\t\t\t}\n",
                     "variables": ""
                   }
                 },
@@ -1332,7 +1302,7 @@
       "name": "AdminTool",
       "item": [
         {
-          "name": "/admintool",
+          "name": "/username",
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -1358,12 +1328,37 @@
               }
             },
             "url": {
-              "raw": "{{url}}/admintool",
+              "raw": "{{url}}/admintool/loggedin/username",
               "host": [
                 "{{url}}"
               ],
               "path": [
-                "admintool"
+                "admintool",
+                "loggedin",
+                "username"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/admintool/events",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "admintool",
+                "events"
               ]
             }
           },
