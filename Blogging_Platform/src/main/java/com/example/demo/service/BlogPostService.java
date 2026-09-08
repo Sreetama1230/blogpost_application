@@ -92,7 +92,7 @@ public class BlogPostService {
 	}
 
 	@Transactional
-	@RateLimiter(name = "Blogging_Platform")
+	@RateLimiter(name = "BloggingPlatform")
 	public BlogPostResponse createOrUpdateBlogPost(BlogPostDTO bp, String requestId) throws JsonProcessingException {
 
 		// check if there any service request is provided (only for create)
