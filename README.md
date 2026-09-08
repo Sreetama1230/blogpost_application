@@ -132,13 +132,13 @@ responsible for:
 
 2)Publishes logged in user details to Kafka with the current timestamp.
 
-Github Link - https://github.com/Sreetama1230/BloggingPlatform
+
 
 ### AI Content Moderation Service (stateless, synchronous)
 
 Called by Blogging_Platform on every blog post create/update, **before** the post is persisted.A pure REST wrapper around the Gemini API.
 
-Github Link - https://github.com/Sreetama1230/AIContentModeration
+
 
 ### Admin Tool (Kafka consumer)
 
@@ -160,7 +160,7 @@ events details from GET `/admintool/loggedin/username` endpoint.
 ]
 
 ```
-GitHub Link : https://github.com/Sreetama1230/AdminTool
+
 
 ### Notification Service (Kafka consumer)
 
@@ -176,7 +176,7 @@ Example Response:
     "Someone has started following you!"
 ]
 ```
-GitHub Link :  https://github.com/Sreetama1230/NotificationService
+
 
 ---
 
