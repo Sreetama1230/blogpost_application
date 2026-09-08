@@ -15,7 +15,7 @@ public class ModerationServiceClient {
 	@Autowired
 	private ModerationClient moderationClient;
 
-	@Retry(name = "moderationService")
+	@Retry(name = "AIContentModerationService")
 	public
 	ModerationResponse checkContent(ModerationRequest moderationRequest) {
 
