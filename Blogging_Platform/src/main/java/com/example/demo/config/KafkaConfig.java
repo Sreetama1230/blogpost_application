@@ -11,8 +11,13 @@ import com.example.demo.constants.AppConstants;
 public class KafkaConfig {
 	
 	@Bean
+	public NewTopic topicAdminToolEvents() {
+		return TopicBuilder.name(AppConstants.ADMINTOOL_EVENTS_TOPIC).build();
+	}
+	
+	@Bean
 	public NewTopic topicAdminTool() {
-		return TopicBuilder.name(AppConstants.ADMINTOOL_TOPIC_NAME).build();
+		return TopicBuilder.name(AppConstants.ADMINTOOL_USERNAME_TOPIC).build();
 	}
 	
 	@Bean

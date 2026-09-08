@@ -10,7 +10,9 @@ import com.example.demo.config.JwtUtils;
 import com.example.demo.customuserdetails.CustomUserDetails;
 import com.example.demo.customuserdetails.CustomUserDetailsService;
 import com.example.demo.dto.AuthRequest;
+import com.example.demo.kafkaservice.KafkaService;
 import com.example.demo.response.AuthResponse;
+import com.example.demo.response.UserResponse;
 
 
 @Service
@@ -18,12 +20,14 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final KafkaService kafkaService;
 
 
     public AuthService(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                       CustomUserDetailsService customUserDetailsService) {
+                       CustomUserDetailsService customUserDetailsService,KafkaService kafkaService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.kafkaService = kafkaService;
        
     }
 
@@ -46,6 +50,10 @@ public class AuthService {
 
         String roles = customUserDetails1.getAuthorities().toString();
         authResponse.setRole(roles);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUsername(authRequest.getUsername());
+        // publishing the event the admin tool topic
+        kafkaService.getLoginUserData(userResponse);
         return  authResponse;
 
     }
