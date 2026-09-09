@@ -39,10 +39,12 @@ public class ModerationClientFallbackFactory implements FallbackFactory<Moderati
 					return new ModerationResponse("Moderation service is temporarily unavailable: " + e.getMessage(), false);
 				}
 
-				if (checkContentManually(moderationRequest)) {
+				if (checkContentManually(moderationRequest)) { // harmful content
+                    logger.info("Content has been checked with fallback method and it has been rejected");
 					return new ModerationResponse("rejected", false);
 
 				} else {
+                    logger.info("Content has been checked with fallback method and it has been approved");
 					return new ModerationResponse("approved", true);
 				}
 			}
