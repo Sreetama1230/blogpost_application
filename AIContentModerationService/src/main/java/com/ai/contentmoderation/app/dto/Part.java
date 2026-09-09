@@ -16,6 +16,7 @@ public class Part {
 		super();
 		this.text = text;
 	}
-	
+    public Part() {
+    }
 	
 }

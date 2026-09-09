@@ -14,6 +14,9 @@ public class GeminiResponse {
 		this.candidates = candidates;
 	}
 
+    public GeminiResponse(){
+
+    }
 	public GeminiResponse(List<Candidate> candidates) {
 		super();
 		this.candidates = candidates;
