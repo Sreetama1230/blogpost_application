@@ -148,6 +148,7 @@ Called by Blogging_Platform on every blog post create/update, **before** the pos
    * **Approves** the content for publishing, or
    * **Rejects** the content if it contains harmful, violent, abusive, or illegal material.
 
+<img width="1001" height="274" alt="image" src="https://github.com/user-attachments/assets/64b3897a-d61c-4b1f-b28e-d81869df9cd2" />
 
 ### Admin Tool (Kafka consumer)
 
