@@ -9,7 +9,7 @@ The project follows an **event-driven architecture** using **Apache Kafka**, wit
 * **Service Registry** (`:8761`) - A service registry service. This is a Eureka server.
 * **APIGatewayApplication**(`:9872`) - API Gateway service. This is a Eureka Client. 
 * **Blogging_Platform** (`:8080`) — the core platform: auth, posts, comments, categories, social graph, feed/timeline, GraphQL. The only Kafka producer in the system. This is a Eureka Client. 
-* **AIContentModerationService** (`:8089`) — stateless moderation gate, called synchronously by Blogging_Platform before a post is persisted. This is a Eureka Client. 
+* **AIContentModerationService** (`:8089`) — stateless moderation gate, called synchronously by Blogging_Platform before a post is persisted. This is an Eureka client. It uses the Gemini API to check the harmfulness of the content.
 * **AdminTool** (`:8081`) — Kafka consumer, audit/monitoring endpoint.This is a Eureka Client. 
 * **NotificationService** (`:8088`) — Kafka consumer, translates events into human-readable notification strings. This is a Eureka Client. 
 
@@ -139,6 +139,15 @@ responsible for:
 Called by Blogging_Platform on every blog post create/update, **before** the post is persisted.A pure REST wrapper around the Gemini API.
 
 
+### How it Works
+
+1. The BlogPost service sends the blog title, content, and categories to the AI Content Moderation Service.
+2. The moderation service uses the **Google Gemini API** to evaluate the content against predefined safety guidelines.
+3. Based on the AI response, the service either:
+
+   * **Approves** the content for publishing, or
+   * **Rejects** the content if it contains harmful, violent, abusive, or illegal material.
+
 
 ### Admin Tool (Kafka consumer)
 
@@ -176,7 +185,27 @@ Example Response:
     "Someone has started following you!"
 ]
 ```
+### APIGateway Application
+Single entry point, build on Spring Cloud Gateway. Routes incoming requests to the right backend service by path, resolving each target through Service Registry rather that a fixed `host:post`.
 
+<br>
+
+It holds a static route table in the request paths under `/api/**` and forwards them, via StripPrefix=1, to the matching backend.
+<br>
+
+Every route target uses a load-balanced `lb://ServiceName` URI - Eureka resolves the actual instance address at request time, the same mechanism Feign uses internally for Blogging_Platform's own call to AIContentModerationService.
+
+### Service Registry
+
+Standlone Eureka server. Every backend service and API Gateway registers itself here on startup, so the gateway can resolve `lb://ServiceName` URIs to a live instance of a hardcoded `host:port`. 
+<br>
+The gateway and Feign are two indenpendent consumers of the same registry(Eureka). 
+<br>
+The gateway uses it to route external traffic to backends; Feign uses it (inside Blogging_Platform) to resolve internal service-to-service calls. 
+Euraka's dashboard is available at:
+```json
+http://localhost:8761/
+```
 
 ---
 
@@ -407,7 +436,7 @@ cd blogpost_application
 ```
 
 ### Start All Services
-
+Make sure the `profile=prod` is active for all the services.
 ```bash
 docker compose up --build
 ```
